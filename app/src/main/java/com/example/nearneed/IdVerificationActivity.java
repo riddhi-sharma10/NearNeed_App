@@ -169,6 +169,7 @@ public class IdVerificationActivity extends AppCompatActivity {
 
             fTitle.setText("Scanning ID...");
             fDesc.setText("Extracting security features...");
+            fIcon.setVisibility(View.VISIBLE);
             fIcon.setImageResource(R.drawable.ic_search_grey);
             fIcon.setColorFilter(0xFF2563EB);
             fIcon.setPadding(0, 0, 0, 0);
@@ -180,10 +181,7 @@ public class IdVerificationActivity extends AppCompatActivity {
 
             new android.os.Handler().postDelayed(() -> {
                 card.setBackgroundResource(R.drawable.bg_id_uploaded);
-                fIcon.setImageResource(R.drawable.ic_checked_blue_white_circle);
-                fIcon.setBackground(null);
-                fIcon.setPadding(0, 0, 0, 0);
-                fIcon.setColorFilter(null);
+                fIcon.setVisibility(View.GONE);
                 fTitle.setText(side + " verified");
                 fTitle.setTextColor(0xFF1D5EF3);
                 fDesc.setText("Data extracted successfully");

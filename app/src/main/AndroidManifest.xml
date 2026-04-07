@@ -69,9 +69,6 @@
         <activity
             android:name=".TermsConditionsActivity"
             android:exported="false" />
-        <activity
-            android:name=".ProfessionalSetupProviderActivity"
-            android:exported="false" />
     </application>
 
 </manifest>

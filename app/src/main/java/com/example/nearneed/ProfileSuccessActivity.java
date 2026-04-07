@@ -25,10 +25,8 @@ public class ProfileSuccessActivity extends AppCompatActivity {
         applyPopAnimation(successContainer);
 
         btnDone.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(this, AccountTypeActivity.class);
             startActivity(intent);
-            finishAffinity();
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
     }

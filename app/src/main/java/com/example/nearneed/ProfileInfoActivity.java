@@ -1,5 +1,6 @@
 package com.example.nearneed;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -19,16 +20,21 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.ChipGroup;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 public class ProfileInfoActivity extends AppCompatActivity {
 
-    private EditText etFullName;
-    private EditText etBio;
+    private EditText etFullName, etBio, etDob;
     private TextView tvBioCount;
     private MaterialButton btnContinue;
     private ImageButton btnBack;
     private ImageView ivProfilePicture;
     private RelativeLayout flProfilePhoto;
+    private ChipGroup cgGender;
+    private android.widget.ScrollView scrollView;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -54,6 +60,9 @@ public class ProfileInfoActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         ivProfilePicture = findViewById(R.id.ivProfilePicture);
         flProfilePhoto = findViewById(R.id.flProfilePhoto);
+        cgGender = findViewById(R.id.cgGender);
+        etDob = findViewById(R.id.etDob);
+        scrollView = findViewById(R.id.scrollView);
     }
 
     private void setupListeners() {
@@ -63,6 +72,16 @@ public class ProfileInfoActivity extends AppCompatActivity {
             pickMedia.launch(new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build());
+        });
+
+        etDob.setOnClickListener(v -> showDatePicker());
+
+        etBio.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                v.postDelayed(() -> {
+                    scrollView.smoothScrollTo(0, etBio.getBottom() + 100);
+                }, 300);
+            }
         });
 
         etBio.addTextChangedListener(new TextWatcher() {
@@ -82,12 +101,25 @@ public class ProfileInfoActivity extends AppCompatActivity {
         btnContinue.setOnClickListener(v -> {
             String name = etFullName.getText().toString().trim();
             if (name.isEmpty()) {
-                Toast.makeText(this, getString(R.string.txt_please_enter_your_name), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
                 return;
             }
             Intent intent = new Intent(ProfileInfoActivity.this, ProfileSetupActivity.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
+    }
+
+    private void showDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
+            String date = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month1 + 1, year1);
+            etDob.setText(date);
+        }, year, month, day);
+        datePickerDialog.show();
     }
 }

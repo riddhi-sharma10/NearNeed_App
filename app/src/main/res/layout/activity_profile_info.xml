@@ -36,9 +36,11 @@
     </RelativeLayout>
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:isScrollContainer="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
@@ -70,7 +72,7 @@
                     android:background="@drawable/bg_chip_blue_soft"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
-                    android:text="Step 1/4"
+                    android:text="Step 1/2"
                     android:textColor="@color/sapphire_primary"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-black" />
@@ -81,7 +83,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="4dp"
                 android:layout_marginTop="8dp"
-                android:progress="25"
+                android:progress="50"
                 android:max="100"
                 android:progressDrawable="@drawable/bg_progress_bar_blue_flat" />
 
@@ -190,6 +192,104 @@
                         android:textColor="@color/text_header"
                         android:textSize="15sp" />
 
+                    <!-- GENDER SECTION -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.05"
+                        android:text="GENDER"
+                        android:textColor="@color/black"
+                        android:textSize="11sp" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cgGender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipMale"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Male"
+                            app:chipBackgroundColor="@color/sel_gender_chip_bg"
+                            android:textColor="@color/sel_gender_chip_text"
+                            app:chipStrokeColor="@color/border_standard"
+                            app:chipStrokeWidth="1dp"
+                            app:chipCornerRadius="24dp"
+                            app:chipIconVisible="false" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFemale"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Female"
+                            app:chipBackgroundColor="@color/sel_gender_chip_bg"
+                            android:textColor="@color/sel_gender_chip_text"
+                            app:chipStrokeColor="@color/border_standard"
+                            app:chipStrokeWidth="1dp"
+                            app:chipCornerRadius="24dp"
+                            app:chipIconVisible="false" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipOther"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Other"
+                            app:chipBackgroundColor="@color/sel_gender_chip_bg"
+                            android:textColor="@color/sel_gender_chip_text"
+                            app:chipStrokeColor="@color/border_standard"
+                            app:chipStrokeWidth="1dp"
+                            app:chipCornerRadius="24dp"
+                            app:chipIconVisible="false" />
+                    </com.google.android.material.chip.ChipGroup>
+
+
+
+                    <!-- DATE OF BIRTH SECTION -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.05"
+                        android:text="DATE OF BIRTH"
+                        android:textColor="@color/black"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_district_pill_input_white_stroke"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="20dp">
+
+                        <EditText
+                            android:id="@+id/etDob"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:hint="DD/MM/YYYY"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:textColor="@color/text_header"
+                            android:textSize="15sp" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_calendar_input"
+                            app:tint="@color/sapphire_primary" />
+                    </LinearLayout>
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -240,6 +340,11 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:cornerRadius="16dp" />
+
+            <!-- Spacer to allow scrolling above keyboard -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="120dp" />
 
         </LinearLayout>
     </ScrollView>

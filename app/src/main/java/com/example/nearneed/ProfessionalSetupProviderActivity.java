@@ -3,7 +3,6 @@ package com.example.nearneed;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +27,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_professional_setup_provider);
+        setContentView(R.layout.activity_provider_details);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());

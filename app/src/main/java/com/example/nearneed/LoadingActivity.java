@@ -37,7 +37,7 @@ public class LoadingActivity extends AppCompatActivity {
         if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_UNSPECIFIED) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
-        setContentView(R.layout.activity_loading);
+        setContentView(R.layout.activity_splash);
 
         progressBar = findViewById(R.id.loadingProgress);
         tvStatus = findViewById(R.id.tvStatus);

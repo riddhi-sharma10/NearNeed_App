@@ -23,7 +23,7 @@ public class CreateAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_signup_page);
+        setContentView(R.layout.activity_signup);
 
         initViews();
         setupListeners();

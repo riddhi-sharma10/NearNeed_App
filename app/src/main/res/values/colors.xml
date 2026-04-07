@@ -14,8 +14,9 @@
     <color name="brand_primary_light">#DBEAFE</color>
     <color name="brand_primary_surface">#EFF6FF</color>
     
-    <color name="brand_secondary">@color/sapphire_secondary</color>
+    <color name="brand_secondary">#0F766E</color>
     <color name="brand_secondary_light">#F0FDFA</color>
+    <color name="brand_secondary_faint">#330F766E</color>
     
     <color name="brand_tertiary">@color/sapphire_tertiary</color>
     <color name="brand_tertiary_light">#FEF3C7</color>

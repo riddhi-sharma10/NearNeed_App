@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="24dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="56dp"
@@ -127,7 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-black"
-                        android:text="Continue as User"
+                        android:text="Continue as Seeker"
                         android:textColor="@color/text_header"
                         android:textSize="16sp" />
 
@@ -173,7 +173,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:padding="24dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="56dp"

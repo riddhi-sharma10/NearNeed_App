@@ -25,14 +25,16 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        cardSeeker.setOnClickListener(v -> navigateToProfileSetup("seeker"));
-        cardProvider.setOnClickListener(v -> navigateToProfileSetup("provider"));
+        cardSeeker.setOnClickListener(v -> completeRegistration("seeker"));
+        cardProvider.setOnClickListener(v -> completeRegistration("provider"));
     }
 
-    private void navigateToProfileSetup(String role) {
+    private void completeRegistration(String role) {
         // You can save the role to shared preferences or pass it via intent
-        Intent intent = new Intent(this, ProfileInfoActivity.class);
+        // Registration is now complete, proceed to Dashboard
+        Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("USER_ROLE", role);
         startActivity(intent);
+        finishAffinity(); // Clear the onboarding activities stack
     }
 }

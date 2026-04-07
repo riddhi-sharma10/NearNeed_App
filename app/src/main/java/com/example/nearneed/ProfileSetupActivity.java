@@ -45,7 +45,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> onBackPressed());
 
         btnContinue.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AccountTypeActivity.class);
+            Intent intent = new Intent(this, ProfileSuccessActivity.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });

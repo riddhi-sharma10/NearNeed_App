@@ -5,211 +5,174 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_background"
+    android:background="@color/white"
     tools:ignore="HardcodedText,ContentDescription,SpUsage">
 
-    <!-- Decorative Top Gradient / Background -->
-    <View
+    <!-- Fixed Header Section -->
+    <RelativeLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:background="@drawable/bg_gradient_overlay"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="64dp"
+        android:paddingHorizontal="24dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="@color/text_header" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="sans-serif-black"
+            android:text="Profile Info"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </RelativeLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:fillViewport="true"
-        android:clipToPadding="false"
-        android:paddingBottom="40dp">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingHorizontal="24dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="40dp">
 
+            <!-- Progress Section -->
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
-
-                <ImageButton
-                    android:id="@+id/btnBack"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/bg_circle_white_card"
-                    android:elevation="4dp"
-                    android:src="@drawable/ic_back_arrow"
-                    app:tint="@color/text_header" />
+                android:layout_height="wrap_content">
 
                 <TextView
-                    style="@style/TextAppearance.App.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="Profile Setup"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Basic Information"
                     android:textColor="@color/black"
-                    android:textSize="18sp"
-                    android:fontFamily="sans-serif-black" />
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Step 1/4"
+                    android:textColor="@color/text_placeholder"
+                    android:textSize="13sp" />
             </RelativeLayout>
 
-            <!-- Progress Indicator Layer -->
+            <ProgressBar
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="8dp"
+                android:progress="25"
+                android:max="100"
+                android:progressDrawable="@drawable/bg_progress_bar_blue_flat" />
+
+            <!-- Main Title & Subtitle -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Tell us about yourself"
+                android:textColor="@color/black"
+                android:textSize="28sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="This is how neighbors will see you on NearNeed."
+                android:textColor="@color/text_subheadline"
+                android:textSize="16sp" />
+
+            <!-- Profile Form Content -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                app:cardCornerRadius="20dp"
+                android:layout_marginTop="24dp"
+                app:cardBackgroundColor="#F9FAFB"
+                app:cardCornerRadius="24dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/glass_white_40"
-                app:strokeColor="@color/glass_border"
+                app:strokeColor="@color/border_light"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                        
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:text="Basic Information"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:fontFamily="sans-serif-medium" />
-                        
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Step 1 of 4"
-                            android:textColor="@color/black"
-                            android:alpha="0.8"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="6dp"
-                        android:layout_marginTop="12dp"
-                        android:progress="25"
-                        android:max="100"
-                        android:progressDrawable="@drawable/bg_progress_bar_blue_flat" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Main Content Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:cardCornerRadius="28dp"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/white"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="28dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tell us about yourself"
-                        android:textColor="@color/text_header"
-                        android:textSize="26sp"
-                        android:fontFamily="sans-serif-black"
-                        android:letterSpacing="-0.02" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="This is how neighbors will see you on NearNeed."
-                        android:textColor="@color/text_subheadline"
-                        android:textSize="15sp" />
+                    android:padding="24dp">
 
                     <!-- Profile Photo Selection -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <RelativeLayout
+                        android:id="@+id/flProfilePhoto"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@drawable/bg_circle_outline_pink"
+                        android:padding="6dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivProfilePicture"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/bg_image_placeholder"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentEnd="true"
+                            app:cardBackgroundColor="@color/sapphire_primary"
+                            app:cardCornerRadius="16dp"
+                            app:cardElevation="4dp"
+                            app:strokeColor="@color/white"
+                            app:strokeWidth="2dp">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_camera_blue"
+                                app:tint="@color/white" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="32dp"
-                        android:gravity="center">
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="12dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Add Profile Photo"
+                        android:textColor="@color/sapphire_primary"
+                        android:textSize="14sp" />
 
-                        <FrameLayout
-                            android:id="@+id/profilePicContainer"
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:clickable="true"
-                            android:focusable="true">
-                            
-                            <!-- Large Bordered Circle -->
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@drawable/bg_circle_outline_pink"
-                                android:padding="4dp" />
-
-                            <com.google.android.material.imageview.ShapeableImageView
-                                android:id="@+id/ivProfilePicture"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_margin="6dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/bg_image_placeholder"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
-
-                            <com.google.android.material.card.MaterialCardView
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:layout_gravity="bottom|end"
-                                android:layout_margin="4dp"
-                                app:cardCornerRadius="18dp"
-                                app:cardElevation="4dp"
-                                app:cardBackgroundColor="@color/brand_primary"
-                                app:strokeWidth="2dp"
-                                app:strokeColor="@color/white">
-                                
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:padding="8dp"
-                                    android:src="@drawable/ic_camera_blue"
-                                    app:tint="@color/white" />
-                            </com.google.android.material.card.MaterialCardView>
-                        </FrameLayout>
-                        
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:text="Add Profile Photo"
-                            android:textColor="@color/brand_primary"
-                            android:textSize="13sp"
-                            android:fontFamily="sans-serif-medium" />
-                    </LinearLayout>
-
-                    <!-- Input Fields -->
+                    <!-- Inputs -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="32dp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.05"
                         android:text="FULL NAME"
                         android:textColor="@color/black"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.05"
-                        android:fontFamily="sans-serif-black" />
+                        android:textSize="11sp" />
 
                     <EditText
                         android:id="@+id/etFullName"
@@ -217,66 +180,63 @@
                         android:layout_height="56dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_district_pill_input_white_stroke"
-                        android:hint="Enter your name"
-                        android:textColorHint="@color/text_muted"
-                        android:textColor="@color/text_header"
-                        android:textSize="16sp"
-                        android:paddingHorizontal="20dp"
+                        android:hint="John Doe"
                         android:inputType="textPersonName"
-                        android:fontFamily="sans-serif-medium" />
+                        android:paddingHorizontal="20dp"
+                        android:textColor="@color/text_header"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="0.05"
                         android:text="SHORT BIO"
                         android:textColor="@color/black"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.05"
-                        android:fontFamily="sans-serif-black" />
+                        android:textSize="11sp" />
 
                     <EditText
                         android:id="@+id/etBio"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_district_pill_input_white_stroke"
-                        android:hint="Tell neighbors about yourself (e.g. skills, location, or what you can help with)."
-                        android:textColorHint="@color/text_muted"
-                        android:textColor="@color/text_header"
-                        android:textSize="15sp"
+                        android:gravity="top"
+                        android:hint="Tell neighbors about your skills or interest in helping..."
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:minHeight="120dp"
                         android:padding="20dp"
-                        android:gravity="top|start"
-                        android:maxLength="150"
-                        android:inputType="textMultiLine" />
+                        android:textColor="@color/text_header"
+                        android:textSize="15sp" />
 
                     <TextView
-                        android:id="@+id/tvBioCount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="8dp"
                         android:gravity="end"
                         android:text="0/150"
                         android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnContinue"
-                        android:layout_width="match_parent"
-                        android:layout_height="64dp"
-                        android:layout_marginTop="32dp"
-                        android:text="Continue"
-                        android:textColor="@color/white"
-                        android:textAllCaps="false"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-black"
-                        app:backgroundTint="@color/brand_primary"
-                        app:cornerRadius="18dp"
-                        app:elevation="8dp" />
+                        android:textSize="11sp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnContinue"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="@color/sapphire_primary"
+                android:text="Continue"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
         </LinearLayout>
     </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

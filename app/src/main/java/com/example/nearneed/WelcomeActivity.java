@@ -41,9 +41,9 @@ public class WelcomeActivity extends AppCompatActivity {
     private void setupSlideshow() {
         vpSlideshow = findViewById(R.id.vpSlideshow);
         int[] images = {
-            R.drawable.welcome_bg_1,
-            R.drawable.welcome_bg_2,
-            R.drawable.welcome_bg_3
+                R.drawable.welcome_bg_1,
+                R.drawable.welcome_bg_2,
+                R.drawable.welcome_bg_3
         };
 
         SlideshowAdapter adapter = new SlideshowAdapter(images);
@@ -70,7 +70,8 @@ public class WelcomeActivity extends AppCompatActivity {
         slideshowHandler.removeCallbacks(slideshowRunnable);
     }
 
-    private class SlideshowAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<SlideshowAdapter.ViewHolder> {
+    private class SlideshowAdapter
+            extends androidx.recyclerview.widget.RecyclerView.Adapter<SlideshowAdapter.ViewHolder> {
         private final int[] images;
 
         public SlideshowAdapter(int[] images) {
@@ -79,7 +80,8 @@ public class WelcomeActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(android.view.ViewGroup parent, int viewType) {
-            android.view.View view = android.view.LayoutInflater.from(parent.getContext()).inflate(R.layout.item_welcome_slideshow, parent, false);
+            android.view.View view = android.view.LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_welcome_slideshow, parent, false);
             return new ViewHolder(view);
         }
 
@@ -95,6 +97,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         class ViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
             android.widget.ImageView imageView;
+
             public ViewHolder(android.view.View itemView) {
                 super(itemView);
                 imageView = itemView.findViewById(R.id.ivSlideshow);

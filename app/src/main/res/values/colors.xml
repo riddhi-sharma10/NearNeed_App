@@ -58,7 +58,7 @@
     <color name="glass_border">#1AFFFFFF</color>
 
     <!-- Decorative & Faint Tints -->
-    <color name="decorative_tint_faint_blue">#D1D5DB</color>
+    <color name="decorative_tint_faint_blue">#A5AFC0</color>
     <color name="icon_decorative_tint">#9CA3AF</color>
     <color name="pagers_indicator_inactive">#CBD5E1</color>
     <color name="shadow_spot">#1A000000</color>

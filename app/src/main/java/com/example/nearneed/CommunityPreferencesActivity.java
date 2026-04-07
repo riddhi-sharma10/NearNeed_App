@@ -49,9 +49,9 @@ public class CommunityPreferencesActivity extends AppCompatActivity {
         swHelp = findViewById(R.id.swHelpNotifications);
         swSms = findViewById(R.id.swSmsNotifications);
 
-        android.content.SharedPreferences prefs = getSharedPreferences("NearNeedPrefs", MODE_PRIVATE);
-        swHelp.setChecked(prefs.getBoolean("pref_help_notifications", true));
-        swSms.setChecked(prefs.getBoolean("pref_sms_notifications", false));
+        // Toggles always start OFF; user enables what they want
+        swHelp.setChecked(false);
+        swSms.setChecked(false);
     }
 
     private void setupListeners() {

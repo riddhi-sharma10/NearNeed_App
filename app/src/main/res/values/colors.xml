@@ -32,6 +32,7 @@
     <color name="text_body_dark">#1F2937</color>
     <color name="text_body_light">#6B7280</color>
     <color name="text_muted">#9CA3AF</color>
+    <color name="text_placeholder">#94A3B8</color>
     <color name="text_on_brand">#FFFFFF</color>
     <color name="text_link">@color/sapphire_primary</color>
 

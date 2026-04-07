@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Layered glass background color (60% Opacity) -->
-    <solid android:color="@color/glass_white_60" />
-    
-    <!-- Thin Glass Border -->
-    <stroke
-        android:width="0.5dp"
-        android:color="@color/glass_border" />
-    
-    <corners android:radius="12dp" />
+    <solid android:color="#F2FFFFFF"/>
+    <corners android:radius="24dp"/>
+    <stroke android:width="1dp" android:color="#80FFFFFF"/>
 </shape>

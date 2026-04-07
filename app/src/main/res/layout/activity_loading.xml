@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@drawable/bg_gradient_premium">
 
     <!-- ── ENRICHED BACKGROUND ICON PATTERN (Light Greyish Hue) ── -->
     <!-- Scattered icons to create an editorial texture -->
@@ -113,6 +113,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center"
+        android:padding="32dp"
+        android:background="@drawable/bg_glass_card"
         android:orientation="vertical">
 
         <FrameLayout
@@ -166,6 +168,7 @@
             android:letterSpacing="-0.02" />
 
         <TextView
+            style="@style/AppDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -186,6 +189,7 @@
 
         <TextView
             android:id="@+id/tvStatus"
+            style="@style/AppFormText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

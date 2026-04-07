@@ -3,11 +3,10 @@
     <style name="Base.Theme.NearNeed" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="colorPrimary">@color/gig_primary</item>
-        <item name="colorAccent">@color/gig_primary</item>
-        <item name="colorPrimaryVariant">@color/gig_light</item>
-        <item name="colorSecondary">@color/community_primary</item>
-        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorAccent">@color/brand_primary</item>
+        <item name="colorPrimaryVariant">@color/brand_primary_dark</item>
+        <item name="colorSecondary">@color/brand_primary</item>
     </style>
 
     <style name="Theme.NearNeed" parent="Base.Theme.NearNeed" />
@@ -47,66 +46,5 @@
         <item name="textStartPadding">4dp</item>
         <item name="textEndPadding">4dp</item>
         <item name="android:textSize">14sp</item>
-    </style>
-
-    <!-- Typography Styles -->
-    <style name="TextAppearance.App.Greeting">
-        <item name="android:textSize">28sp</item>
-        <item name="android:fontFamily">sans-serif-black</item>
-        <item name="android:textColor">@color/text_primary_system</item>
-        <item name="android:letterSpacing">-0.02</item>
-    </style>
-
-    <style name="TextAppearance.App.SectionHeader">
-        <item name="android:textSize">20sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/text_primary_system</item>
-        <item name="android:letterSpacing">-0.01</item>
-    </style>
-
-    <style name="TextAppearance.App.CardTitle">
-        <item name="android:textSize">16sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/text_primary_system</item>
-    </style>
-
-    <style name="TextAppearance.App.CardSubtitle">
-        <item name="android:textSize">13sp</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">@color/text_secondary_system</item>
-    </style>
-
-    <style name="TextAppearance.App.SearchHint">
-        <item name="android:textSize">15sp</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">@color/text_tertiary_system</item>
-    </style>
-
-    <style name="TextAppearance.App.CategoryLabel">
-        <item name="android:textSize">11sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/text_secondary_system</item>
-        <item name="android:letterSpacing">0.05</item>
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <!-- Glassmorphism Styles -->
-    <style name="Widget.App.Glass" parent="Widget.Material3.CardView.Elevated">
-        <item name="android:background">@drawable/bg_glass_main</item>
-        <item name="cardElevation">4dp</item>
-        <item name="cardCornerRadius">16dp</item>
-        <item name="cardBackgroundColor">@android:color/transparent</item>
-        <item name="android:padding">16dp</item>
-    </style>
-
-    <style name="Widget.App.NavbarGlass">
-        <item name="android:background">@drawable/bg_glass_navbar</item>
-        <item name="android:elevation">8dp</item>
-        <item name="android:padding">8dp</item>
-    </style>
-
-    <style name="Widget.App.GlassLayered">
-        <item name="android:background">@drawable/bg_glass_layered</item>
-        <item name="android:elevation">2dp</item>
     </style>
 </resources>

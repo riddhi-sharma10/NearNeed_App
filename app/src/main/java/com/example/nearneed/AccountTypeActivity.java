@@ -4,11 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.button.MaterialButton;
 
 public class AccountTypeActivity extends AppCompatActivity {
 
-    private MaterialCardView cardSeeker;
-    private MaterialCardView cardProvider;
+    private MaterialCardView cardSeeker, cardProvider;
+    private MaterialButton btnSeekerAction, btnProviderAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,11 +23,16 @@ public class AccountTypeActivity extends AppCompatActivity {
     private void initViews() {
         cardSeeker = findViewById(R.id.cardSeeker);
         cardProvider = findViewById(R.id.cardProvider);
+        btnSeekerAction = findViewById(R.id.btnSeekerAction);
+        btnProviderAction = findViewById(R.id.btnProviderAction);
     }
 
     private void setupListeners() {
         cardSeeker.setOnClickListener(v -> completeRegistration("seeker"));
+        btnSeekerAction.setOnClickListener(v -> completeRegistration("seeker"));
+        
         cardProvider.setOnClickListener(v -> completeRegistration("provider"));
+        btnProviderAction.setOnClickListener(v -> completeRegistration("provider"));
     }
 
     private void completeRegistration(String role) {

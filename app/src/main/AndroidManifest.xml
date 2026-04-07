@@ -69,6 +69,10 @@
         <activity
             android:name=".TermsConditionsActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".AccountTypeActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

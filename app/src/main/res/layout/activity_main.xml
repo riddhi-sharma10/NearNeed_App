@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/sapphire_bg">
@@ -34,7 +35,6 @@
         android:background="@color/sapphire_dark"
         app:itemIconTint="@color/nav_item_color"
         app:itemTextColor="@color/nav_item_color"
-        app:itemActiveIndicatorColor="#221E3A8A"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu" />
 

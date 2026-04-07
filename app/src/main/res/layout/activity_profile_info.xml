@@ -67,9 +67,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
+                    android:background="@drawable/bg_chip_blue_soft"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
                     android:text="Step 1/4"
-                    android:textColor="@color/text_placeholder"
-                    android:textSize="13sp" />
+                    android:textColor="@color/sapphire_primary"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-black" />
             </RelativeLayout>
 
             <ProgressBar
@@ -104,10 +108,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                app:cardBackgroundColor="#F9FAFB"
+                app:cardBackgroundColor="#F2FFFFFF"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_light"
+                app:cardElevation="2dp"
+                app:strokeColor="#4DFFFFFF"
                 app:strokeWidth="1dp">
 
                 <LinearLayout

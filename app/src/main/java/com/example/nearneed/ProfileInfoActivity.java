@@ -1,5 +1,6 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,6 +9,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,7 +28,7 @@ public class ProfileInfoActivity extends AppCompatActivity {
     private MaterialButton btnContinue;
     private ImageButton btnBack;
     private ImageView ivProfilePicture;
-    private FrameLayout profilePicContainer;
+    private RelativeLayout flProfilePhoto;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -51,13 +53,13 @@ public class ProfileInfoActivity extends AppCompatActivity {
         btnContinue = findViewById(R.id.btnContinue);
         btnBack = findViewById(R.id.btnBack);
         ivProfilePicture = findViewById(R.id.ivProfilePicture);
-        profilePicContainer = findViewById(R.id.profilePicContainer);
+        flProfilePhoto = findViewById(R.id.flProfilePhoto);
     }
 
     private void setupListeners() {
         btnBack.setOnClickListener(v -> onBackPressed());
 
-        profilePicContainer.setOnClickListener(v -> {
+        flProfilePhoto.setOnClickListener(v -> {
             pickMedia.launch(new PickVisualMediaRequest.Builder()
                     .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
                     .build());
@@ -83,7 +85,9 @@ public class ProfileInfoActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.txt_please_enter_your_name), Toast.LENGTH_SHORT).show();
                 return;
             }
-            startActivity(new android.content.Intent(ProfileInfoActivity.this, ProfileSetupActivity.class));
+            Intent intent = new Intent(ProfileInfoActivity.this, ProfileSetupActivity.class);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
     }
 }

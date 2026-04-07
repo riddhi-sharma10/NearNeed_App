@@ -43,4 +43,11 @@
         <item name="android:letterSpacing">0.05</item>
     </style>
 
+    <style name="TextAppearance.App.SectionHeader" parent="">
+        <item name="android:fontFamily">@string/font_family_heading</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_body_dark</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
 </resources>

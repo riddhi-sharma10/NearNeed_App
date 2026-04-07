@@ -147,23 +147,25 @@ public class IdVerificationActivity extends AppCompatActivity {
         android.widget.ImageView icon = null;
         TextView title = null;
         TextView desc = null;
+        android.widget.ImageView tick = null;
 
-        if (card instanceof android.view.ViewGroup) {
-            android.view.ViewGroup group = (android.view.ViewGroup) card;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                android.view.View child = group.getChildAt(i);
-                if (child instanceof android.widget.ImageView) icon = (android.widget.ImageView) child;
-                if (child instanceof android.widget.TextView) {
-                    if (title == null) title = (android.widget.TextView) child;
-                    else desc = (android.widget.TextView) child;
-                }
-            }
+        if (card.getId() == R.id.cardUploadFront) {
+            icon = card.findViewById(R.id.iconFront);
+            title = card.findViewById(R.id.titleFront);
+            desc = card.findViewById(R.id.descFront);
+            tick = card.findViewById(R.id.tickFront);
+        } else if (card.getId() == R.id.cardUploadBack) {
+            icon = card.findViewById(R.id.iconBack);
+            title = card.findViewById(R.id.titleBack);
+            desc = card.findViewById(R.id.descBack);
+            tick = card.findViewById(R.id.tickBack);
         }
 
         if (icon != null && title != null && desc != null) {
             final android.widget.ImageView fIcon = icon;
             final TextView fTitle = title;
             final TextView fDesc = desc;
+            final android.widget.ImageView fTick = tick;
 
             fTitle.setText("Scanning ID...");
             fDesc.setText("Extracting security features...");
@@ -171,6 +173,10 @@ public class IdVerificationActivity extends AppCompatActivity {
             fIcon.setColorFilter(0xFF2563EB);
             fIcon.setPadding(0, 0, 0, 0);
             fIcon.setBackground(null);
+            
+            if (fTick != null) {
+                fTick.setVisibility(View.GONE);
+            }
 
             new android.os.Handler().postDelayed(() -> {
                 card.setBackgroundResource(R.drawable.bg_id_uploaded);
@@ -182,6 +188,10 @@ public class IdVerificationActivity extends AppCompatActivity {
                 fTitle.setTextColor(0xFF1D5EF3);
                 fDesc.setText("Data extracted successfully");
                 fDesc.setTextColor(0xFF1D5EF3);
+                
+                if (fTick != null) {
+                    fTick.setVisibility(View.VISIBLE);
+                }
 
                 if (side.contains("Front")) frontUploaded = true;
                 else backUploaded = true;

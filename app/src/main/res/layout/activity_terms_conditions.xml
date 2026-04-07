@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/surface_background"
     tools:ignore="HardcodedText">
 
+    <!-- App Bar -->
     <RelativeLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:paddingHorizontal="16dp"
+        android:background="@color/surface_background"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -30,15 +33,24 @@
             android:layout_centerInParent="true"
             android:text="Guidelines"
             android:textColor="@color/text_header"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
     </RelativeLayout>
 
+    <!-- Thin Divider -->
+    <View
+        android:id="@+id/dividerAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border_light"
+        app:layout_constraintTop_toBottomOf="@id/appBar" />
+
+    <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/appBar">
+        app:layout_constraintTop_toBottomOf="@id/dividerAppBar">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -46,95 +58,158 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <!-- Hero Header -->
             <TextView
-                style="@style/AppHero"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Trust and Safety\nGuidelines"
+                android:layout_marginTop="12dp"
+                android:fontFamily="serif"
+                android:letterSpacing="-0.02"
+                android:lineSpacingExtra="0dp"
+                android:text="Our&#10;Agreement"
                 android:textColor="@color/text_header"
-                android:textSize="24sp"
-                android:letterSpacing="-0.01" />
+                android:textSize="44sp"
+                android:textStyle="bold" />
 
+            <!-- Intro Paragraph -->
             <TextView
+                style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="NearNeed is built on mutual trust. To ensure a safe environment for all neighbors, please adhere to these verification guidelines."
+                android:text="NearNeed is built on mutual trust. To keep our community safe and verified, we&#8217;ve distilled our guidelines into four essential commitments."
                 android:textColor="@color/text_subheadline"
-                android:textSize="14sp"
-                android:lineSpacingExtra="4dp" />
+                android:textSize="15sp"
+                android:lineSpacingExtra="5dp" />
 
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border_light"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Section 1 -->
             <TextView
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="1. Accuracy of Information"
+                android:layout_marginTop="12dp"
+                android:text="1.  Accuracy of Information"
                 android:textColor="@color/text_header"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <TextView
+                style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="You agree that all information provided during ID verification is accurate and belongs to you. Impersonation is strictly prohibited."
                 android:textColor="@color/text_subheadline"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
 
+            <!-- Section 2 -->
             <TextView
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="2. Data Privacy"
+                android:text="2.  Data Privacy"
                 android:textColor="@color/text_header"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <TextView
+                style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="We store your ID securely for verification purposes only. Your personal details will never be shared with other users without your explicit consent."
                 android:textColor="@color/text_subheadline"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
 
+            <!-- Section 3 -->
             <TextView
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="3. Prohibited Content"
+                android:text="3.  Prohibited Content"
                 android:textColor="@color/text_header"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <TextView
+                style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Uploading forged, expired, or tampered documents will result in permanent account suspension."
                 android:textColor="@color/text_subheadline"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
 
+            <!-- Section 4 -->
             <TextView
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="4. Community Conduct"
+                android:text="4.  Community Conduct"
                 android:textColor="@color/text_header"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <TextView
+                style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Verified members are expected to interact respectfully and fulfill their commitments to neighbors."
                 android:textColor="@color/text_subheadline"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border_light"
+                android:layout_marginTop="12dp" />
+
+            <!-- Encrypted Note (glass layered) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_glass_layered"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:elevation="1dp">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_lock_small"
+                    app:tint="@color/brand_primary" />
+
+                <TextView
+                    style="@style/AppDescription"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="By continuing, you confirm you have read, understood, and agreed to NearNeed's Trust &amp; Safety Guidelines."
+                    android:textColor="@color/text_subheadline"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="48dp" />
+                android:layout_height="32dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

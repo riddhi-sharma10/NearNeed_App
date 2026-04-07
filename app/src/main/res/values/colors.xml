@@ -64,6 +64,28 @@
     <color name="shadow_spot">#1A000000</color>
     <color name="shadow_ambient">#0F000000</color>
 
+    <!-- Navigation -->
+    <color name="sapphire_dark">#0F172A</color>
+    <color name="nav_active">#FFFFFF</color>
+    <color name="nav_inactive">#64748B</color>
+
+    <!-- Home screen feature colors -->
+    <color name="community_green">#10B981</color>
+    <color name="community_green_bg">#D1FAE5</color>
+    <color name="urgent_red">#EF4444</color>
+    <color name="urgent_red_bg">#FEE2E2</color>
+    <color name="trending_amber_bg">#FEF3C7</color>
+    <color name="trending_amber">#D97706</color>
+    <color name="rating_star">#F59E0B</color>
+
+    <!-- Chip color state lists (simple values) -->
+    <color name="sel_chip_bg_primary">#EFF6FF</color>
+    <color name="sel_chip_stroke_primary">#1E3A8A</color>
+    <color name="sel_chip_text_primary">#1E3A8A</color>
+    <color name="sel_chip_bg_red">#FEE2E2</color>
+    <color name="sel_chip_stroke_red">#EF4444</color>
+    <color name="sel_chip_text_red">#DC2626</color>
+
     <!-- Standard Library Colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

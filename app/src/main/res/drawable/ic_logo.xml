@@ -6,7 +6,7 @@
     <group android:translateY="10">
         <path
             android:pathData="M48,38 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"
-            android:fillColor="#1A6ACB"/>
+            android:fillColor="@color/brand_primary"/>
         <path
             android:pathData="M48,38 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"
             android:fillColor="#ffffff"

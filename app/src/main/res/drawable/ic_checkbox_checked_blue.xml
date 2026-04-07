@@ -3,7 +3,7 @@
     <!-- Blue rounded background box -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#1D5EF3" />
+            <solid android:color="@color/brand_primary" />
             <corners android:radius="4dp" />
         </shape>
     </item>

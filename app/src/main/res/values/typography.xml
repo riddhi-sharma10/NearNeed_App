@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Font Family Constants: Change these to update fonts globally -->
+    <string name="font_family_heading">sans-serif-medium</string>
+    <string name="font_family_hero">sans-serif-black</string>
+    <string name="font_family_forms">sans-serif</string>
+    <string name="font_family_description">sans-serif-light</string>
+
+    <!-- Centralized Typography Styles -->
+
+    <!-- Heading Font Style: Used for titles, important emphasis -->
+    <style name="AppHeading">
+        <item name="android:fontFamily">@string/font_family_heading</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_body_dark</item>
+    </style>
+
+    <style name="AppHero">
+        <item name="android:fontFamily">@string/font_family_hero</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Form Font Style: Used for labels, inputs, and controls -->
+    <style name="AppFormText">
+        <item name="android:fontFamily">@string/font_family_forms</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <!-- Descriptive Font Style: Used for body text, hints, and details -->
+    <style name="AppDescription">
+        <item name="android:fontFamily">@string/font_family_description</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_body_light</item>
+    </style>
+
+    <!-- Variants for specific sizes or cases -->
+    <style name="AppHeading.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="AppHeading.Small">
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+</resources>

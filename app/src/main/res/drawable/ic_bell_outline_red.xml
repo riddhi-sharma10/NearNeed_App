@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M12,22c1.1,0 2,-0.9 2,-2h-4c0,1.1 0.9,2 2,2zm6,-6v-5c0,-3.07 -1.63,-5.64 -4.5,-6.32V4c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68C7.64,5.36 6,7.92 6,11v5l-2,2v1h16v-1l-2,-2zm-2,1H8v-6c0,-2.48 1.51,-4.5 4,-4.5s4,2.02 4,4.5v6z"/>
+    <!-- The ring lines -->
+    <path
+        android:fillColor="#F43F5E"
+        android:pathData="M19.78,5.4l1.42,-1.42A9.97,9.97 0 0 0 17 1.48L16.27,3.34c1.33,0.48 2.51,1.19 3.51,2.06zM7.74,3.34L7.01,1.48A9.97,9.97 0 0 0 2.81 3.98l1.42,1.42C5.23,4.53 6.41,3.82 7.74,3.34z"/>
+</vector>

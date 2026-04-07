@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Map Background -->
+    <path
+        android:fillColor="#D8E2D5"
+        android:pathData="M 0 0 h 200 v 200 h -200 Z" />
+
+    <!-- Street Lines -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeAlpha="0.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="
+            M -20,80 L 220,50
+            M -20,130 L 220,180
+            M 60,-20 L 90,220
+            M 140,-20 L 110,220
+            M 30,50 L 80,110
+            M 100,50 L 180,100
+            M 80,150 L 160,190
+            M 150,10 L 190,40
+            " />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.0"
+        android:strokeAlpha="0.8"
+        android:pathData="M -20,100 L 220,130 M 40,-20 L 70,220" />
+</vector>

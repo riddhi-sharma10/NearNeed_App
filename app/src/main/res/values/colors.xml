@@ -1,5 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Basic Palette -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="overlay_dark">#B3000000</color>
+    <color name="overlay_dark_medium">#99000000</color>
+    <color name="overlay_dark_light">#80000000</color>
+    <color name="overlay_header">#800F172A</color>
+    <color name="shadow_ambient">#0F000000</color>
+    <color name="shadow_spot">#1A000000</color>
+    <color name="shadow_subtle">#08000000</color>
+
+    <!-- Brand / Primary Colors -->
+    <color name="brand_primary">#1D5EF3</color>
+    <color name="brand_primary_dark">#1A6BCC</color>
+    <color name="brand_primary_alt">#2563EB</color>
+    <color name="brand_primary_light">#EFF6FF</color>
+    <color name="brand_primary_surface">#F0F7FF</color>
+    <color name="brand_info_vibrant">#3B82F6</color>
+    <color name="brand_info_light">#E0F2FE</color>
+    <color name="brand_info_bg">#E0E7FF</color>
+    <color name="brand_info_accent_light">#93C5FD</color>
+    <color name="brand_info_accent_soft">#BFDBFE</color>
+    <color name="brand_success">#059669</color>
+    <color name="brand_success_solid">#12B76A</color>
+    <color name="brand_success_vibrant">#10B981</color>
+    <color name="brand_success_vibrant_alt">#22C55E</color>
+    <color name="brand_success_alt">#16A34A</color>
+    <color name="brand_success_bg">#A7F3D0</color>
+    <color name="brand_error">#EF4444</color>
+    <color name="community_red">#EF4444</color>
+    <color name="brand_error_solid">#EF4444</color>
+    <color name="brand_error_vibrant">#E11D48</color>
+    <color name="brand_error_dark">#DC2626</color>
+    <color name="brand_error_text">#BE123C</color>
+    <color name="brand_error_text_dark">#881337</color>
+    <color name="brand_error_bg">#FFE4E6</color>
+    <color name="brand_error_bg_alt">#FCE7F3</color>
+    <color name="brand_error_bg_light">#FEF2F2</color>
+    <color name="brand_error_accent">#F87171</color>
+    <color name="brand_error_accent_light">#FCA5A5</color>
+    <color name="brand_error_track">#FDA4AF</color>
+    <color name="brand_warning">#F59E0B</color>
+    <color name="brand_warning_solid">#D97706</color>
+    <color name="brand_warning_vibrant">#EAB308</color>
+    <color name="brand_warning_bg">#FEF3C7</color>
+    <color name="brand_warning_bg_alt">#FFEDD5</color>
+    <color name="brand_warning_accent">#FDE047</color>
+    <color name="brand_warning_alt">#F97316</color>
+    <color name="brand_warning_text">#92400E</color>
+    <color name="brand_warning_text_alt">#B45309</color>
+
+    <!-- Neutral Backgrounds -->
+    <color name="surface_background">#F4F6FB</color>
+    <color name="surface_background_alt">#FAFAFA</color>
+    <color name="surface_background_clean">#FCFAFA</color>
+    <color name="surface_background_subtle">#FCFCFC</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_card_subtle">#F8FAFC</color>
+    <color name="surface_footer">#F1F5F9</color>
+    <color name="surface_dark">#111111</color>
+
+    <!-- Typography -->
+    <color name="text_header">#0F172A</color>
+    <color name="text_subheadline">#64748B</color>
+    <color name="text_body_dark">#1D263B</color>
+    <color name="text_body_light">#7B8497</color>
+    <color name="text_body_light_alt">#5F6368</color>
+    <color name="text_secondary_dark">#334155</color>
+    <color name="text_hint">#A1A7B9</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="text_on_brand">#FFFFFF</color>
+    <color name="text_link">#1D5EF3</color>
+
+    <!-- UI Accents / Decorative -->
+    <color name="icon_decorative_tint">#94A3B8</color>
+    <color name="decorative_tint_faint_blue">#8493A2</color>
+    <color name="pagers_indicator_inactive">#CBD5E1</color>
+
+    <!-- Borders and UI Elements -->
+    <color name="border_standard">#E2E8F0</color>
+    <color name="border_light">#EAECF0</color>
+    <color name="divider_soft">#F1F5F9</color>
+    <color name="input_background">#F8FAFC</color>
+    <color name="input_stroke">#E2E8F0</color>
+    <color name="chip_background">#EFF6FF</color>
+    <color name="chip_selected">#1D5EF3</color>
+
+    <!-- Legacy / Older Colors -->
+    <color name="legacy_material_blue">#1A73E8</color>
 </resources>

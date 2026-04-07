@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="24dp">
+
+    <!-- Top Branding Section (Re-aligned to Top-Left) -->
+
+    <!-- Decorative Background Widgets -->
+
+    <ImageView
+        android:id="@+id/imageView12"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:alpha="0.10"
+        android:rotation="-20"
+        android:src="@drawable/ic_solid_supplies"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.072"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView11"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:alpha="0.12"
+        android:rotation="30"
+        android:src="@drawable/ic_solid_plug"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.02"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:alpha="0.14"
+        android:rotation="-15"
+        android:src="@drawable/ic_solid_broom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.08"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView13"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:alpha="0.10"
+        android:rotation="-10"
+        android:src="@drawable/ic_solid_bell"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.30"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.18"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:alpha="0.12"
+        android:rotation="45"
+        android:src="@drawable/ic_solid_laptop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.238"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView14"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:alpha="0.12"
+        android:rotation="15"
+        android:src="@drawable/ic_solid_car"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.81"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.188"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:alpha="0.12"
+        android:rotation="10"
+        android:src="@drawable/ic_solid_medical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.99"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.32"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:alpha="0.14"
+        android:rotation="-10"
+        android:src="@drawable/ic_solid_sms"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.03"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.45"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView16"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:alpha="0.10"
+        android:rotation="20"
+        android:src="@drawable/ic_solid_bell"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.42"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:alpha="0.15"
+        android:rotation="20"
+        android:src="@drawable/ic_solid_wrench"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.97"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.55"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView15"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:alpha="0.12"
+        android:rotation="-5"
+        android:src="@drawable/ic_solid_truck"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.58"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:alpha="0.14"
+        android:rotation="-10"
+        android:src="@drawable/ic_solid_oven"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.01"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.68"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView17"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:alpha="0.12"
+        android:rotation="-15"
+        android:src="@drawable/ic_solid_car"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.256"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.775"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView6"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:alpha="0.12"
+        android:rotation="25"
+        android:src="@drawable/ic_solid_plant"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.99"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.78"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView9"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:alpha="0.10"
+        android:rotation="-40"
+        android:src="@drawable/ic_solid_firstaid"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.90"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView18"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:alpha="0.12"
+        android:rotation="10"
+        android:src="@drawable/ic_solid_truck"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.72"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.88"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView10"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:alpha="0.12"
+        android:rotation="15"
+        android:src="@drawable/ic_solid_wrench"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.98"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:alpha="0.12"
+        android:rotation="10"
+        android:src="@drawable/ic_solid_paw"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.92"
+        app:tint="@color/decorative_tint_faint_blue" />
+
+    <LinearLayout
+        android:id="@+id/llTopBranding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Header Section -->
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Great things\nhappen locally."
+        android:textColor="@color/text_header"
+        android:textSize="36sp"
+        android:lineHeight="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llTopBranding" />
+
+    <TextView
+        android:id="@+id/tvSubHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Your neighbor is here to help.\nJoin a safe &amp; verified community."
+        android:textColor="@color/text_subheadline"
+        android:textSize="16sp"
+        android:alpha="0.8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHeader" />
+
+    <!-- Dedicated Slideshow Window -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvSlideshow"
+        android:layout_width="match_parent"
+        android:layout_height="315dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/border_standard"
+        app:strokeWidth="1.5dp"
+        app:layout_constraintBottom_toTopOf="@id/cardHelpers"
+        app:layout_constraintTop_toBottomOf="@id/tvSubHeader">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpSlideshow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="12dp"
+                android:alpha="0.7"
+                android:background="@drawable/bg_pill_pink_transparent"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="Gallery"
+                android:textColor="@color/brand_primary"
+                android:textSize="8sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Community Helper Card (In Place of Establish connections) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardHelpers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/border_standard"
+        app:strokeWidth="1dp"
+        app:layout_constraintBottom_toTopOf="@id/btnSignUp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSignUp"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginBottom="12dp"
+        android:text="SIGN UP"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.02"
+        app:backgroundTint="@color/brand_primary"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toTopOf="@id/btnLogin" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginBottom="12dp"
+        android:text="LOG IN"
+        android:textColor="@color/brand_primary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.02"
+        app:backgroundTint="@color/white"
+        app:strokeColor="@color/brand_primary"
+        app:strokeWidth="1.5dp"
+        app:cornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

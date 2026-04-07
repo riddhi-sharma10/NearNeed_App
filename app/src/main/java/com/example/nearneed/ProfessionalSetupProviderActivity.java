@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.HashSet;
 import java.util.Set;
+import android.content.Intent;
 
 public class ProfessionalSetupProviderActivity extends AppCompatActivity {
 
@@ -52,6 +53,10 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
             }
             Toast.makeText(this, "Setup Complete!", Toast.LENGTH_SHORT).show();
             // Proceed to next activity
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finishAffinity();
         });
     }
 

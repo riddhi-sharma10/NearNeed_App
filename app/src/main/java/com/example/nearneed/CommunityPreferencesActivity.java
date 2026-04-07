@@ -83,8 +83,16 @@ public class CommunityPreferencesActivity extends AppCompatActivity {
         btnEnter.setOnClickListener(v -> {
             if (validateSelections()) {
                 saveSkills();
-                Intent intent = new Intent(this, ProfessionalSetupProviderActivity.class);
-                startActivity(intent);
+                String role = getIntent().getStringExtra("USER_ROLE");
+                if ("provider".equals(role)) {
+                    Intent intent = new Intent(this, ProfessionalSetupProviderActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finishAffinity();
+                }
             }
         });
     }

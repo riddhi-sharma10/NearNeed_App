@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Navbar glass background color (80% Opacity) -->
+    <solid android:color="@color/glass_white_80" />
+    
+    <!-- Thin Glass Border (Bottom only) if context allows, but stroke applies to all sides.
+         For simple glass effect, we'll keep it uniform. -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/glass_border" />
+    
+    <!-- Typically smaller radius for Navbars -->
+    <corners android:radius="8dp" />
+</shape>

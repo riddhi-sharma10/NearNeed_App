@@ -90,4 +90,42 @@
 
     <!-- Legacy / Older Colors -->
     <color name="legacy_material_blue">#1A73E8</color>
+
+    <!-- User Color System -->
+    <!-- 1. Primary Colors (Gig) -->
+    <color name="gig_primary">#4F46E5</color>
+    <color name="gig_light">#818CF8</color>
+    <color name="gig_surface">#EEF2FF</color>
+    <color name="gig_gradient_start">#6366F1</color>
+    <color name="gig_gradient_end">#8B5CF6</color>
+
+    <!-- 2. Secondary Colors (Community) -->
+    <color name="community_primary">#10B981</color>
+    <color name="community_light">#34D399</color>
+    <color name="community_surface">#D1FAE5</color>
+    <color name="community_gradient_start">#10B981</color>
+    <color name="community_gradient_end">#059669</color>
+
+    <!-- 3. Neutral Colors -->
+    <color name="bg_primary">#F8F9FA</color>
+    <color name="bg_secondary">#FFFFFF</color>
+    <color name="bg_tertiary">#F1F3F5</color>
+
+    <!-- 4. Text Colors -->
+    <color name="text_primary_system">#111827</color>
+    <color name="text_secondary_system">#6B7280</color>
+    <color name="text_tertiary_system">#9CA3AF</color>
+
+    <!-- 5. Glassmorphism -->
+    <color name="glass_white_80">#CCFFFFFF</color>
+    <color name="glass_white_60">#99FFFFFF</color>
+    <color name="glass_white_40">#66FFFFFF</color>
+    <color name="glass_border">#1AFFFFFF</color>
+
+    <!-- 6. Accent Colors -->
+    <color name="accent_yellow">#F59E0B</color>
+    <color name="urgent_red">#EF4444</color>
+
+    <!-- 7. Utility -->
+    <color name="border_light_system">#E5E7EB</color>
 </resources>

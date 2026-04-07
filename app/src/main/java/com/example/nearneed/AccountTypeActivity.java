@@ -36,11 +36,10 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void completeRegistration(String role) {
-        // You can save the role to shared preferences or pass it via intent
-        // Registration is now complete, proceed to Dashboard
-        Intent intent = new Intent(this, MainActivity.class);
+        // Save the role or pass it via intent
+        // Now proceed to Community Preferences to refine the user profile
+        Intent intent = new Intent(this, CommunityPreferencesActivity.class);
         intent.putExtra("USER_ROLE", role);
         startActivity(intent);
-        finishAffinity(); // Clear the onboarding activities stack
     }
 }

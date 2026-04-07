@@ -83,7 +83,7 @@ public class CommunityPreferencesActivity extends AppCompatActivity {
         btnEnter.setOnClickListener(v -> {
             if (validateSelections()) {
                 saveSkills();
-                Intent intent = new Intent(this, IdVerificationActivity.class);
+                Intent intent = new Intent(this, ProfessionalSetupProviderActivity.class);
                 startActivity(intent);
             }
         });

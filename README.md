@@ -1,0 +1,2 @@
+# NearNeed_App
+A hyperlocal mobile app that connects people within a 10 km radius to hire verified individuals for small paid tasks like home repairs, errands, or technical help. Users can negotiate prices and pay via UPI or cash. The app also includes a community feature where neighbors can share urgent needs or emergencies and volunteer to help others, such as assisting senior citizens. It aims to build a trusted local support network.

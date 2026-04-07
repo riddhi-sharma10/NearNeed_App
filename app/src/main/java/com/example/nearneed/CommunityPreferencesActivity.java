@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.util.TypedValue;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -69,7 +70,7 @@ public class CommunityPreferencesActivity extends AppCompatActivity {
                 (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 String newSkill = etOtherSkill.getText().toString().trim();
                 if (!newSkill.isEmpty()) {
-                    addNewChip(cgSkills, newSkill, R.color.sel_chip_bg_red, R.color.sel_chip_stroke_red, R.color.sel_chip_text_red);
+                    addNewChip(cgSkills, newSkill, R.color.sel_chip_bg_primary, R.color.sel_chip_stroke_primary, R.color.sel_chip_text_primary);
                     etOtherSkill.setText("");
                     tilOtherSkill.setVisibility(View.GONE);
                     chipOther.setChecked(false);

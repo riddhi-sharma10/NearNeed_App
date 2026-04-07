@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Top row: URGENT badge + time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:id="@+id/urgentBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_urgent_badge"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="URGENT"
+                    android:textColor="@color/urgent_red"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvTimeAgo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30 mins ago"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvNeedTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Elderly Groceries Delivery"
+            android:textColor="@color/text_header"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- Location + Time row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="6dp">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_loc_pin_small"
+                app:tint="@color/text_muted" />
+
+            <TextView
+                android:id="@+id/tvNeedLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.3 km away"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  ·  "
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvNeedTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Today 5:00 PM"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Volunteer Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVolunteer"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="14dp"
+            android:text="Volunteer"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textAllCaps="false"
+            android:fontFamily="sans-serif-medium"
+            app:backgroundTint="@color/community_green"
+            app:cornerRadius="12dp"
+            app:elevation="0dp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

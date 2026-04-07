@@ -34,12 +34,10 @@
 
         <activity
             android:name=".OtpEnterActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".OtpVerifyActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -53,12 +51,10 @@
 
         <activity
             android:name=".ProfileInfoActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ProfileSetupActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -72,10 +68,6 @@
 
         <activity
             android:name=".TermsConditionsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AccountTypeActivity"
             android:exported="false" />
     </application>
 

@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="Professional Setup"
-            android:textColor="@color/brand_primary"
+            android:textColor="@color/text_header"
             android:textSize="16sp" />
 
     </RelativeLayout>
@@ -110,11 +110,12 @@
                 <TextView
                     android:id="@+id/chipPlumbing"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
                     android:background="@drawable/bg_chip_selected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Plumbing"
                     android:textColor="@color/white"
                     android:textSize="13sp" />
@@ -122,12 +123,13 @@
                 <TextView
                     android:id="@+id/chipElectrical"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Electrical"
                     android:textColor="@color/text_header"
                     android:textSize="13sp" />
@@ -135,12 +137,13 @@
                 <TextView
                     android:id="@+id/chipCarpentry"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Carpentry"
                     android:textColor="@color/text_header"
                     android:textSize="13sp" />
@@ -157,11 +160,12 @@
                 <TextView
                     android:id="@+id/chipPainting"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Painting"
                     android:textColor="@color/text_header"
                     android:textSize="13sp" />
@@ -169,25 +173,77 @@
                 <TextView
                     android:id="@+id/chipAppliance"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Appliance"
+                    android:textColor="@color/text_header"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/chipCleaning"
+                    style="@style/AppFormText"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:gravity="center"
+                    android:paddingHorizontal="4dp"
+                    android:text="Cleaning"
+                    android:textColor="@color/text_header"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- Row 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipGardening"
+                    style="@style/AppFormText"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:gravity="center"
+                    android:paddingHorizontal="4dp"
+                    android:text="Gardening"
+                    android:textColor="@color/text_header"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/chipAssembly"
+                    style="@style/AppFormText"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_chip_unselected"
+                    android:gravity="center"
+                    android:paddingHorizontal="4dp"
+                    android:text="Assembly"
                     android:textColor="@color/text_header"
                     android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/chipOther"
                     style="@style/AppFormText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="40dp"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/bg_chip_unselected"
                     android:gravity="center"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="4dp"
                     android:text="Other"
                     android:textColor="@color/text_header"
                     android:textSize="13sp" />
@@ -331,10 +387,10 @@
                     style="@style/AppFormText"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="@drawable/bg_circle_grey_solid"
+                    android:background="@drawable/bg_circle_light_blue"
                     android:gravity="center"
                     android:text="Sun"
-                    android:textColor="@color/text_header"
+                    android:textColor="@color/brand_primary"
                     android:textSize="10sp" />
 
                 <TextView
@@ -403,10 +459,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_grey_solid"
+                    android:background="@drawable/bg_circle_light_blue"
                     android:gravity="center"
                     android:text="Sat"
-                    android:textColor="@color/text_header"
+                    android:textColor="@color/brand_primary"
                     android:textSize="10sp" />
 
             </LinearLayout>
@@ -484,13 +540,6 @@
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:paddingHorizontal="16dp">
-
-                    <ImageView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_solid_plug"
-                        android:layout_marginEnd="5dp"
-                        app:tint="@color/white" />
 
                     <TextView
                         style="@style/AppFormText"

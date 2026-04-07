@@ -21,6 +21,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
     private final Set<TextView> selectedCategories = new HashSet<>();
     private TextView selectedExperience = null;
     private final Set<TextView> selectedDays = new HashSet<>();
+    private final Set<TextView> selectedTimeSlots = new HashSet<>();
 
     private TextView tvStartTime, tvEndTime;
 
@@ -35,6 +36,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
         setupCategories();
         setupExperience();
         setupDays();
+        setupTimeSlots();
         setupTimePickers();
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
@@ -74,11 +76,11 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
     private void toggleCategory(TextView chip) {
         if (selectedCategories.contains(chip)) {
             selectedCategories.remove(chip);
-            chip.setBackgroundResource(R.drawable.bg_chip_unselected);
-            chip.setTextColor(ContextCompat.getColor(this, R.color.text_header));
+            chip.setBackgroundResource(R.drawable.bg_chip_unselected_uniform);
+            chip.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
         } else {
             selectedCategories.add(chip);
-            chip.setBackgroundResource(R.drawable.bg_chip_selected);
+            chip.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
             chip.setTextColor(ContextCompat.getColor(this, R.color.white));
         }
     }
@@ -93,11 +95,11 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
             }
             exp.setOnClickListener(v -> {
                 if (selectedExperience != null) {
-                    selectedExperience.setBackgroundResource(R.drawable.bg_chip_unselected);
-                    selectedExperience.setTextColor(ContextCompat.getColor(this, R.color.text_header));
+                    selectedExperience.setBackgroundResource(R.drawable.bg_chip_unselected_uniform);
+                    selectedExperience.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
                 }
                 selectedExperience = (TextView) v;
-                selectedExperience.setBackgroundResource(R.drawable.bg_chip_selected);
+                selectedExperience.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
                 selectedExperience.setTextColor(ContextCompat.getColor(this, R.color.white));
             });
         }
@@ -122,12 +124,31 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
     private void toggleDay(TextView day) {
         if (selectedDays.contains(day)) {
             selectedDays.remove(day);
-            day.setBackgroundResource(R.drawable.bg_circle_light_blue);
+            day.setBackgroundResource(R.drawable.bg_circle_unselected_uniform);
             day.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
         } else {
             selectedDays.add(day);
-            day.setBackgroundResource(R.drawable.bg_circle_blue_solid);
+            day.setBackgroundResource(R.drawable.bg_circle_selected_uniform);
             day.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
+    }
+
+    private void setupTimeSlots() {
+        int[] slotIds = {R.id.slotMorning, R.id.slotAfternoon, R.id.slotEvening};
+        for (int id : slotIds) {
+            TextView slot = findViewById(id);
+            slot.setOnClickListener(v -> {
+                TextView tv = (TextView) v;
+                if (selectedTimeSlots.contains(tv)) {
+                    selectedTimeSlots.remove(tv);
+                    tv.setBackgroundResource(R.drawable.bg_chip_unselected_uniform);
+                    tv.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
+                } else {
+                    selectedTimeSlots.add(tv);
+                    tv.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
+                    tv.setTextColor(ContextCompat.getColor(this, R.color.white));
+                }
+            });
         }
     }
 

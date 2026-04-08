@@ -36,10 +36,15 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void completeRegistration(String role) {
-        // Save the role or pass it via intent
-        // Now proceed to Community Preferences to refine the user profile
-        Intent intent = new Intent(this, CommunityPreferencesActivity.class);
-        intent.putExtra("USER_ROLE", role);
-        startActivity(intent);
+        if ("seeker".equals(role)) {
+            // Direct navigation to the Seeker No Posts page as requested
+            Intent intent = new Intent(this, HomeSeekerNoPostsActivity.class);
+            startActivity(intent);
+        } else {
+            // Standard flow for providers
+            Intent intent = new Intent(this, CommunityPreferencesActivity.class);
+            intent.putExtra("USER_ROLE", role);
+            startActivity(intent);
+        }
     }
 }

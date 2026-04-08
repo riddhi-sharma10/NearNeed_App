@@ -51,6 +51,23 @@ public class MessagesActivity extends AppCompatActivity {
         chats.add(new ChatEntry("Ethan Robinson", "GIG: GYM TRAINER", "Consistency is key. See you tomorrow.", "2 months ago", false, true));
 
         rvMessages.setAdapter(new MessagesAdapter(chats));
+
+        setupBottomNavigation();
+    }
+
+    private void setupBottomNavigation() {
+        View navHome = findViewById(R.id.nav_home_container);
+        View navMap = findViewById(R.id.nav_map_container);
+        View navBookings = findViewById(R.id.nav_bookings_container);
+        View navProfile = findViewById(R.id.nav_profile_container);
+
+        if (navHome != null) navHome.setOnClickListener(v -> finish()); // Go back to main
+        if (navMap != null) navMap.setOnClickListener(v -> Toast.makeText(this, "Map coming soon", Toast.LENGTH_SHORT).show());
+        if (navBookings != null) navBookings.setOnClickListener(v -> Toast.makeText(this, "Bookings coming soon", Toast.LENGTH_SHORT).show());
+        if (navProfile != null) navProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileInfoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private static class ChatEntry {
@@ -93,6 +110,19 @@ public class MessagesActivity extends AppCompatActivity {
             holder.tvMessageSnippet.setText(chat.snippet);
             holder.tvTime.setText(chat.time);
             holder.vUnreadIndicator.setVisibility(chat.isUnread ? View.VISIBLE : View.GONE);
+            
+            holder.itemView.setOnClickListener(v -> {
+                android.content.Intent intent = new android.content.Intent(v.getContext(), ChatActivity.class);
+                intent.putExtra("CHAT_NAME", chat.name);
+                intent.putExtra("CHAT_TIME", chat.time);
+                intent.putExtra("CHAT_ONLINE", chat.isOnline);
+                intent.putExtra("CHAT_SNIPPET", chat.snippet);
+                v.getContext().startActivity(intent);
+                // Premium transition
+                if (v.getContext() instanceof android.app.Activity) {
+                    ((android.app.Activity) v.getContext()).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
         }
 
         @Override

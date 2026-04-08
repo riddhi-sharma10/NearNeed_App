@@ -81,6 +81,11 @@
         <activity
             android:name=".MessagesActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
     </application>
 
 </manifest>

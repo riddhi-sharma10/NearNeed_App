@@ -9,15 +9,12 @@
     tools:context=".MessagesActivity"
     tools:ignore="HardcodedText,ContentDescription,SpUsage">
 
-    <androidx.core.widget.NestedScrollView
+    <!-- Use a simple relative or linear approach without NestedScrollView for better RecyclerView scrolling -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="72dp">
 
         <!-- Header Area -->
             <LinearLayout
@@ -74,17 +71,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMessages"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
             tools:listitem="@layout/item_message_row" />
             
-        <!-- Spacer trick to allow scrolling past the floating navbar -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="120dp" />
-
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
 
         <!-- Bottom Navigation Bar (Glass Navbar) -->
         <com.google.android.material.card.MaterialCardView

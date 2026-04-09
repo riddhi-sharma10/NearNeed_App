@@ -2,12 +2,14 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.button.MaterialButton;
 
 public class AccountTypeActivity extends AppCompatActivity {
 
+    private ImageButton btnBack;
     private MaterialCardView cardSeeker, cardProvider;
     private MaterialButton btnSeekerAction, btnProviderAction;
 
@@ -21,6 +23,7 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        btnBack = findViewById(R.id.btnBack);
         cardSeeker = findViewById(R.id.cardSeeker);
         cardProvider = findViewById(R.id.cardProvider);
         btnSeekerAction = findViewById(R.id.btnSeekerAction);
@@ -28,6 +31,8 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        btnBack.setOnClickListener(v -> onBackPressed());
+
         cardSeeker.setOnClickListener(v -> completeRegistration("seeker"));
         btnSeekerAction.setOnClickListener(v -> completeRegistration("seeker"));
         

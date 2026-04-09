@@ -45,10 +45,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".OtpVerifiedActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".IdVerificationActivity"
             android:exported="false" />
 

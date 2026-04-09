@@ -59,8 +59,8 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 // Redirect to Profile Setup (Step 1)
                 intent = new Intent(this, ProfileInfoActivity.class);
             } else {
-                // Login flow: OTP Verified screen -> Account Type
-                intent = new Intent(this, OtpVerifiedActivity.class);
+                // Login flow: OTP -> Account Type
+                intent = new Intent(this, AccountTypeActivity.class);
             }
             startActivity(intent);
             finish();

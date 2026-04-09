@@ -13,13 +13,28 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.MediaRecorder;
+import android.media.MediaPlayer;
+import android.graphics.Bitmap;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.MediaStore;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import androidx.recyclerview.widget.SimpleItemAnimator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +48,25 @@ public class ChatActivity extends AppCompatActivity {
     private TextView tvChatName;
     private TextView tvChatStatus;
     
+    // Image Preview Views
+    private View cvImagePreview;
+    private ImageView ivSelectedImage, btnRemoveImage;
+    private Uri selectedImageUri;
+
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private boolean permissionToRecordAccepted = false;
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO};
+    
+    private ActivityResultLauncher<Intent> pickImageLauncher;
+    private ActivityResultLauncher<Intent> captureImageLauncher;
+
+    private MediaRecorder recorder;
+    private String audioFilePath;
+    private MediaPlayer mediaPlayer;
+
     private Handler handler = new Handler(Looper.getMainLooper());
+    private static final Object PAYLOAD_AUDIO_STATE = "payload_audio_state";
+    private int activeAudioPosition = RecyclerView.NO_POSITION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +81,32 @@ public class ChatActivity extends AppCompatActivity {
         tvChatName = findViewById(R.id.tvChatName);
         tvChatStatus = findViewById(R.id.tvChatStatus);
 
+        // Bubble containers
+        // Note: we'll find these in the ViewHolder since they are per-item
+
+        // Preview views
+        cvImagePreview = findViewById(R.id.cvImagePreview);
+        ivSelectedImage = findViewById(R.id.ivSelectedImage);
+        btnRemoveImage = findViewById(R.id.btnRemoveImage);
+
+        if (btnRemoveImage != null) {
+            btnRemoveImage.setOnClickListener(v -> {
+                selectedImageUri = null;
+                if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
+                
+                // Update Mic/Send button state
+                String text = etMessageInput.getText().toString().trim();
+                if (text.isEmpty()) {
+                    btnSend.setVisibility(View.GONE);
+                    final ImageView btnMicLocal = findViewById(R.id.btnMic);
+                    if (btnMicLocal != null) btnMicLocal.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        setupLaunchers();
+        setupMicButton();
+
         String chatName = getIntent().getStringExtra("CHAT_NAME");
         String chatTime = getIntent().getStringExtra("CHAT_TIME");
         boolean isOnline = getIntent().getBooleanExtra("CHAT_ONLINE", false);
@@ -57,12 +116,15 @@ public class ChatActivity extends AppCompatActivity {
             tvChatName.setText(chatName);
         }
         
+        View vOnlineDot = findViewById(R.id.vOnlineDot);
         if (isOnline) {
             tvChatStatus.setText("Online");
-            tvChatStatus.setTextColor(android.graphics.Color.parseColor("#10B981")); // theme community green roughly
+            tvChatStatus.setTextColor(ContextCompat.getColor(this, R.color.brand_success_vibrant));
+            if (vOnlineDot != null) vOnlineDot.setVisibility(View.VISIBLE);
         } else {
             tvChatStatus.setText(chatTime != null ? "Seen " + chatTime : "Offline");
-            tvChatStatus.setTextColor(android.graphics.Color.parseColor("#6B7280"));
+            tvChatStatus.setTextColor(ContextCompat.getColor(this, R.color.text_body_light));
+            if (vOnlineDot != null) vOnlineDot.setVisibility(View.GONE);
         }
 
         btnBack.setOnClickListener(v -> finish());
@@ -89,14 +151,24 @@ public class ChatActivity extends AppCompatActivity {
         layoutManager.setStackFromEnd(true); // messages start from bottom
         rvMessages.setLayoutManager(layoutManager);
         rvMessages.setAdapter(adapter);
+        RecyclerView.ItemAnimator animator = rvMessages.getItemAnimator();
+        if (animator instanceof SimpleItemAnimator) {
+            ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
+        }
         // Scroll to the latest message
         rvMessages.scrollToPosition(messageList.size() - 1);
 
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
             String text = etMessageInput.getText().toString().trim();
-            if (!text.isEmpty()) {
-                addMessage(new ChatMessage(text, false, true));
+            if (!text.isEmpty() || selectedImageUri != null) {
+                ChatMessage msg = new ChatMessage(text, false, true);
+                if (selectedImageUri != null) {
+                    msg.imageUri = selectedImageUri.toString();
+                    selectedImageUri = null;
+                    if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
+                }
+                addMessage(msg);
                 etMessageInput.setText("");
             }
         });
@@ -109,7 +181,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().trim().length() > 0) {
+                if (s.toString().trim().length() > 0 || selectedImageUri != null) {
                     btnSend.setVisibility(View.VISIBLE);
                     if (btnMicLocal != null) btnMicLocal.setVisibility(View.GONE);
                 } else {
@@ -124,31 +196,156 @@ public class ChatActivity extends AppCompatActivity {
 
         // Initialize button visibility
         btnSend.setVisibility(View.GONE);
+    }
 
-        // MIC button - simulate voice recording on tap
+    private void setupLaunchers() {
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        selectedImageUri = result.getData().getData();
+                        showImagePreview();
+                    }
+                }
+        );
+
+        captureImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        // Camera returns thumbnail bitmap in extras
+                        Bitmap photo = (Bitmap) result.getData().getExtras().get("data");
+                        if (photo != null) {
+                            selectedImageUri = saveBitmapToUri(photo);
+                            showImagePreview();
+                        }
+                    }
+                }
+        );
+    }
+
+    private Uri saveBitmapToUri(Bitmap bitmap) {
+        File file = new File(getExternalFilesDir(null), "photo_" + System.currentTimeMillis() + ".jpg");
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Uri.fromFile(file);
+    }
+
+    private void showImagePreview() {
+        if (selectedImageUri != null) {
+            if (cvImagePreview != null) cvImagePreview.setVisibility(View.VISIBLE);
+            if (ivSelectedImage != null) ivSelectedImage.setImageURI(selectedImageUri);
+            if (btnSend != null) btnSend.setVisibility(View.VISIBLE);
+            final ImageView btnMicLocal = findViewById(R.id.btnMic);
+            if (btnMicLocal != null) btnMicLocal.setVisibility(View.GONE);
+        }
+    }
+
+    // MIC button - simulate real-time recording
+    private void setupMicButton() {
+        final ImageView btnMicLocal = findViewById(R.id.btnMic);
         if (btnMicLocal != null) {
-            btnMicLocal.setOnClickListener(v -> {
-                Toast.makeText(this, "🎙 Voice message sent!", Toast.LENGTH_SHORT).show();
-                addMessage(new ChatMessage("", true, true));
-            });
-            
-            // Add a long-press simulation for recording
-            btnMicLocal.setOnLongClickListener(v -> {
-                Toast.makeText(this, "Recording...", Toast.LENGTH_SHORT).show();
-                return true;
+            View llRecordingTab = findViewById(R.id.llRecordingTab);
+            View flInputWrapper = findViewById(R.id.flInputWrapper);
+            TextView tvRecordingTime = findViewById(R.id.tvRecordingTime);
+            View vRecordDot = findViewById(R.id.vRecordDot);
+
+            btnMicLocal.setOnTouchListener(new View.OnTouchListener() {
+                long startTime = 0;
+                float startX = 0;
+                boolean isCancelled = false;
+                Runnable timerRunnable;
+                
+                @Override
+                public boolean onTouch(View v, android.view.MotionEvent event) {
+                    if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                        if (ContextCompat.checkSelfPermission(ChatActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(ChatActivity.this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+                            return false;
+                        }
+                        startTime = System.currentTimeMillis();
+                        startX = event.getX();
+                        isCancelled = false;
+                        
+                        btnMicLocal.animate().scaleX(1.3f).scaleY(1.3f).setDuration(150).start();
+                        if (flInputWrapper != null) flInputWrapper.setVisibility(View.GONE);
+                        if (btnAdd != null) btnAdd.setVisibility(View.GONE);
+                        if (llRecordingTab != null) llRecordingTab.setVisibility(View.VISIBLE);
+                        
+                        startRecording();
+
+                        timerRunnable = new Runnable() {
+                            boolean dotVisible = true;
+                            @Override
+                            public void run() {
+                                long elapsed = System.currentTimeMillis() - startTime;
+                                int secs = (int) (elapsed / 1000);
+                                if (tvRecordingTime != null) tvRecordingTime.setText(String.format("0:%02d", secs));
+                                
+                                dotVisible = !dotVisible;
+                                if (vRecordDot != null) vRecordDot.setAlpha(dotVisible ? 1f : 0f);
+                                
+                                handler.postDelayed(this, 500);
+                            }
+                        };
+                        handler.post(timerRunnable);
+                        return true;
+                        
+                    } else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
+                        if (startX - event.getX() > 100 && !isCancelled) {
+                            isCancelled = true;
+                            if (timerRunnable != null) handler.removeCallbacks(timerRunnable);
+                            
+                            if (flInputWrapper != null) flInputWrapper.setVisibility(View.VISIBLE);
+                            if (btnAdd != null) btnAdd.setVisibility(View.VISIBLE);
+                            if (llRecordingTab != null) llRecordingTab.setVisibility(View.GONE);
+                            btnMicLocal.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+                        }
+                        return true;
+                        
+                    } else if (event.getAction() == android.view.MotionEvent.ACTION_UP || 
+                               event.getAction() == android.view.MotionEvent.ACTION_CANCEL) {
+                        
+                        if (timerRunnable != null) {
+                            handler.removeCallbacks(timerRunnable);
+                        }
+                        
+                        if (flInputWrapper != null) flInputWrapper.setVisibility(View.VISIBLE);
+                        if (btnAdd != null) btnAdd.setVisibility(View.VISIBLE);
+                        if (llRecordingTab != null) llRecordingTab.setVisibility(View.GONE);
+                        btnMicLocal.animate().scaleX(1.0f).scaleY(1.0f).setDuration(150).start();
+                        
+                        stopRecording(isCancelled);
+
+                        if (event.getAction() == android.view.MotionEvent.ACTION_UP && !isCancelled) {
+                            long elapsed = System.currentTimeMillis() - startTime;
+                            int secs = (int) (elapsed / 1000);
+                            
+                            if (secs < 1) {
+                                Toast.makeText(ChatActivity.this, "🎙 Hold to record a voice message", Toast.LENGTH_SHORT).show();
+                            } else {
+                                ChatMessage msg = new ChatMessage("", true, true);
+                                msg.durationSecs = secs;
+                                msg.audioPath = audioFilePath;
+                                addMessage(msg);
+                            }
+                        }
+                        return true;
+                    }
+                    return true;
+                }
             });
         }
+        // ADD/ATTACHMENT button - opens gallery directly
+        btnAdd.setOnClickListener(v -> {
+            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            pickImageLauncher.launch(galleryIntent);
+        });
 
-        // ADD/ATTACHMENT button
-        btnAdd.setOnClickListener(v -> showAttachmentOptions());
-
-        // EMOJI button
-        ImageView btnEmoji = findViewById(R.id.btnEmoji);
-        if (btnEmoji != null) {
-            btnEmoji.setOnClickListener(v ->
-                Toast.makeText(this, "😊 Emoji picker coming soon!", Toast.LENGTH_SHORT).show()
-            );
-        }
+        // EMOJI button - removed per user request
 
         // PROFILE / INFO area
         findViewById(R.id.topBar).setOnClickListener(v -> 
@@ -157,18 +354,201 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void showAttachmentOptions() {
-        String[] options = {"Upload Attachment", "Send Voice Message"};
+        String[] options = {"📷  Take Photo", "🖼  Choose from Gallery"};
         new AlertDialog.Builder(this)
                 .setTitle("Attach Media")
                 .setItems(options, (dialog, which) -> {
                     if (which == 0) {
-                        Toast.makeText(this, "Attachment uploaded!", Toast.LENGTH_SHORT).show();
-                        addMessage(new ChatMessage("Sent an attachment \ud83d\udcc1", false, true));
+                        checkCameraPermissionAndLaunch();
                     } else if (which == 1) {
-                        addMessage(new ChatMessage("", true, true));
+                        Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        pickImageLauncher.launch(galleryIntent);
                     }
                 })
                 .show();
+    }
+
+    private void checkCameraPermissionAndLaunch() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 101);
+        } else {
+            launchCamera();
+        }
+    }
+
+    private void launchCamera() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        captureImageLauncher.launch(cameraIntent);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+            permissionToRecordAccepted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (permissionToRecordAccepted) {
+                Toast.makeText(this, "Microphone access granted", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == 101) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchCamera();
+            }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handler.removeCallbacks(progressUpdater);
+        activeAudioPosition = RecyclerView.NO_POSITION;
+        if (recorder != null) {
+            recorder.release();
+            recorder = null;
+        }
+        releaseMediaPlayer();
+    }
+
+    private void startRecording() {
+        try {
+            audioFilePath = getExternalFilesDir(null).getAbsolutePath() + "/voice_" + System.currentTimeMillis() + ".3gp";
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setOutputFile(audioFilePath);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.prepare();
+            recorder.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Recording failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void stopRecording(boolean cancelled) {
+        if (recorder != null) {
+            try {
+                recorder.stop();
+            } catch (Exception e) {
+                // Handle stop failure
+            }
+            recorder.release();
+            recorder = null;
+        }
+        if (cancelled && audioFilePath != null) {
+            File file = new File(audioFilePath);
+            if (file.exists()) file.delete();
+            audioFilePath = null;
+        }
+    }
+
+    private void playAudio(String path, ChatMessage message, int position) {
+        if (position == RecyclerView.NO_POSITION || position >= messageList.size()) {
+            return;
+        }
+        if (path == null || !(new File(path).exists())) {
+            Toast.makeText(this, "Audio file not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition != position) {
+            stopAudio(messageList.get(activeAudioPosition), activeAudioPosition);
+        }
+        releaseMediaPlayer();
+        
+        mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            message.durationSecs = Math.max(1, mediaPlayer.getDuration() / 1000);
+            message.progress = 0;
+            activeAudioPosition = position;
+            mediaPlayer.start();
+            message.isPlaying = true;
+            adapter.notifyItemChanged(position, PAYLOAD_AUDIO_STATE);
+            startProgressLoop();
+            
+            mediaPlayer.setOnCompletionListener(mp -> {
+                stopAudio(message, position);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            message.isPlaying = false;
+            message.progress = 0;
+            activeAudioPosition = RecyclerView.NO_POSITION;
+            releaseMediaPlayer();
+            Toast.makeText(this, "Playback failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void stopAllAudio() {
+        if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition < messageList.size()) {
+            stopAudio(messageList.get(activeAudioPosition), activeAudioPosition);
+            return;
+        }
+        for (ChatMessage m : messageList) {
+            m.isPlaying = false;
+        }
+        activeAudioPosition = RecyclerView.NO_POSITION;
+        handler.removeCallbacks(progressUpdater);
+        releaseMediaPlayer();
+    }
+
+    private void stopAudio(ChatMessage message, int position) {
+        if (message == null || position == RecyclerView.NO_POSITION || position >= messageList.size()) {
+            return;
+        }
+        if (activeAudioPosition == position) {
+            handler.removeCallbacks(progressUpdater);
+            releaseMediaPlayer();
+            activeAudioPosition = RecyclerView.NO_POSITION;
+        }
+        message.isPlaying = false;
+        message.progress = 0;
+        adapter.notifyItemChanged(position, PAYLOAD_AUDIO_STATE);
+    }
+
+    private void releaseMediaPlayer() {
+        if (mediaPlayer != null) {
+            try {
+                if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+            } catch (Exception ignored) {}
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+
+    private boolean isMediaPlayerActive() {
+        return mediaPlayer != null && mediaPlayer.isPlaying();
+    }
+
+    private int getMediaPlayerProgress() {
+        try {
+            if (mediaPlayer != null && mediaPlayer.getDuration() > 0) {
+                return (int) ((float) mediaPlayer.getCurrentPosition() / mediaPlayer.getDuration() * 100);
+            }
+        } catch (Exception ignored) {}
+        return 0;
+    }
+
+    private int getMediaPlayerPositionSecs() {
+        try {
+            if (mediaPlayer != null) {
+                return mediaPlayer.getCurrentPosition() / 1000;
+            }
+        } catch (Exception ignored) {}
+        return 0;
+    }
+
+    private void showFullscreenImage(Uri imageUri) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        ImageView imageView = new ImageView(this);
+        imageView.setImageURI(imageUri);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        imageView.setBackgroundColor(android.graphics.Color.BLACK);
+        imageView.setPadding(0, 0, 0, 0);
+        builder.setView(imageView);
+        AlertDialog dialog = builder.create();
+        imageView.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 
     private void addMessage(ChatMessage message) {
@@ -180,22 +560,47 @@ public class ChatActivity extends AppCompatActivity {
     private Runnable progressUpdater = new Runnable() {
         @Override
         public void run() {
-            boolean isAnyPlaying = false;
-            for (int i = 0; i < messageList.size(); i++) {
-                ChatMessage m = messageList.get(i);
-                if (m.isPlaying) {
-                    isAnyPlaying = true;
-                    m.progress += 2;
-                    if (m.progress >= 100) {
-                        m.progress = 0;
-                        m.isPlaying = false;
-                    }
-                    adapter.notifyItemChanged(i);
+            if (activeAudioPosition == RecyclerView.NO_POSITION || activeAudioPosition >= messageList.size()) {
+                return;
+            }
+
+            ChatMessage activeMessage = messageList.get(activeAudioPosition);
+            if (!activeMessage.isPlaying) {
+                return;
+            }
+
+            if (activeMessage.audioPath != null && isMediaPlayerActive()) {
+                activeMessage.progress = getMediaPlayerProgress();
+            } else {
+                activeMessage.progress += 2;
+                if (activeMessage.progress >= 100) {
+                    stopAudio(activeMessage, activeAudioPosition);
+                    return;
                 }
             }
-            if (isAnyPlaying) {
-                handler.postDelayed(this, 100); 
+
+            RecyclerView.ViewHolder vh = rvMessages.findViewHolderForAdapterPosition(activeAudioPosition);
+            if (vh != null) {
+                SeekBar sb = vh.itemView.findViewById(R.id.sbProgress);
+                TextView tvDur = vh.itemView.findViewById(R.id.tvDuration);
+                ImageView ivPP = vh.itemView.findViewById(R.id.ivPlayPause);
+
+                if (sb != null) sb.setProgress(activeMessage.progress);
+                if (tvDur != null) {
+                    if (activeMessage.audioPath != null) {
+                        tvDur.setText("0:" + String.format("%02d", getMediaPlayerPositionSecs()));
+                    } else {
+                        int secs = (int) (activeMessage.progress / 100f * activeMessage.durationSecs);
+                        tvDur.setText("0:" + String.format("%02d", secs));
+                    }
+                }
+                if (ivPP != null) {
+                    ivPP.setImageResource(android.R.drawable.ic_media_pause);
+                    ivPP.setAlpha(0.9f);
+                }
             }
+
+            handler.postDelayed(this, 100);
         }
     };
 
@@ -210,11 +615,15 @@ public class ChatActivity extends AppCompatActivity {
         boolean isOutgoing;
         boolean isPlaying = false;
         int progress = 0;
+        int durationSecs = 0;
+        String imageUri;
+        String audioPath;
 
         ChatMessage(String text, boolean isVoice, boolean isOutgoing) {
             this.text = text;
             this.isVoice = isVoice;
             this.isOutgoing = isOutgoing;
+            if (this.isVoice) this.durationSecs = 7;
         }
     }
 
@@ -248,55 +657,96 @@ public class ChatActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
             ChatMessage message = messages.get(position);
 
+            View llBubble = message.isOutgoing ? holder.llSentBubble : holder.llReceivedBubble;
+
             if (message.isVoice && holder.clVoiceMessage != null) {
-                if (holder.tvMessage != null) holder.tvMessage.setVisibility(View.GONE);
+                if (llBubble != null) llBubble.setVisibility(View.GONE);
                 holder.clVoiceMessage.setVisibility(View.VISIBLE);
 
-                if (holder.sbProgress != null) holder.sbProgress.setProgress(message.progress);
+                updateVoicePlaybackViews(holder, message);
+
                 if (holder.ivPlayPause != null) {
-                    holder.ivPlayPause.setImageResource(
-                        message.isPlaying ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play
-                    );
                     holder.ivPlayPause.setOnClickListener(v -> {
-                        message.isPlaying = !message.isPlaying;
-                        if (message.isPlaying) startProgressLoop();
-                        notifyItemChanged(position);
+                        int adapterPosition = holder.getAdapterPosition();
+                        if (adapterPosition == RecyclerView.NO_POSITION) return;
+
+                        ChatMessage currentMessage = messages.get(adapterPosition);
+                        if (currentMessage.isPlaying) {
+                            stopAudio(currentMessage, adapterPosition);
+                        } else {
+                            if (currentMessage.audioPath != null) {
+                                playAudio(currentMessage.audioPath, currentMessage, adapterPosition);
+                            } else {
+                                // Fallback for simulated messages
+                                if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition < messages.size()) {
+                                    stopAudio(messages.get(activeAudioPosition), activeAudioPosition);
+                                }
+                                currentMessage.isPlaying = true;
+                                currentMessage.progress = 0;
+                                activeAudioPosition = adapterPosition;
+                                startProgressLoop();
+                                notifyItemChanged(adapterPosition, PAYLOAD_AUDIO_STATE);
+                            }
+                        }
                     });
                 }
-
-                if (holder.tvDuration != null) {
-                    int secs = (int) (message.progress / 100f * 60);
-                    holder.tvDuration.setText("0:" + String.format("%02d", secs));
-                }
-
-                if (holder.ivDelete != null) {
-                    holder.ivDelete.setOnClickListener(v -> {
-                        messages.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, messages.size());
-                    });
-                }
-
             } else {
+                if (llBubble != null) llBubble.setVisibility(View.VISIBLE);
                 if (holder.tvMessage != null) {
-                    holder.tvMessage.setVisibility(View.VISIBLE);
                     holder.tvMessage.setText(message.text);
+                    holder.tvMessage.setVisibility((message.text == null || message.text.isEmpty()) ? View.GONE : View.VISIBLE);
                 }
                 if (holder.clVoiceMessage != null) {
                     holder.clVoiceMessage.setVisibility(View.GONE);
                 }
-            }
 
-            // Animate in message (fade + slight scale)
-            holder.itemView.setAlpha(0f);
-            holder.itemView.setScaleX(0.95f);
-            holder.itemView.setScaleY(0.95f);
-            holder.itemView.animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(250)
-                    .start();
+                // Image handling
+                View cvImage = message.isOutgoing ? holder.cvImageSent : holder.cvImageReceived;
+                ImageView ivImage = message.isOutgoing ? holder.ivSentImage : holder.ivReceivedImage;
+
+                if (cvImage != null && ivImage != null) {
+                    if (message.imageUri != null) {
+                        cvImage.setVisibility(View.VISIBLE);
+                        ivImage.setImageURI(Uri.parse(message.imageUri));
+                        // Click to view fullscreen
+                        ivImage.setOnClickListener(v -> showFullscreenImage(Uri.parse(message.imageUri)));
+                    } else {
+                        cvImage.setVisibility(View.GONE);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ChatViewHolder holder, int position, @NonNull List<Object> payloads) {
+            if (!payloads.isEmpty() && payloads.contains(PAYLOAD_AUDIO_STATE)) {
+                ChatMessage message = messages.get(position);
+                if (message.isVoice) {
+                    updateVoicePlaybackViews(holder, message);
+                }
+                return;
+            }
+            super.onBindViewHolder(holder, position, payloads);
+        }
+
+        private void updateVoicePlaybackViews(@NonNull ChatViewHolder holder, @NonNull ChatMessage message) {
+            if (holder.sbProgress != null) {
+                holder.sbProgress.setProgress(message.progress);
+            }
+            if (holder.ivPlayPause != null) {
+                holder.ivPlayPause.setImageResource(
+                        message.isPlaying ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play
+                );
+                holder.ivPlayPause.setAlpha(message.isPlaying ? 0.9f : 1f);
+            }
+            if (holder.tvDuration != null) {
+                if (message.isPlaying && message.audioPath != null) {
+                    int secs = getMediaPlayerPositionSecs();
+                    holder.tvDuration.setText("0:" + String.format("%02d", secs));
+                } else {
+                    holder.tvDuration.setText("0:" + String.format("%02d", message.durationSecs));
+                }
+            }
         }
 
         @Override
@@ -306,8 +756,9 @@ public class ChatActivity extends AppCompatActivity {
 
         class ChatViewHolder extends RecyclerView.ViewHolder {
             TextView tvMessage, tvDuration;
-            View clVoiceMessage;
-            ImageView ivPlayPause, ivDelete;
+            View clVoiceMessage, cvImageSent, cvImageReceived;
+            View llSentBubble, llReceivedBubble;
+            ImageView ivPlayPause, ivSentImage, ivReceivedImage;
             SeekBar sbProgress;
 
             ChatViewHolder(@NonNull View itemView) {
@@ -315,27 +766,21 @@ public class ChatActivity extends AppCompatActivity {
                 tvMessage = itemView.findViewById(R.id.tvMessage);
                 clVoiceMessage = itemView.findViewById(R.id.clVoiceMessage);
                 ivPlayPause = itemView.findViewById(R.id.ivPlayPause);
-                ivDelete = itemView.findViewById(R.id.ivDelete); // May be null in received layout
+
                 sbProgress = itemView.findViewById(R.id.sbProgress);
                 tvDuration = itemView.findViewById(R.id.tvDuration);
-                
-                if (sbProgress != null) {
-                    sbProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                            if (fromUser) {
-                                int pos = getAdapterPosition();
-                                if(pos != RecyclerView.NO_POSITION) {
-                                    messages.get(pos).progress = progress;
-                                }
-                            }
-                        }
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {}
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {}
-                    });
-                }
+
+                // Sent Image Views
+                cvImageSent = itemView.findViewById(R.id.cvImageSent);
+                ivSentImage = itemView.findViewById(R.id.ivSentImage);
+
+                // Received Image Views
+                cvImageReceived = itemView.findViewById(R.id.cvImageReceived);
+                ivReceivedImage = itemView.findViewById(R.id.ivReceivedImage);
+
+                // Bubble containers
+                llSentBubble = itemView.findViewById(R.id.llSentMessageBubble);
+                llReceivedBubble = itemView.findViewById(R.id.llReceivedMessageBubble);
             }
         }
     }

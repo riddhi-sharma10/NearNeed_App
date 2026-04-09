@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingBottom="72dp">
+        android:paddingBottom="96dp">
 
         <!-- Header Area -->
             <LinearLayout
@@ -58,6 +58,81 @@
         </LinearLayout>
 
 
+        <!-- Search bar (hidden by default, shown when search icon clicked) -->
+        <LinearLayout
+            android:id="@+id/searchBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#F3F4F6">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_search_grey"
+                        app:tint="#9CA3AF" />
+
+                    <EditText
+                        android:id="@+id/etSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:hint="Search conversations…"
+                        android:textColorHint="#9CA3AF"
+                        android:textColor="#111827"
+                        android:textSize="15sp"
+                        android:singleLine="true"
+                        android:imeOptions="actionSearch"
+                        android:inputType="textPersonName" />
+
+                    <ImageView
+                        android:id="@+id/btnClearSearch"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        app:tint="#9CA3AF"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/btnCancelSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Cancel"
+                android:textColor="@color/sapphire_primary"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp" />
+        </LinearLayout>
 
         <!-- Divider below search -->
         <View
@@ -65,7 +140,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#F3F4F6"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="8dp" />
 
         <!-- List -->
         <androidx.recyclerview.widget.RecyclerView
@@ -78,148 +153,6 @@
             
         </LinearLayout>
 
-        <!-- Bottom Navigation Bar (Glass Navbar) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bottomNavCard"
-            android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_gravity="bottom"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="36dp"
-            app:cardElevation="16dp"
-            app:strokeWidth="0dp">
-
-            <!-- The Glass Background -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_floating_glass_navbar" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="4dp">
-
-                <!-- Home -->
-                <FrameLayout
-                    android:id="@+id/nav_home_container"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:cardBackgroundColor="@android:color/transparent"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_nav_home"
-                            app:tint="@color/text_muted" />
-                    </com.google.android.material.card.MaterialCardView>
-                </FrameLayout>
-
-                <!-- Map -->
-                <FrameLayout
-                    android:id="@+id/nav_map_container"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:cardBackgroundColor="@android:color/transparent"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_nav_map_final"
-                            app:tint="@color/text_muted" />
-                    </com.google.android.material.card.MaterialCardView>
-                </FrameLayout>
-
-                <!-- Bookings -->
-                <FrameLayout
-                    android:id="@+id/nav_bookings_container"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:cardBackgroundColor="@android:color/transparent"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_bookings_calendar"
-                            app:tint="@color/text_muted" />
-                    </com.google.android.material.card.MaterialCardView>
-                </FrameLayout>
-
-                <!-- Chat (Selected) -->
-                <FrameLayout
-                    android:id="@+id/nav_chat_container"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:cardBackgroundColor="@color/brand_primary_light"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_nav_messages"
-                            app:tint="@color/sapphire_primary" />
-                    </com.google.android.material.card.MaterialCardView>
-                </FrameLayout>
-
-                <!-- Profile -->
-                <FrameLayout
-                    android:id="@+id/nav_profile_container"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:cardBackgroundColor="@android:color/transparent"
-                        app:cardCornerRadius="24dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_nav_profile"
-                            app:tint="@color/text_muted" />
-                    </com.google.android.material.card.MaterialCardView>
-                </FrameLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+    <include layout="@layout/layout_floating_navbar_seeker" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

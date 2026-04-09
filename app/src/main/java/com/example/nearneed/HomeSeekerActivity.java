@@ -1,8 +1,11 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -27,9 +30,11 @@ public class HomeSeekerActivity extends AppCompatActivity {
         com.google.android.material.floatingactionbutton.FloatingActionButton fab = findViewById(R.id.fab_add_seeker);
         if (fab != null) {
             fab.setOnClickListener(v -> {
-                android.content.Intent intent = new android.content.Intent(this, CreatePostActivity.class);
+                Intent intent = new Intent(this, CreatePostActivity.class);
                 startActivity(intent);
             });
         }
+
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
     }
 }

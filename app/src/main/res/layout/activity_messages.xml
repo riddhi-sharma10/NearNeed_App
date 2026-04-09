@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".MessagesActivity"
+    tools:ignore="HardcodedText,ContentDescription,SpUsage">
+
+    <!-- Use a simple relative or linear approach without NestedScrollView for better RecyclerView scrolling -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="96dp">
+
+        <!-- Header Area -->
+            <LinearLayout
+                android:id="@+id/headerArea"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="54dp"
+                android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Messages"
+                    android:textColor="#111827"
+                    android:textSize="32sp"
+                    android:letterSpacing="-0.02"
+                    android:fontFamily="sans-serif-black" />
+            </LinearLayout>
+
+            <!-- Action: Search Icon -->
+            <ImageView
+                android:id="@+id/btnSearch"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_search_grey"
+                app:tint="#4B5563"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"/>
+
+        </LinearLayout>
+
+
+        <!-- Search bar (hidden by default, shown when search icon clicked) -->
+        <LinearLayout
+            android:id="@+id/searchBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="4dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#F3F4F6">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="14dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_search_grey"
+                        app:tint="#9CA3AF" />
+
+                    <EditText
+                        android:id="@+id/etSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:hint="Search conversations…"
+                        android:textColorHint="#9CA3AF"
+                        android:textColor="#111827"
+                        android:textSize="15sp"
+                        android:singleLine="true"
+                        android:imeOptions="actionSearch"
+                        android:inputType="textPersonName" />
+
+                    <ImageView
+                        android:id="@+id/btnClearSearch"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                        app:tint="#9CA3AF"
+                        android:visibility="gone"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/btnCancelSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Cancel"
+                android:textColor="@color/sapphire_primary"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp" />
+        </LinearLayout>
+
+        <!-- Divider below search -->
+        <View
+            android:id="@+id/mainDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F3F4F6"
+            android:layout_marginTop="8dp" />
+
+        <!-- List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMessages"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_message_row" />
+            
+        </LinearLayout>
+
+    <include layout="@layout/layout_floating_navbar_seeker" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

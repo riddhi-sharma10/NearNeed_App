@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="initial_budget_values">
+        <item>45</item>
+        <item>120</item>
+    </array>
+</resources>

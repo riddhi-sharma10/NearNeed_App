@@ -17,11 +17,9 @@ public class IdVerifiedActivity extends AppCompatActivity {
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
 
         btnContinue.setOnClickListener(v -> {
-            // End of Onboarding. Go to dashboard.
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            // End of ID Verification. Go to Profile Success.
+            Intent intent = new Intent(this, ProfileSuccessActivity.class);
             startActivity(intent);
-            finishAffinity();
         });
     }
 }

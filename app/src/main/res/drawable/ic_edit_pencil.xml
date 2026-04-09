@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Pencil shaft -->
+    <path
+        android:pathData="M16.862,4.487 L18.549,2.799 C19.343,2.006 20.627,2.006 21.421,2.799 C22.215,3.593 22.215,4.877 21.421,5.672 L19.734,7.359 M16.862,4.487 L4.252,17.097 C3.864,17.486 3.594,17.975 3.473,18.509 L3,21 L5.491,20.527 C6.025,20.406 6.514,20.136 6.902,19.748 L19.734,7.359 M16.862,4.487 L19.734,7.359"
+        android:strokeColor="@color/white"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000" />
+
+</vector>

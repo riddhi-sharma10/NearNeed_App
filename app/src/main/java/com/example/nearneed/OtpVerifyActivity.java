@@ -45,6 +45,10 @@ public class OtpVerifyActivity extends AppCompatActivity {
             tvCodeSentTo.setText("Code sent to +91 " + phone);
         }
 
+        // Keep verify locked until all OTP digits are entered.
+        btnVerify.setEnabled(false);
+        btnVerify.setAlpha(0.6f);
+
         setupListeners();
         setupOtpInputLogic();
     }
@@ -59,13 +63,11 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 // Redirect to Profile Setup (Step 1)
                 intent = new Intent(this, ProfileInfoActivity.class);
             } else {
-                // Redirect to Dashboard (Login flow)
-                intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                // Login flow: OTP -> Account Type
+                intent = new Intent(this, AccountTypeActivity.class);
             }
             startActivity(intent);
-            if (!isSignup) finishAffinity();
-            else finish();
+            finish();
         });
 
         btnResend.setOnClickListener(v -> {
@@ -87,11 +89,27 @@ public class OtpVerifyActivity extends AppCompatActivity {
                     } else if (s.length() == 0 && currentIndex > 0) {
                         otpBoxes[currentIndex - 1].requestFocus();
                     }
+
+                    updateVerifyButtonState();
                 }
 
                 @Override
                 public void afterTextChanged(Editable s) {}
             });
         }
+    }
+
+    private void updateVerifyButtonState() {
+        boolean isOtpComplete = true;
+        for (EditText otpBox : otpBoxes) {
+            CharSequence value = otpBox.getText();
+            if (value == null || value.length() != 1) {
+                isOtpComplete = false;
+                break;
+            }
+        }
+
+        btnVerify.setEnabled(isOtpComplete);
+        btnVerify.setAlpha(isOtpComplete ? 1.0f : 0.6f);
     }
 }

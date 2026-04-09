@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.HashSet;
 import java.util.Set;
+import android.content.Intent;
 
 public class ProfessionalSetupProviderActivity extends AppCompatActivity {
 
@@ -24,8 +25,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
 
     private TextView tvStartTime, tvEndTime;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    @Override    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider_details);
 
@@ -40,6 +40,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
         CheckBox cbTerms = findViewById(R.id.cbTerms);
+        View layoutSuccessOverlay = findViewById(R.id.layout_success_overlay);
 
         btnContinue.setOnClickListener(v -> {
             if (!cbTerms.isChecked()) {
@@ -50,8 +51,28 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please complete your availability, experience, and services.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Toast.makeText(this, "Setup Complete!", Toast.LENGTH_SHORT).show();
-            // Proceed to next activity
+            
+            // SHOW THE OVERLAP MODAL
+            if (layoutSuccessOverlay != null) {
+                layoutSuccessOverlay.setVisibility(View.VISIBLE);
+                
+                // BACK TO HOME BUTTON IN MODAL
+                MaterialButton btnSuccessHome = findViewById(R.id.btnSuccessHome);
+                if (btnSuccessHome != null) {
+                    btnSuccessHome.setOnClickListener(v2 -> {
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finishAffinity();
+                    });
+                }
+            } else {
+                // Fallback if overlay not found
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finishAffinity();
+            }
         });
     }
 

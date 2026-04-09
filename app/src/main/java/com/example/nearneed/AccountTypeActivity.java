@@ -2,12 +2,14 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.button.MaterialButton;
 
 public class AccountTypeActivity extends AppCompatActivity {
 
+    private ImageButton btnBack;
     private MaterialCardView cardSeeker, cardProvider;
     private MaterialButton btnSeekerAction, btnProviderAction;
 
@@ -21,6 +23,7 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        btnBack = findViewById(R.id.btnBack);
         cardSeeker = findViewById(R.id.cardSeeker);
         cardProvider = findViewById(R.id.cardProvider);
         btnSeekerAction = findViewById(R.id.btnSeekerAction);
@@ -28,6 +31,8 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        btnBack.setOnClickListener(v -> onBackPressed());
+
         cardSeeker.setOnClickListener(v -> completeRegistration("seeker"));
         btnSeekerAction.setOnClickListener(v -> completeRegistration("seeker"));
         
@@ -36,10 +41,17 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void completeRegistration(String role) {
-        // Save the role or pass it via intent
-        // Now proceed to Community Preferences to refine the user profile
-        Intent intent = new Intent(this, CommunityPreferencesActivity.class);
-        intent.putExtra("USER_ROLE", role);
-        startActivity(intent);
+        if ("seeker".equals(role)) {
+            RoleManager.setRole(this, RoleManager.ROLE_SEEKER);
+            // Direct navigation to the Seeker No Posts page as requested
+            Intent intent = new Intent(this, HomeSeekerNoPostsActivity.class);
+            startActivity(intent);
+        } else {
+            RoleManager.setRole(this, RoleManager.ROLE_PROVIDER);
+            // Standard flow for providers
+            Intent intent = new Intent(this, CommunityPreferencesActivity.class);
+            intent.putExtra("USER_ROLE", role);
+            startActivity(intent);
+        }
     }
 }

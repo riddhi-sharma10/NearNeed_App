@@ -85,6 +85,7 @@
                     android:textColor="@color/text_header"
                     android:textSize="22sp"
                     android:inputType="phone"
+                    android:digits="0123456789"
                     android:maxLength="10" />
 
             </LinearLayout>

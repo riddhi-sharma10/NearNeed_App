@@ -32,7 +32,7 @@
             android:fontFamily="sans-serif-black"
             android:text="Profile Info"
             android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:textSize="20sp" />
     </RelativeLayout>
 
     <ScrollView

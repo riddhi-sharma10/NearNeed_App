@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- TOOLBOX BODY -->
+    <path
+        android:fillColor="@color/sapphire_primary"
+        android:pathData="M20,8H4C2.9,8 2,8.9 2,10V20C2,21.1 2.9,22 4,22H20C21.1,22 22,21.1 22,20V10C22,8.9 21.1,8 20,8Z" />
+    
+    <!-- HANDLE -->
+    <path
+        android:fillColor="@color/sapphire_primary"
+        android:pathData="M16,8V6C16,4.9 15.1,4 14,4H10C8.9,4 8,4.9 8,6V8H16Z" 
+        android:alpha="0.8"/>
+
+    <!-- LATCHES (WHITE) -->
+    <path
+        android:fillColor="@color/white"
+        android:pathData="M7,13H10V15H7V13Z" />
+    <path
+        android:fillColor="@color/white"
+        android:pathData="M14,13H17V15H14V13Z" />
+</vector>

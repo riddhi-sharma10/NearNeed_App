@@ -33,7 +33,7 @@ public class OtpEnterActivity extends AppCompatActivity {
 
         btnSendOtp.setOnClickListener(v -> {
             String phone = etPhone.getText().toString().trim();
-            if (phone.length() < 10) {
+            if (!phone.matches("\\d{10}")) {
                 Toast.makeText(this, getString(R.string.txt_please_enter_a_valid_10_digit), Toast.LENGTH_SHORT).show();
                 return;
             }

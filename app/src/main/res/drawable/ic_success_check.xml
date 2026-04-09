@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Outer Shadow-like soft circle (optional, but let's keep it solid for the icon itself) -->
+    <path
+        android:fillColor="#059669"
+        android:pathData="M60,60m-50,0a50,50 0,1 1,100 0a50,50 0,1 1,-100 0" />
+    <!-- Pure White Checkmark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52.5,75L37.5,60L41.7,55.8L52.5,66.6L78.3,40.8L82.5,45L52.5,75Z" />
+</vector>

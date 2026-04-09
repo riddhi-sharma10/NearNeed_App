@@ -92,6 +92,7 @@
 
             <!-- ── Service Categories ── -->
             <TextView
+                android:id="@+id/tvCategoryHeader"
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -99,6 +100,17 @@
                 android:text="Service Categories"
                 android:textColor="@color/text_header"
                 android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/tvCategoryError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Select at least one service category"
+                android:textColor="#FF0000"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                android:visibility="gone" />
 
             <!-- Row 1 -->
             <LinearLayout
@@ -113,11 +125,11 @@
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_chip_selected_uniform"
+                    android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Plumbing"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -132,7 +144,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Electrical"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -147,7 +159,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Carpentry"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -170,7 +182,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Painting"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -185,7 +197,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Appliance"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -200,7 +212,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Cleaning"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -223,7 +235,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Gardening"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -238,7 +250,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Assembly"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -253,7 +265,7 @@
                     android:gravity="center"
                     android:paddingHorizontal="4dp"
                     android:text="Other"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -288,6 +300,7 @@
 
             <!-- ── Experience Level ── -->
             <TextView
+                android:id="@+id/tvExperienceHeader"
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -295,6 +308,17 @@
                 android:text="Experience Level"
                 android:textColor="@color/text_header"
                 android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/tvExperienceError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Select your experience level"
+                android:textColor="#FF0000"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                android:visibility="gone" />
 
             <!-- Exp Row 1 -->
             <LinearLayout
@@ -312,7 +336,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="0-2 yrs"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -323,10 +347,10 @@
                     android:layout_height="52dp"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:background="@drawable/bg_chip_selected_uniform"
+                    android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="2-5 yrs"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -348,7 +372,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="5-10 yrs"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -362,7 +386,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="10+ yrs"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -370,6 +394,7 @@
 
             <!-- ── Availability Schedule ── -->
             <TextView
+                android:id="@+id/tvDaysHeader"
                 style="@style/AppHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -377,6 +402,17 @@
                 android:text="Availability Schedule"
                 android:textColor="@color/text_header"
                 android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/tvDaysError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Select your available days"
+                android:textColor="#FF0000"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                android:visibility="gone" />
 
             <TextView
                 style="@style/AppDescription"
@@ -403,7 +439,7 @@
                     android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Sun"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -481,7 +517,7 @@
                     android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Sat"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -489,6 +525,7 @@
 
             <!-- Preferred Time Slots -->
             <TextView
+                android:id="@+id/tvTimeSlotsHeader"
                 style="@style/AppDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -496,6 +533,17 @@
                 android:text="Preferred Time Slots"
                 android:textColor="@color/text_subheadline"
                 android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvTimeSlotsError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Select at least one time preferred slot"
+                android:textColor="#FF0000"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                android:visibility="gone" />
 
             <!-- Slot Row 1: Morning, Afternoon, Evening -->
             <LinearLayout
@@ -513,7 +561,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="Morning"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -527,7 +575,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="Afternoon"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -541,7 +589,7 @@
                     android:background="@drawable/bg_chip_unselected_uniform"
                     android:gravity="center"
                     android:text="Evening"
-                    android:textColor="@color/brand_primary"
+                    android:textColor="#000000"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -679,6 +727,8 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:button="@drawable/sel_custom_checkbox"
+                        android:buttonTint="@null"
+                        app:buttonTint="@null"
                         android:padding="0dp" />
 
                     <LinearLayout

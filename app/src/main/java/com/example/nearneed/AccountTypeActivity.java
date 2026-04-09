@@ -37,10 +37,12 @@ public class AccountTypeActivity extends AppCompatActivity {
 
     private void completeRegistration(String role) {
         if ("seeker".equals(role)) {
+            RoleManager.setRole(this, RoleManager.ROLE_SEEKER);
             // Direct navigation to the Seeker No Posts page as requested
             Intent intent = new Intent(this, HomeSeekerNoPostsActivity.class);
             startActivity(intent);
         } else {
+            RoleManager.setRole(this, RoleManager.ROLE_PROVIDER);
             // Standard flow for providers
             Intent intent = new Intent(this, CommunityPreferencesActivity.class);
             intent.putExtra("USER_ROLE", role);

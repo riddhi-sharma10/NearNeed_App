@@ -54,22 +54,7 @@ public class MessagesActivity extends AppCompatActivity {
 
         rvMessages.setAdapter(new MessagesAdapter(chats));
 
-        setupBottomNavigation();
-    }
-
-    private void setupBottomNavigation() {
-        View navHome = findViewById(R.id.nav_home_container);
-        View navMap = findViewById(R.id.nav_map_container);
-        View navBookings = findViewById(R.id.nav_bookings_container);
-        View navProfile = findViewById(R.id.nav_profile_container);
-
-        if (navHome != null) navHome.setOnClickListener(v -> finish()); // Go back to main
-        if (navMap != null) navMap.setOnClickListener(v -> Toast.makeText(this, "Map coming soon", Toast.LENGTH_SHORT).show());
-        if (navBookings != null) navBookings.setOnClickListener(v -> Toast.makeText(this, "Bookings coming soon", Toast.LENGTH_SHORT).show());
-        if (navProfile != null) navProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ProfileInfoActivity.class);
-            startActivity(intent);
-        });
+        MessagesNavbarController.bind(this, findViewById(android.R.id.content));
     }
 
     private static class ChatEntry {

@@ -16,47 +16,68 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp">
 
-        <!-- Home (Active) -->
         <FrameLayout
+            android:id="@+id/nav_home_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <View
+                android:id="@+id/nav_home_active_bg"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_gravity="center"
-                android:background="@drawable/bg_circle_light_blue" />
+                android:background="@drawable/bg_circle_light_blue"
+                android:visibility="gone" />
 
             <ImageView
+                android:id="@+id/nav_home_icon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_nav_home"
-                app:tint="@color/sapphire_primary" />
+                app:tint="@color/text_muted" />
         </FrameLayout>
 
-        <!-- Map -->
         <FrameLayout
+            android:id="@+id/nav_map_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
+            <View
+                android:id="@+id/nav_map_active_bg"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_nav_map"
-                app:tint="#94A3B8" />
+                android:background="@drawable/bg_circle_light_blue"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/nav_map_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_nav_map_final"
+                app:tint="@color/text_muted" />
         </FrameLayout>
 
-        <!-- Bookings -->
         <FrameLayout
+            android:id="@+id/nav_bookings_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
+            <View
+                android:id="@+id/nav_bookings_active_bg"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_light_blue"
+                android:visibility="gone" />
+
             <ImageView
+                android:id="@+id/nav_bookings_icon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
@@ -64,13 +85,22 @@
                 app:tint="#94A3B8" />
         </FrameLayout>
 
-        <!-- Messages -->
         <FrameLayout
+            android:id="@+id/nav_chat_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
+            <View
+                android:id="@+id/nav_chat_active_bg"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_light_blue"
+                android:visibility="gone" />
+
             <ImageView
+                android:id="@+id/nav_chat_icon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
@@ -78,18 +108,27 @@
                 app:tint="#94A3B8" />
         </FrameLayout>
 
-        <!-- Profile -->
         <FrameLayout
+            android:id="@+id/nav_profile_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
+            <View
+                android:id="@+id/nav_profile_active_bg"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_circle_light_blue"
+                android:visibility="visible" />
+
             <ImageView
+                android:id="@+id/nav_profile_icon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_nav_profile"
-                app:tint="#94A3B8" />
+                app:tint="@color/sapphire_primary" />
         </FrameLayout>
 
     </LinearLayout>

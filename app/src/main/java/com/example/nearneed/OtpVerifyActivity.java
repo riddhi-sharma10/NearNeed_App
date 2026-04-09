@@ -59,13 +59,11 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 // Redirect to Profile Setup (Step 1)
                 intent = new Intent(this, ProfileInfoActivity.class);
             } else {
-                // Redirect to Dashboard (Login flow)
-                intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                // Login flow: OTP Verified screen -> Account Type
+                intent = new Intent(this, OtpVerifiedActivity.class);
             }
             startActivity(intent);
-            if (!isSignup) finishAffinity();
-            else finish();
+            finish();
         });
 
         btnResend.setOnClickListener(v -> {

@@ -68,7 +68,6 @@ public final class MessagesNavbarController {
 
         if (profileContainer != null) {
             profileContainer.setOnClickListener(v -> {
-                RoleManager.setRole(activity, RoleManager.ROLE_SEEKER);
                 Intent intent = new Intent(activity, ProfileActivity.class);
                 activity.startActivity(intent);
                 activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

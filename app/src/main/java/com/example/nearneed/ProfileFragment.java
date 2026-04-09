@@ -120,14 +120,9 @@ public class ProfileFragment extends Fragment {
         // Help & Support
         if (seekerBinding.menuHelp != null) {
             seekerBinding.menuHelp.setOnClickListener(v -> {
-                new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Need Help?")
-                        .setMessage("Our support team is available 24/7. Would you like to view the FAQ or contact support directly?")
-                        .setPositiveButton("Contact Support", (dialog, which) -> {
-                            Snackbar.make(requireView(), "Opening Support Chat...", Snackbar.LENGTH_SHORT).show();
-                        })
-                        .setNegativeButton("FAQ", null)
-                        .show();
+                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
@@ -171,6 +166,15 @@ public class ProfileFragment extends Fragment {
         if (providerBinding.menuEarnings != null) {
             providerBinding.menuEarnings.setOnClickListener(v -> {
                 Snackbar.make(requireView(), "Fetching Your Revenue Reports...", Snackbar.LENGTH_SHORT).show();
+            });
+        }
+
+        // Help & Support
+        if (providerBinding.menuHelpProvider != null) {
+            providerBinding.menuHelpProvider.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 

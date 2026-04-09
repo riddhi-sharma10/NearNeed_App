@@ -55,7 +55,7 @@ public class MessagesFragment extends Fragment {
         currentRole = RoleManager.getRole(requireContext());
         loadChatsForRole(currentRole);
         setupSearch(view);
-        MessagesNavbarController.bind(requireActivity(), view);
+        SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_CHAT);
     }
 
     @Override

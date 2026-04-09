@@ -28,9 +28,9 @@
 
     <!-- Descriptive Font Style: Used for body text, hints, and details -->
     <style name="AppDescription">
-        <item name="android:fontFamily">@string/font_family_description</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/text_body_light</item>
+        <item name="android:textColor">@color/text_subheadline</item>
     </style>
 
     <!-- Variants for specific sizes or cases -->

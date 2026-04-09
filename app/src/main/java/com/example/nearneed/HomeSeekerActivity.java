@@ -24,7 +24,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_home_seeker);
 
-        SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
 
         // Connect FAB to CreatePostActivity
         com.google.android.material.floatingactionbutton.FloatingActionButton fab = findViewById(R.id.fab_add_seeker);
@@ -34,7 +34,5 @@ public class HomeSeekerActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
-
-        SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
     }
 }

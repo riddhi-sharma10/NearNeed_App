@@ -22,6 +22,6 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
             });
         }
 
-        SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
     }
 }

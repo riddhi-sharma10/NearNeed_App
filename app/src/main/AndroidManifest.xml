@@ -119,6 +119,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".PostedSuccessfullyActivity"
             android:exported="false" />
     </application>

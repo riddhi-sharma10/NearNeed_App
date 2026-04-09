@@ -22,10 +22,11 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         ProfileModeSwitcher.bind(this, findViewById(android.R.id.content), role);
-        bindHelpSupportClick();
+        bindMenuClicks();
     }
 
-    private void bindHelpSupportClick() {
+    private void bindMenuClicks() {
+        // Help & Support
         View seekerHelp = findViewById(R.id.menu_help);
         if (seekerHelp != null) {
             seekerHelp.setOnClickListener(v -> openHelpSupport());
@@ -35,6 +36,23 @@ public class ProfileActivity extends AppCompatActivity {
         if (providerHelp != null) {
             providerHelp.setOnClickListener(v -> openHelpSupport());
         }
+
+        // Settings
+        View seekerSettings = findViewById(R.id.menu_settings);
+        if (seekerSettings != null) {
+            seekerSettings.setOnClickListener(v -> openSettings());
+        }
+
+        View providerSettings = findViewById(R.id.menu_settings_provider);
+        if (providerSettings != null) {
+            providerSettings.setOnClickListener(v -> openSettings());
+        }
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openHelpSupport() {

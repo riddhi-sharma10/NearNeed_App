@@ -58,6 +58,41 @@ public class ProfileActivity extends AppCompatActivity {
         if (providerSettings != null) {
             providerSettings.setOnClickListener(v -> openSettings());
         }
+
+        // Logout
+        View seekerLogout = findViewById(R.id.menu_logout);
+        if (seekerLogout != null) {
+            seekerLogout.setOnClickListener(v -> showLogoutDialog());
+        }
+
+        View providerLogout = findViewById(R.id.menu_logout_provider);
+        if (providerLogout != null) {
+            providerLogout.setOnClickListener(v -> showLogoutDialog());
+        }
+    }
+
+    private void showLogoutDialog() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_logout_confirmation, null);
+        dialog.setContentView(view);
+        
+        // Ensure transparent background for custom padding shadow effect
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        view.findViewById(R.id.btn_logout_confirm).setOnClickListener(v -> {
+            dialog.dismiss();
+            Intent intent = new Intent(this, WelcomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+
+        view.findViewById(R.id.btn_logout_cancel).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void openMyPosts() {

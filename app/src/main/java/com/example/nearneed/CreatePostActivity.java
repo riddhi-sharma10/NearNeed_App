@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -24,6 +25,9 @@ public class CreatePostActivity extends AppCompatActivity {
     private List<MaterialCardView> categoryCards = new ArrayList<>();
     private List<TextView> categoryTexts = new ArrayList<>();
     private String selectedCategory = "";
+    private View layoutOtherCategory;
+    private EditText etOtherCategory;
+    private MaterialButton btnAddOtherCategory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,10 @@ public class CreatePostActivity extends AppCompatActivity {
         categoryTexts.add(findViewById(R.id.tvElectrical));
         categoryTexts.add(findViewById(R.id.tvMore));
 
+        layoutOtherCategory = findViewById(R.id.layoutOtherCategory);
+        etOtherCategory = findViewById(R.id.etOtherCategory);
+        btnAddOtherCategory = findViewById(R.id.btnAddOtherCategory);
+
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
     }
@@ -71,6 +79,11 @@ public class CreatePostActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 int length = s.length();
                 tvCharCount.setText(length + "/250");
+                if (length >= 250) {
+                    tvCharCount.setTextColor(Color.RED);
+                } else {
+                    tvCharCount.setTextColor(Color.parseColor("#94A3B8"));
+                }
                 updateNextButtonState();
             }
 
@@ -97,6 +110,23 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(this, "Photo picker coming soon!", Toast.LENGTH_SHORT).show();
         });
 
+        // Other Category "Set" Button
+        btnAddOtherCategory.setOnClickListener(v -> {
+            String otherCat = etOtherCategory.getText().toString().trim();
+            if (!otherCat.isEmpty()) {
+                TextView tvMore = findViewById(R.id.tvMore);
+                tvMore.setText(otherCat);
+                selectedCategory = otherCat;
+                layoutOtherCategory.setVisibility(View.GONE);
+                updateNextButtonState();
+                
+                // Keep it selected visually
+                selectCategory(3); // 3 is the index for 'More'
+            } else {
+                Toast.makeText(this, "Please enter a category", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // Next Step Action
         btnNextStep.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreatePostStep2Activity.class);
@@ -118,7 +148,22 @@ public class CreatePostActivity extends AppCompatActivity {
         selectedCard.setCardBackgroundColor(Color.parseColor("#EFF6FF"));
         categoryTexts.get(index).setTextColor(Color.parseColor("#1E3A8A"));
 
-        selectedCategory = categoryTexts.get(index).getText().toString();
+        // Manage 'More' input field visibility
+        if (index == 3) {
+            layoutOtherCategory.setVisibility(View.VISIBLE);
+            String currentText = categoryTexts.get(3).getText().toString();
+            if (!currentText.equals("More")) {
+                etOtherCategory.setText(currentText);
+                selectedCategory = currentText;
+            } else {
+                selectedCategory = "";
+            }
+            etOtherCategory.requestFocus();
+        } else {
+            layoutOtherCategory.setVisibility(View.GONE);
+            selectedCategory = categoryTexts.get(index).getText().toString();
+        }
+        
         updateNextButtonState();
     }
 

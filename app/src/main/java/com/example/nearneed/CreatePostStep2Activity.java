@@ -97,7 +97,13 @@ public class CreatePostStep2Activity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                tvNotesCharCount.setText(s.length() + "/250");
+                int length = s.length();
+                tvNotesCharCount.setText(length + "/250");
+                if (length >= 250) {
+                    tvNotesCharCount.setTextColor(Color.RED);
+                } else {
+                    tvNotesCharCount.setTextColor(Color.parseColor("#94A3B8"));
+                }
             }
             @Override
             public void afterTextChanged(Editable s) {}

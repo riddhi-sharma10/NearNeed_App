@@ -14,10 +14,11 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_seeker_no_posts);
 
         // Connect the FAB to potentially a Create Post Activity (standard behavior)
-        FloatingActionButton fab = findViewById(R.id.fab_add_seeker);
-        if (fab != null) {
-            fab.setOnClickListener(v -> {
-                Intent intent = new Intent(this, CreatePostActivity.class);
+        // Connect the Add Button to PostOptionsActivity
+        View btnAdd = findViewById(R.id.fab_add_seeker);
+        if (btnAdd != null) {
+            btnAdd.setOnClickListener(v -> {
+                Intent intent = new Intent(this, PostOptionsActivity.class);
                 startActivity(intent);
             });
         }

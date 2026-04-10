@@ -18,26 +18,28 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- HEADER -->
+            <!-- HEADER & GREETING RESTRUCTURED -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/profileImageCard"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="NearNeed"
-                        android:textColor="@color/text_header"
-                        android:textSize="20sp"
                         android:fontFamily="sans-serif-black"
-                        android:letterSpacing="-0.01" />
+                        android:text="Hello, Abhinav"
+                        android:textColor="@color/text_header"
+                        android:textSize="30sp"
+                        android:letterSpacing="-0.02" />
 
+                    <!-- LOCATION SECTION -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -68,13 +70,28 @@
                             android:src="@drawable/ic_dropdown_small"
                             app:tint="@color/sapphire_primary" />
                     </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="4dp"
+                        android:text="Welcome back to your sanctuary. Everything is in order for your upcoming tasks."
+                        android:textColor="@color/text_subheadline"
+                        android:textSize="14sp"
+                        android:alpha="0.9" />
+
                 </LinearLayout>
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/profileImageCard"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                    android:layout_marginTop="6dp"
                     app:cardCornerRadius="22dp"
                     app:cardElevation="2dp">
                     <ImageView
@@ -85,38 +102,6 @@
                 </androidx.cardview.widget.CardView>
             </RelativeLayout>
 
-            <!-- GREETING -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-black"
-                        android:text="Hello, Abhinav"
-                        android:textColor="@color/text_header"
-                        android:textSize="32sp"
-                        android:letterSpacing="-0.02" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:lineSpacingExtra="4dp"
-                        android:text="Welcome back to your sanctuary. Everything is in order for your upcoming tasks."
-                        android:textColor="@color/text_subheadline"
-                        android:textSize="14sp"
-                        android:alpha="0.9" />
-                </LinearLayout>
-            </RelativeLayout>
 
             <!-- SEARCH BAR -->
             <androidx.cardview.widget.CardView

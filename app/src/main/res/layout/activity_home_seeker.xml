@@ -236,6 +236,23 @@
                     android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fab_add_seeker"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="Post a New Request"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-black"
+                app:backgroundTint="@color/sapphire_primary"
+                app:cornerRadius="26dp"
+                app:icon="@drawable/ic_plus_circle_white"
+                app:iconSize="20dp"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -668,20 +685,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                    <!-- PLUS FAB BUTTON (RIGHT SIDE) -->
-                    <com.google.android.material.floatingactionbutton.FloatingActionButton
-                        android:id="@+id/fab_add_seeker"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="24dp"
-                        android:layout_marginTop="16dp"
-                        android:src="@drawable/ic_plus_white"
-                        app:backgroundTint="@color/sapphire_primary"
-                        app:fabSize="normal"
-                        app:elevation="4dp"
-                        app:tint="@color/white"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.MediumComponent" />
 
                     <!-- EXTRA SCROLLING SPACE -->
                     <View

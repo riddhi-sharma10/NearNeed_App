@@ -319,40 +319,58 @@
                 android:textColor="#94A3B8"
                 android:textSize="14sp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/btnAddPhoto"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="40dp"
-                app:cardBackgroundColor="#F8FAFC"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#CBD5E1"
-                app:strokeWidth="1dp"
-                android:clickable="true"
-                android:focusable="true">
+                android:scrollbars="none">
+
                 <LinearLayout
+                    android:id="@+id/layoutPhotoContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_nav_profile"
-                        app:tint="#94A3B8" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:fontFamily="sans-serif-black"
-                        android:text="ADD PHOTO"
-                        android:textColor="#94A3B8"
-                        android:textSize="10sp" />
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btnAddPhoto"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_marginEnd="12dp"
+                        app:cardBackgroundColor="#F8FAFC"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#CBD5E1"
+                        app:strokeWidth="1dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <ImageView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:src="@drawable/ic_add_circular"
+                                app:tint="#94A3B8" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="ADD PHOTO"
+                                android:textColor="#94A3B8"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Picked photos will be added here dynamically -->
+
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </HorizontalScrollView>
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNextStep"

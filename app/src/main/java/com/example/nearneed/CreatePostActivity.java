@@ -10,7 +10,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.net.Uri;
 import android.view.View;
+import android.view.ViewGroup;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
@@ -28,6 +32,9 @@ public class CreatePostActivity extends AppCompatActivity {
     private View layoutOtherCategory;
     private EditText etOtherCategory;
     private MaterialButton btnAddOtherCategory;
+    private android.widget.LinearLayout layoutPhotoContainer;
+    private List<Uri> selectedImages = new ArrayList<>();
+    private ActivityResultLauncher<Intent> photoPickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +42,7 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         initViews();
+        setupPhotoPicker();
         setupListeners();
         updateNextButtonState();
     }
@@ -58,6 +66,7 @@ public class CreatePostActivity extends AppCompatActivity {
         layoutOtherCategory = findViewById(R.id.layoutOtherCategory);
         etOtherCategory = findViewById(R.id.etOtherCategory);
         btnAddOtherCategory = findViewById(R.id.btnAddOtherCategory);
+        layoutPhotoContainer = findViewById(R.id.layoutPhotoContainer);
 
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
@@ -107,7 +116,14 @@ public class CreatePostActivity extends AppCompatActivity {
 
         // Add Photo Listener
         findViewById(R.id.btnAddPhoto).setOnClickListener(v -> {
-            Toast.makeText(this, "Photo picker coming soon!", Toast.LENGTH_SHORT).show();
+            if (selectedImages.size() >= 5) {
+                Toast.makeText(this, "Maximum 5 photos allowed", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            photoPickerLauncher.launch(Intent.createChooser(intent, "Select up to " + (5 - selectedImages.size()) + " photos"));
         });
 
         // Other Category "Set" Button
@@ -132,6 +148,71 @@ public class CreatePostActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CreatePostStep2Activity.class);
             startActivity(intent);
         });
+    }
+
+    private void setupPhotoPicker() {
+        photoPickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        if (result.getData().getClipData() != null) {
+                            int count = result.getData().getClipData().getItemCount();
+                            for (int i = 0; i < count; i++) {
+                                if (selectedImages.size() < 5) {
+                                    selectedImages.add(result.getData().getClipData().getItemAt(i).getUri());
+                                }
+                            }
+                        } else if (result.getData().getData() != null) {
+                            if (selectedImages.size() < 5) {
+                                selectedImages.add(result.getData().getData());
+                            }
+                        }
+                        updatePhotoGallery();
+                    }
+                }
+        );
+    }
+
+    private void updatePhotoGallery() {
+        // Remove existing image views (keep the ADD button)
+        int childCount = layoutPhotoContainer.getChildCount();
+        if (childCount > 1) {
+            layoutPhotoContainer.removeViews(1, childCount - 1);
+        }
+
+        for (int i = 0; i < selectedImages.size(); i++) {
+            Uri imageUri = selectedImages.get(i);
+            addThumbnailToGallery(imageUri);
+        }
+        
+        // Hide/Show add button based on limit
+        findViewById(R.id.btnAddPhoto).setVisibility(selectedImages.size() >= 5 ? View.GONE : View.VISIBLE);
+    }
+
+    private void addThumbnailToGallery(Uri uri) {
+        MaterialCardView card = new MaterialCardView(this);
+        int size = (int) (100 * getResources().getDisplayMetrics().density);
+        android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(size, size);
+        params.setMargins(0, 0, (int) (12 * getResources().getDisplayMetrics().density), 0);
+        card.setLayoutParams(params);
+        card.setRadius(20 * getResources().getDisplayMetrics().density);
+        card.setCardElevation(0);
+        card.setStrokeColor(Color.parseColor("#E2E8F0"));
+        card.setStrokeWidth(1);
+
+        android.widget.ImageView iv = new android.widget.ImageView(this);
+        iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+        iv.setImageURI(uri);
+        card.addView(iv);
+
+        // Removal on click
+        card.setOnClickListener(v -> {
+            selectedImages.remove(uri);
+            updatePhotoGallery();
+        });
+
+        layoutPhotoContainer.addView(card);
     }
 
     private void selectCategory(int index) {

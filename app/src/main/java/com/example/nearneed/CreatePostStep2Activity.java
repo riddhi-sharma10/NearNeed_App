@@ -13,21 +13,25 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.slider.RangeSlider;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CreatePostStep2Activity extends AppCompatActivity {
 
-    private TextView tvBudgetDisplay, tvNotesCharCount, tvDisplayDate, tvDisplayTime;
-    private RangeSlider budgetSlider;
+    private TextView tvNotesCharCount, tvDisplayDate, tvDisplayTime;
     private EditText etAdditionalNotes;
     private MaterialButton btnPostRequest;
     
     private List<MaterialCardView> urgencyCards = new ArrayList<>();
     private List<TextView> urgencyTexts = new ArrayList<>();
     private List<ImageView> urgencyIcons = new ArrayList<>();
-    private String selectedUrgency = "Now"; // Default
+    private String selectedUrgency = "Urgent"; // Default
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +44,6 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     }
 
     private void initViews() {
-        tvBudgetDisplay = findViewById(R.id.tvBudgetDisplay);
-        budgetSlider = findViewById(R.id.budgetSlider);
         etAdditionalNotes = findViewById(R.id.etAdditionalNotes);
         tvNotesCharCount = findViewById(R.id.tvNotesCharCount);
         tvDisplayDate = findViewById(R.id.tvDisplayDate);
@@ -68,28 +70,53 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        budgetSlider.addOnChangeListener((slider, value, fromUser) -> {
-            List<Float> values = slider.getValues();
-            String min = String.valueOf(values.get(0).intValue());
-            String max = String.valueOf(values.get(1).intValue());
-            tvBudgetDisplay.setText("₹" + min + " — ₹" + max);
-        });
-
         for (int i = 0; i < urgencyCards.size(); i++) {
             final int index = i;
             urgencyCards.get(i).setOnClickListener(v -> selectUrgency(index));
         }
 
         findViewById(R.id.containerSetDate).setOnClickListener(v -> {
-            tvDisplayDate.setText("Oct 24, 2023"); // Mock selection
-            tvDisplayDate.setTextColor(Color.parseColor("#111827"));
-            updatePostButtonState();
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select Date")
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .build();
+
+            datePicker.addOnPositiveButtonClickListener(selection -> {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(selection);
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+                String selectedDate = sdf.format(calendar.getTime());
+                tvDisplayDate.setText(selectedDate);
+                tvDisplayDate.setTextColor(Color.parseColor("#111827"));
+                updatePostButtonState();
+            });
+
+            datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
         });
 
         findViewById(R.id.containerSetTime).setOnClickListener(v -> {
-            tvDisplayTime.setText("02:00 PM - 05:00 PM"); // Mock selection
-            tvDisplayTime.setTextColor(Color.parseColor("#111827"));
-            updatePostButtonState();
+            MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_12H)
+                    .setHour(12)
+                    .setMinute(0)
+                    .setTitleText("Select Time Window")
+                    .build();
+
+            timePicker.addOnPositiveButtonClickListener(dialog -> {
+                int hour = timePicker.getHour();
+                int minute = timePicker.getMinute();
+                String amPm = (hour >= 12) ? "PM" : "AM";
+                int displayHour = (hour > 12) ? hour - 12 : (hour == 0 ? 12 : hour);
+                String selectedTime = String.format(Locale.getDefault(), "%02d:%02d %s", displayHour, minute, amPm);
+                
+                // Typically post creation might want a window, but a single time is a good start. 
+                // Let's just set the selected time.
+                tvDisplayTime.setText(selectedTime);
+                tvDisplayTime.setTextColor(Color.parseColor("#111827"));
+                updatePostButtonState();
+            });
+
+            timePicker.show(getSupportFragmentManager(), "TIME_PICKER");
         });
 
         etAdditionalNotes.addTextChangedListener(new TextWatcher() {
@@ -135,9 +162,19 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     }
 
     private void updatePostButtonState() {
-        // Validation could go here if needed
-        btnPostRequest.setEnabled(true);
-        btnPostRequest.setAlpha(1.0f);
+        boolean isDateSet = !tvDisplayDate.getText().toString().contains("Set Date");
+        boolean isTimeSet = !tvDisplayTime.getText().toString().contains("Set Time");
+        
+        boolean isEnabled = isDateSet && isTimeSet;
+        btnPostRequest.setEnabled(isEnabled);
+        
+        if (isEnabled) {
+            btnPostRequest.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1E3A8A")));
+            btnPostRequest.setAlpha(1.0f);
+        } else {
+            btnPostRequest.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#CBD5E1")));
+            btnPostRequest.setAlpha(0.6f);
+        }
     }
 }
 

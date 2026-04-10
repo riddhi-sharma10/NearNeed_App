@@ -160,93 +160,7 @@
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- BUDGET RANGE -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="Budget Range"
-                    android:textColor="#111827"
-                    android:textSize="18sp" />
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    app:cardBackgroundColor="#EFF6FF"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#1E3A8A"
-                    app:strokeWidth="1dp">
-                    <TextView
-                        android:id="@+id/tvBudgetDisplay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="6dp"
-                        android:text="₹45 — ₹120"
-                        android:textColor="#1E3A8A"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
-            </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_info_alert"
-                android:orientation="horizontal"
-                android:padding="16dp">
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginTop="2dp"
-                    android:src="@drawable/ic_info_circle"
-                    app:tint="#1E3A8A" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:text="Negotiation helps you find the right talent faster by allowing flexibility in budget for highly rated providers."
-                    android:textColor="#1E3A8A"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <com.google.android.material.slider.RangeSlider
-                android:id="@+id/budgetSlider"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:valueFrom="15"
-                android:valueTo="500"
-                app:thumbColor="#1E3A8A"
-                app:thumbRadius="10dp"
-                app:trackColorActive="#1E3A8A"
-                app:trackColorInactive="#F1F5F9"
-                app:values="@array/initial_budget_values" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MIN: ₹15"
-                    android:textColor="#94A3B8"
-                    android:textSize="11sp" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="MAX: ₹500+"
-                    android:textColor="#94A3B8"
-                    android:textSize="11sp" />
-            </RelativeLayout>
 
             <!-- URGENCY -->
             <TextView
@@ -293,7 +207,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:fontFamily="sans-serif-black"
-                        android:text="Now"
+                        android:text="Urgent"
                         android:textColor="@color/white"
                         android:textSize="14sp" />
                 </LinearLayout>

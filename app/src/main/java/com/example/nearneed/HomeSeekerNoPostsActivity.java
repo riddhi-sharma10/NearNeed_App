@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.View;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class HomeSeekerNoPostsActivity extends AppCompatActivity {
@@ -18,7 +19,7 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
         View btnAdd = findViewById(R.id.fab_add_seeker);
         if (btnAdd != null) {
             btnAdd.setOnClickListener(v -> {
-                Intent intent = new Intent(this, PostOptionsActivity.class);
+                Intent intent = new Intent(this, CreatePostActivity.class);
                 startActivity(intent);
             });
         }

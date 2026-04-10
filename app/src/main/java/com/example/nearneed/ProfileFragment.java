@@ -96,7 +96,9 @@ public class ProfileFragment extends Fragment {
         // My Posts
         if (seekerBinding.menuMyPosts != null) {
             seekerBinding.menuMyPosts.setOnClickListener(v -> {
-                Snackbar.make(requireView(), "Loading Your Active Requests...", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(requireContext(), MyPostsActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 

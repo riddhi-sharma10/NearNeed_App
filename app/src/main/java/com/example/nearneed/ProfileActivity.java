@@ -26,6 +26,17 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void bindMenuClicks() {
+        // Posts & Jobs
+        View myPosts = findViewById(R.id.menu_my_posts);
+        if (myPosts != null) {
+            myPosts.setOnClickListener(v -> openMyPosts());
+        }
+
+        View myJobs = findViewById(R.id.menu_my_jobs);
+        if (myJobs != null) {
+            myJobs.setOnClickListener(v -> openMyPosts());
+        }
+
         // Help & Support
         View seekerHelp = findViewById(R.id.menu_help);
         if (seekerHelp != null) {
@@ -47,6 +58,12 @@ public class ProfileActivity extends AppCompatActivity {
         if (providerSettings != null) {
             providerSettings.setOnClickListener(v -> openSettings());
         }
+    }
+
+    private void openMyPosts() {
+        Intent intent = new Intent(this, MyPostsActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openSettings() {

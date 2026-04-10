@@ -69,6 +69,24 @@ public class ProfileActivity extends AppCompatActivity {
         if (providerLogout != null) {
             providerLogout.setOnClickListener(v -> showLogoutDialog());
         }
+
+        // Edit Profile
+        View btnEditProfileSeeker = findViewById(R.id.btn_edit_profile);
+        if (btnEditProfileSeeker != null) {
+            btnEditProfileSeeker.setOnClickListener(v -> openEditProfile());
+        }
+
+        // On provider mode it might be named differently
+        View btnEditProfileProvider = findViewById(R.id.btn_edit_profile_provider);
+        if (btnEditProfileProvider != null) {
+            btnEditProfileProvider.setOnClickListener(v -> openEditProfile());
+        }
+    }
+
+    private void openEditProfile() {
+        Intent intent = new Intent(this, EditProfileActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void showLogoutDialog() {

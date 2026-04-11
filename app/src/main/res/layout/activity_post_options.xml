@@ -250,6 +250,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <include layout="@layout/layout_floating_navbar_seeker" />
+    <include layout="@layout/layout_main_navbar_page" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

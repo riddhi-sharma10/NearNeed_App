@@ -494,7 +494,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <include
-        layout="@layout/layout_floating_navbar_seeker"
+        layout="@layout/layout_main_navbar_page"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom" />

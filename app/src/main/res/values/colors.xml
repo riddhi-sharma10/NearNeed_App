@@ -92,4 +92,12 @@
     <color name="provider_chip_inactive_text">#64748B</color>
     <color name="provider_schedule_time_text">#64748B</color>
     <color name="provider_accent_blue">#1E3A8A</color>
+
+    <!-- New Theme Palette from User -->
+    <color name="palette_primary">#0061A4</color>
+    <color name="palette_secondary">#006D3A</color>
+    <color name="palette_tertiary">#F9A825</color>
+    <color name="palette_neutral">#F2F4F7</color>
+    <color name="palette_primary_light">#DBEAFE</color>
+    <color name="palette_secondary_light">#DCFCE7</color>
 </resources>

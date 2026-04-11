@@ -147,6 +147,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".CalendarProviderActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".HomeProviderActivity"
             android:exported="false" />
     </application>

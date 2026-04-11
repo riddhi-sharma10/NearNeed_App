@@ -179,4 +179,40 @@
     <string name="txt_profile_image">Profile Image</string>
     <string name="txt_user_name">Abhinav Oberoi</string>
     <string name="txt_user_location">Downtown, NY</string>
+
+    <!-- Provider Home Screen Strings -->
+    <string name="title_curated_commons">The Curated Commons</string>
+    <string name="greeting_marcus">Good Morning, Marcus</string>
+    <string name="subtext_impact">Ready for today\'s community impact?</string>
+    <string name="status_available">Available</string>
+    <string name="status_busy">Busy</string>
+    <string name="status_offline">Offline</string>
+    <string name="earnings_mtd">EARNINGS MTD</string>
+    <string name="earnings_amount">$1,250.00</string>
+    <string name="earnings_growth">+12% from last month</string>
+    <string name="active_jobs_label">Active Jobs</string>
+    <string name="active_jobs_count">4</string>
+    <string name="rating_label">Rating</string>
+    <string name="rating_value">4.9</string>
+    <string name="today_schedule">Today\'s Schedule</string>
+    <string name="view_calendar">View Calendar</string>
+    <string name="job_plumbing">Plumbing Fix</string>
+    <string name="job_garden">Garden Maintenance</string>
+    <string name="time_10_00">10:00</string>
+    <string name="time_am">AM</string>
+    <string name="time_02_00">02:00</string>
+    <string name="time_pm">PM</string>
+    <string name="loc_baker_st">224 Baker St.</string>
+    <string name="loc_riverside">15 Riverside Dr.</string>
+    <string name="requests_nearby">Requests Nearby</string>
+    <string name="live_map">LIVE MAP</string>
+    <string name="job_faucet">Leaky Faucet Repair</string>
+    <string name="job_light">Light Installation</string>
+    <string name="distance_0_8">0.8 mi</string>
+    <string name="distance_2_4">2.4 mi</string>
+    <string name="price_45_est">$45 Est.</string>
+    <string name="price_80_est">$80 Est.</string>
+    <string name="btn_decline">Decline</string>
+    <string name="btn_accept">Accept</string>
+    <string name="view_earnings_history">View Earnings History</string>
 </resources>

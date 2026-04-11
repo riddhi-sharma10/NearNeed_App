@@ -84,4 +84,12 @@
     <color name="transparent">#00000000</color>
     <color name="overlay_dark">#80000000</color>
     <color name="overlay_dark_medium">#4D000000</color>
+
+    <!-- Provider Home Screen Colors -->
+    <color name="provider_earnings_bg">#96F2C0</color>
+    <color name="provider_status_available">#065F46</color>
+    <color name="provider_status_available_bg">#059669</color>
+    <color name="provider_chip_inactive_text">#64748B</color>
+    <color name="provider_schedule_time_text">#64748B</color>
+    <color name="provider_accent_blue">#1E3A8A</color>
 </resources>

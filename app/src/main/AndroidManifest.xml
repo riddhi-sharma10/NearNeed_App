@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="replace"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -140,6 +140,14 @@
 
         <activity
             android:name=".PostedSuccessfullyActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".PostOptionsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".HomeProviderActivity"
             android:exported="false" />
     </application>
 

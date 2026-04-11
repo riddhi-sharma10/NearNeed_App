@@ -95,15 +95,24 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                 MaterialButton btnSuccessHome = findViewById(R.id.btnSuccessHome);
                 if (btnSuccessHome != null) {
                     btnSuccessHome.setOnClickListener(v2 -> {
-                        Intent intent = new Intent(this, MainActivity.class);
+                        Intent intent = new Intent(this, HomeProviderActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finishAffinity();
                     });
                 }
+                
+                // VIEW PROFILE BUTTON IN MODAL
+                MaterialButton btnSuccessProfile = findViewById(R.id.btnSuccessProfile);
+                if (btnSuccessProfile != null) {
+                    btnSuccessProfile.setOnClickListener(v2 -> {
+                        Intent intent = new Intent(this, ProfileActivity.class);
+                        startActivity(intent);
+                    });
+                }
             } else {
                 // Fallback if overlay not found
-                Intent intent = new Intent(this, MainActivity.class);
+                Intent intent = new Intent(this, HomeProviderActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finishAffinity();

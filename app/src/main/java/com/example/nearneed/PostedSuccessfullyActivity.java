@@ -20,8 +20,17 @@ public class PostedSuccessfullyActivity extends AppCompatActivity {
     }
 
     private void navigateHome() {
-        // Clear activity stack and return to the main Seeker Home screen (showing the new post)
-        Intent intent = new Intent(this, HomeSeekerActivity.class);
+        String role = RoleManager.getRole(this);
+        Intent intent;
+        
+        if (RoleManager.ROLE_PROVIDER.equals(role)) {
+            // Return to the Provider Dashboard
+            intent = new Intent(this, HomeProviderActivity.class);
+        } else {
+            // Return to the Seeker Dashboard
+            intent = new Intent(this, HomeSeekerActivity.class);
+        }
+        
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();

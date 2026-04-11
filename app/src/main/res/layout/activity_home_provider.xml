@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="100dp">
+        android:paddingBottom="400dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -445,17 +445,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:layout_marginBottom="90dp"
-        android:src="@drawable/ic_plus_white"
-        app:backgroundTint="@color/brand_success"
-        app:fabSize="normal"
-        app:tint="@color/white"
-        android:contentDescription="@null" />
 
     <include layout="@layout/layout_floating_navbar_seeker" />
 

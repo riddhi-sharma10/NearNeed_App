@@ -19,7 +19,7 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
         View btnAdd = findViewById(R.id.fab_add_seeker);
         if (btnAdd != null) {
             btnAdd.setOnClickListener(v -> {
-                Intent intent = new Intent(this, CreatePostActivity.class);
+                Intent intent = new Intent(this, PostOptionsActivity.class);
                 startActivity(intent);
             });
         }

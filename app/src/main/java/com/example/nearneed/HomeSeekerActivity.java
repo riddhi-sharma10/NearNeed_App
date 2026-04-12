@@ -27,6 +27,15 @@ public class HomeSeekerActivity extends AppCompatActivity {
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
 
         // Connect FAB to CreatePostActivity
+        // Connect View All to GigPostListActivity
+        View btnViewAll = findViewById(R.id.btnViewAllGigs);
+        if (btnViewAll != null) {
+            btnViewAll.setOnClickListener(v -> {
+                Intent intent = new Intent(this, GigPostListActivity.class);
+                startActivity(intent);
+            });
+        }
+
         // Connect Add Button to PostOptionsActivity
         View btnAdd = findViewById(R.id.fab_add_seeker);
         if (btnAdd != null) {

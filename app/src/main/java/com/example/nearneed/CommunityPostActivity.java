@@ -34,11 +34,29 @@ public class CommunityPostActivity extends AppCompatActivity {
         }
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
+        android.widget.EditText etTitle = findViewById(R.id.etRequestTitle);
+        android.widget.EditText etDesc = findViewById(R.id.etRequestDescription);
+        android.widget.TextView tvTitleCounter = findViewById(R.id.tvTitleCounter);
+        android.widget.TextView tvDescCounter = findViewById(R.id.tvDescCounter);
+
+        etTitle.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tvTitleCounter.setText(s.length() + "/50");
+            }
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        etDesc.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tvDescCounter.setText(s.length() + "/250");
+            }
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
         if (btnContinue != null) {
             btnContinue.setOnClickListener(v -> {
-                android.widget.EditText etTitle = findViewById(R.id.etRequestTitle);
-                android.widget.EditText etDesc = findViewById(R.id.etRequestDescription);
-                
                 if (etTitle.getText().toString().trim().isEmpty()) {
                     etTitle.setError("Title is required");
                     return;

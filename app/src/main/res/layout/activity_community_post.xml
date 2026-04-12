@@ -218,14 +218,28 @@
             </com.google.android.material.card.MaterialCardView>
 
             <!-- INPUTS -->
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:fontFamily="sans-serif-black"
-                android:text="Request Title"
-                android:textColor="#475569"
-                android:textSize="14sp" />
+                android:orientation="horizontal"
+                android:gravity="bottom">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Request Title"
+                    android:textColor="#475569"
+                    android:textSize="14sp" />
+                <TextView
+                    android:id="@+id/tvTitleCounter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/50"
+                    android:textColor="#94A3B8"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/etRequestTitle"
@@ -233,7 +247,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_edittext_field"
-                android:backgroundTint="#E2E8F0"
+                android:backgroundTint="#F1F5F9"
                 android:hint="Enter your request title"
                 android:paddingHorizontal="16dp"
                 android:textColor="#0F172A"
@@ -242,14 +256,28 @@
                 android:maxLines="1"
                 android:inputType="textCapSentences" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:fontFamily="sans-serif-black"
-                android:text="Tell your neighbours more"
-                android:textColor="#475569"
-                android:textSize="14sp" />
+                android:orientation="horizontal"
+                android:gravity="bottom">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Tell your neighbours more"
+                    android:textColor="#475569"
+                    android:textSize="14sp" />
+                <TextView
+                    android:id="@+id/tvDescCounter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/250"
+                    android:textColor="#94A3B8"
+                    android:textSize="12sp" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/etRequestDescription"
@@ -257,7 +285,7 @@
                 android:layout_height="160dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/bg_edittext_field"
-                android:backgroundTint="#E2E8F0"
+                android:backgroundTint="#F1F5F9"
                 android:gravity="top"
                 android:hint="Provide more details about your request"
                 android:padding="16dp"

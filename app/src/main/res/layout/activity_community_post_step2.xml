@@ -84,6 +84,82 @@
                 app:trackThickness="6dp"
                 android:progress="100" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Location"
+                android:textColor="#0F172A"
+                android:textSize="18sp" />
+
+            <!-- SERVICE LOCATION SECTION -->
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/map_placeholder_styled" />
+
+                    <!-- Search Bar Overlay -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_margin="16dp"
+                        app:cardBackgroundColor="#F8FAFC"
+                        app:cardCornerRadius="26dp"
+                        app:cardElevation="4dp"
+                        app:strokeWidth="0dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:paddingHorizontal="20dp">
+
+                            <ImageView
+                                android:id="@+id/icSearchLoc"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/ic_search_grey"
+                                app:tint="#94A3B8" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_marginStart="10dp"
+                                android:layout_toEndOf="@id/icSearchLoc"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="Search address or landmark..."
+                                android:textColor="#94A3B8"
+                                android:textSize="13sp" />
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Center Pin -->
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_loc_pin_small"
+                        app:tint="#1E3A8A" />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- VOLUNTEERS SECTION -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -202,15 +278,15 @@
                                 android:textSize="12sp" />
                         </LinearLayout>
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchLimitVolunteers"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:checked="true"
-                            app:thumbTint="@color/white"
-                            app:trackTint="#059669" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchLimitVolunteers"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="true"
+                                app:thumbTint="@color/white"
+                                app:trackTint="@color/sel_switch_track_primary" />
                     </RelativeLayout>
 
                 </LinearLayout>

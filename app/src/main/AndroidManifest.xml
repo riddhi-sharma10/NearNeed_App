@@ -151,7 +151,23 @@
             android:exported="false" />
 
         <activity
+            android:name=".AddScheduleActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".HomeProviderActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GigPostListActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CommunityPostActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CommunityPostStep2Activity"
             android:exported="false" />
     </application>
 

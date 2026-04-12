@@ -31,25 +31,34 @@ public class CommunityPostStep2Activity extends AppCompatActivity {
             }
         });
 
+        // TOGGLE LOGIC
+        com.google.android.material.switchmaterial.SwitchMaterial switchLimit = findViewById(R.id.switchLimitVolunteers);
+        switchLimit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            String msg = isChecked ? "Volunteer limit enabled" : "Volunteer limit disabled";
+            android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_SHORT).show();
+        });
+
         // DATE PICKER
         findViewById(R.id.layoutDate).setOnClickListener(v -> {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
             android.app.DatePickerDialog dpd = new android.app.DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
                 android.widget.TextView tv = findViewById(R.id.tvSelectedDate);
-                tv.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
+                tv.setText((month + 1) + "/" + dayOfMonth + "/" + year);
                 tv.setTextColor(0xFF0F172A);
-            }, 2026, 3, 12);
+            }, cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH));
             dpd.show();
         });
 
         // TIME PICKER
         findViewById(R.id.layoutTime).setOnClickListener(v -> {
+            java.util.Calendar cal = java.util.Calendar.getInstance();
             android.app.TimePickerDialog tpd = new android.app.TimePickerDialog(this, (view, hourOfDay, minute) -> {
                 android.widget.TextView tv = findViewById(R.id.tvSelectedTime);
                 String ampm = hourOfDay >= 12 ? "PM" : "AM";
                 int displayHour = hourOfDay > 12 ? hourOfDay - 12 : (hourOfDay == 0 ? 12 : hourOfDay);
                 tv.setText(String.format("%02d:%02d %s", displayHour, minute, ampm));
                 tv.setTextColor(0xFF0F172A);
-            }, 10, 0, false);
+            }, cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE), false);
             tpd.show();
         });
 

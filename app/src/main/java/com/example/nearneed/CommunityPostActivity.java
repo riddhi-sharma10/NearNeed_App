@@ -18,20 +18,41 @@ public class CommunityPostActivity extends AppCompatActivity {
         }
 
         // CATEGORY SELECTION LOGIC
-        int[] chipIds = {R.id.chipMedical, R.id.chipFood, R.id.chipTransport, R.id.chipTools, R.id.chipShelter, R.id.chipInformation, R.id.chipOther};
+        int[] chipIds = {
+            R.id.chipMedical, R.id.chipFood, R.id.chipTransport,
+            R.id.chipTools, R.id.chipShelter, R.id.chipInformation,
+            R.id.chipOther
+        };
         
-        // Default select Food
-        selectChip(findViewById(R.id.chipFood), chipIds);
+        android.widget.EditText etOtherSpec = findViewById(R.id.etOtherCategory);
 
         for (int id : chipIds) {
             findViewById(id).setOnClickListener(v -> {
+                selectChip((android.widget.TextView) v, chipIds);
                 if (id == R.id.chipOther) {
-                    showOtherCategoryDialog(chipIds);
+                    etOtherSpec.setVisibility(android.view.View.VISIBLE);
+                    etOtherSpec.requestFocus();
+                    // Show keyboard automatically
+                    android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(etOtherSpec, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
                 } else {
-                    selectChip((android.widget.TextView) v, chipIds);
+                    etOtherSpec.setVisibility(android.view.View.GONE);
                 }
             });
         }
+
+        etOtherSpec.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                android.widget.TextView chipOther = findViewById(R.id.chipOther);
+                if (s.length() > 0) {
+                    chipOther.setText(s);
+                } else {
+                    chipOther.setText("Other");
+                }
+            }
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
         android.widget.EditText etTitle = findViewById(R.id.etRequestTitle);
@@ -70,38 +91,86 @@ public class CommunityPostActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         }
+
+        findViewById(R.id.cardAddPhoto).setOnClickListener(v -> {
+            if (photoUris.size() >= 5) {
+                android.widget.Toast.makeText(this, "Maximum 5 photos allowed", android.widget.Toast.LENGTH_SHORT).show();
+            } else {
+                photoPickerLauncher.launch("image/*");
+            }
+        });
+    }
+
+    private java.util.List<android.net.Uri> photoUris = new java.util.ArrayList<>();
+    private final androidx.activity.result.ActivityResultLauncher<String> photoPickerLauncher =
+        registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+        uri -> {
+            if (uri != null) {
+                photoUris.add(uri);
+                addPhotoThumbnail(uri);
+                updateAddButtonVisibility();
+            }
+        });
+
+    private void addPhotoThumbnail(android.net.Uri uri) {
+        android.widget.LinearLayout layout = findViewById(R.id.layoutPhotos);
+        com.google.android.material.card.MaterialCardView card = new com.google.android.material.card.MaterialCardView(this);
+        
+        android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(
+            (int)(100 * getResources().getDisplayMetrics().density),
+            (int)(100 * getResources().getDisplayMetrics().density)
+        );
+        params.setMargins(0, 0, (int)(10 * getResources().getDisplayMetrics().density), 0);
+        card.setLayoutParams(params);
+        card.setRadius(20 * getResources().getDisplayMetrics().density);
+        card.setCardElevation(0);
+        card.setStrokeColor(android.graphics.Color.parseColor("#E2E8F0"));
+        card.setStrokeWidth(1);
+
+        android.widget.ImageView iv = new android.widget.ImageView(this);
+        iv.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+        ));
+        iv.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+        iv.setImageURI(uri);
+        
+        card.addView(iv);
+        
+        // Add before the ADD button
+        layout.addView(card, layout.getChildCount() - 1);
+        
+        card.setOnLongClickListener(v -> {
+            layout.removeView(card);
+            photoUris.remove(uri);
+            updateAddButtonVisibility();
+            return true;
+        });
+    }
+
+    private void updateAddButtonVisibility() {
+        android.view.View btnAdd = findViewById(R.id.cardAddPhoto);
+        if (photoUris.size() >= 5) {
+            btnAdd.setVisibility(android.view.View.GONE);
+        } else {
+            btnAdd.setVisibility(android.view.View.VISIBLE);
+        }
     }
 
     private void selectChip(android.widget.TextView selected, int[] chipIds) {
         for (int otherId : chipIds) {
             android.widget.TextView ot = findViewById(otherId);
-            ot.setBackgroundResource(R.drawable.sel_community_chip);
-            ot.setTextColor(0xFF1E293B);
-            ot.setTypeface(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL);
+            if (ot != null) {
+                ot.setBackgroundResource(R.drawable.sel_community_chip);
+                ot.setTextColor(0xFF1E293B);
+                ot.setTypeface(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.NORMAL);
+            }
         }
-        selected.setBackgroundResource(R.drawable.bg_id_uploaded);
-        selected.getBackground().setTint(0xFF065F46); // Dark Green
-        selected.setTextColor(android.graphics.Color.WHITE);
-        selected.setTypeface(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.BOLD);
-    }
-
-    private void showOtherCategoryDialog(int[] chipIds) {
-        android.widget.EditText input = new android.widget.EditText(this);
-        input.setHint("Specify category");
-        input.setPadding(40, 40, 40, 40);
-        
-        new android.app.AlertDialog.Builder(this)
-            .setTitle("Other Category")
-            .setView(input)
-            .setPositiveButton("Specify", (dialog, which) -> {
-                String text = input.getText().toString().trim();
-                if (!text.isEmpty()) {
-                    android.widget.TextView chipOther = findViewById(R.id.chipOther);
-                    chipOther.setText(text);
-                    selectChip(chipOther, chipIds);
-                }
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
+        if (selected != null) {
+            selected.setBackgroundResource(R.drawable.bg_id_uploaded);
+            selected.getBackground().setTint(0xFF065F46); // Dark Green
+            selected.setTextColor(android.graphics.Color.WHITE);
+            selected.setTypeface(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.BOLD);
+        }
     }
 }

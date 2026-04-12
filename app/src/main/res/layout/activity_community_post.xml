@@ -98,9 +98,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-medium"
-                        android:text="SELECT CATEGORY"
-                        android:textColor="#475569"
+                        android:fontFamily="sans-serif-black"
+                        android:text="Select Category"
+                        android:textColor="#64748B"
                         android:textSize="12sp"
                         android:letterSpacing="0.05" />
 
@@ -110,109 +110,79 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:orientation="horizontal">
-
                         <TextView
                             android:id="@+id/chipMedical"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/sel_community_chip"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Medical"
-                            android:textColor="#1E293B"
-                            android:textSize="14sp" />
-
+                            style="@style/CategoryChipStyle"
+                            android:layout_weight="1"
+                            android:text="Medical" />
                         <TextView
                             android:id="@+id/chipFood"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            style="@style/CategoryChipStyle"
                             android:layout_marginStart="10dp"
-                            android:background="@drawable/bg_id_uploaded"
-                            android:backgroundTint="#065F46"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Food"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:fontFamily="sans-serif-black" />
-
-                    </LinearLayout>
-
-                    <!-- ROW 2 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:orientation="horizontal">
-
+                            android:layout_weight="1"
+                            android:text="Food" />
                         <TextView
                             android:id="@+id/chipTransport"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/sel_community_chip"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Transport"
-                            android:textColor="#1E293B"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/chipTools"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            style="@style/CategoryChipStyle"
                             android:layout_marginStart="10dp"
-                            android:background="@drawable/sel_community_chip"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Tools"
-                            android:textColor="#1E293B"
-                            android:textSize="14sp" />
-
+                            android:layout_weight="1"
+                            android:text="Transport" />
                     </LinearLayout>
 
-                    <!-- ROW 3 -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:orientation="horizontal">
-
+                        <TextView
+                            android:id="@+id/chipTools"
+                            style="@style/CategoryChipStyle"
+                            android:layout_weight="1"
+                            android:text="Tools" />
                         <TextView
                             android:id="@+id/chipShelter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/sel_community_chip"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Shelter"
-                            android:textColor="#1E293B"
-                            android:textSize="14sp" />
-
+                            style="@style/CategoryChipStyle"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="Shelter" />
                         <TextView
                             android:id="@+id/chipInformation"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            style="@style/CategoryChipStyle"
                             android:layout_marginStart="10dp"
-                            android:background="@drawable/sel_community_chip"
-                            android:paddingHorizontal="20dp"
-                            android:paddingVertical="10dp"
-                            android:text="Information"
-                            android:textColor="#1E293B"
-                            android:textSize="14sp" />
-
+                            android:layout_weight="1"
+                            android:text="Information" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/chipOther"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:background="@drawable/sel_community_chip"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="10dp"
-                        android:text="Other"
-                        android:textColor="#1E293B"
-                        android:textSize="14sp" />
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/chipOther"
+                            style="@style/CategoryChipStyle"
+                            android:layout_width="0dp"
+                            android:layout_weight="0.33"
+                            android:text="Other" />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.67" />
+                    </LinearLayout>
+
+                    <!-- Other Category Specification Input -->
+                    <EditText
+                        android:id="@+id/etOtherCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_edittext_field"
+                        android:backgroundTint="#F1F5F9"
+                        android:hint="Specify your category"
+                        android:paddingHorizontal="16dp"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -293,6 +263,77 @@
                 android:textSize="16sp"
                 android:maxLength="250"
                 android:inputType="textMultiLine|textCapSentences" />
+
+            <!-- PHOTOS SECTION -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Photos"
+                android:textColor="#0F172A"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Add up to 5 photos to help providers understand the task better."
+                android:textColor="#94A3B8"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/layoutPhotos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Picked photos will be added here dynamically -->
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardAddPhoto"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        app:cardBackgroundColor="#F1F5F9"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E2E8F0"
+                        app:strokeWidth="1dp"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_plus_circle_white"
+                                app:tint="#94A3B8" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:fontFamily="sans-serif-black"
+                                android:text="ADD PHOTO"
+                                android:textColor="#94A3B8"
+                                android:textSize="10sp"
+                                android:letterSpacing="0.05" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </HorizontalScrollView>
 
             <!-- TIP CARD -->
             <com.google.android.material.card.MaterialCardView

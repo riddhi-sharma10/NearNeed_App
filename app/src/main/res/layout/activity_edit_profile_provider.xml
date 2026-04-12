@@ -172,6 +172,35 @@
                     android:paddingVertical="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Gender (READ-ONLY) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:hint="Gender"
+                app:hintTextColor="@color/text_muted"
+                app:boxStrokeColor="@color/border_standard"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:startIconDrawable="@drawable/ic_nav_profile"
+                app:startIconTint="@color/text_muted"
+                android:layout_marginBottom="14dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:cursorVisible="false"
+                    android:text="Male"
+                    android:textColor="@color/text_header"
+                    android:textSize="15sp"
+                    android:paddingVertical="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <!-- Phone (READ-ONLY) -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"

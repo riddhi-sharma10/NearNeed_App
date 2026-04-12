@@ -780,101 +780,127 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- SUCCESS OVERLAY (Hidden by default, triggered by btnContinue) -->
+    <!-- SUCCESS OVERLAY (Redesigned to match image 2 style) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_success_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#991E293B"
+        android:background="#FFFFFF"
         android:visibility="gone"
         android:elevation="100dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="48dp"
-            app:cardElevation="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <!-- CLOSE BUTTON -->
+        <ImageButton
+            android:id="@+id/btnSuccessClose"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/bg_circle_light_blue"
+            android:backgroundTint="#F8FAFC"
+            android:padding="12dp"
+            android:src="@drawable/ic_close"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#64748B" />
+
+        <!-- CENTERED CONTENT -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="32dp">
+            <!-- SUCCESS ICON CIRCLE -->
+            <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp">
 
-                <!-- SUCCESS ICON -->
+                <!-- Outer soft glow -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha="0.2"
+                    android:background="@drawable/bg_circle_light_blue"
+                    android:backgroundTint="#2563EB" />
+
+                <!-- Inner solid blue circle -->
+                <View
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_circle_light_blue"
+                    android:backgroundTint="#2563EB" />
+
+                <!-- White check icon -->
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:src="@drawable/ic_success_check" />
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_check_solid_white" />
+            </FrameLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:fontFamily="sans-serif-black"
-                    android:text="Success!"
-                    android:textColor="#111827"
-                    android:textSize="32sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Success!"
+                android:textColor="#0F172A"
+                android:textSize="26sp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:text="Your community preferences\nhave been updated."
-                    android:textColor="#4B5563"
-                    android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:lineSpacingExtra="4dp"
+                android:text="Your community preferences have been updated.\nYou're all set to go!"
+                android:textColor="#64748B"
+                android:textSize="15sp" />
 
-                <!-- NEIGHBORHOOD IMAGE -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="110dp"
-                    android:layout_marginTop="24dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-bold"
+                android:text="Status: Active Profile"
+                android:textColor="#2563EB"
+                android:textSize="14sp" />
 
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/img_neighborhood" />
-                </com.google.android.material.card.MaterialCardView>
+            <!-- ACTION BUTTONS -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSuccessHome"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginTop="48dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Back to Home"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:backgroundTint="#004B73"
+                app:cornerRadius="18dp"
+                app:elevation="0dp" />
 
-                <!-- ACTION BUTTONS -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSuccessHome"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="32dp"
-                    android:text="Back to Home"
-                    android:textAllCaps="false"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:fontFamily="sans-serif-medium"
-                    app:backgroundTint="#004B73"
-                    app:cornerRadius="28dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSuccessProfile"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif-black"
+                android:text="View Profile"
+                android:textAllCaps="false"
+                android:textColor="#2563EB"
+                android:textSize="15sp" />
 
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:id="@+id/btnSuccessProfile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="View Profile"
-                    android:textAllCaps="false"
-                    android:textColor="#004B73"
-                    android:textSize="16sp"
-                    android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
 
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

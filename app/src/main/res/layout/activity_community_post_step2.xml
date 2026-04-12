@@ -203,6 +203,7 @@
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchLimitVolunteers"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
@@ -309,66 +310,26 @@
                     app:tint="#64748B" />
             </RelativeLayout>
 
-            <!-- REACH PREVIEW CARD -->
-            <com.google.android.material.card.MaterialCardView
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnContinueStep2"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="64dp"
                 android:layout_marginTop="32dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="0dp">
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-                    <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/img_reach_preview" />
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#80000000" />
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="Your post will reach approximately"
-                            android:textColor="@color/white"
-                            android:textSize="14sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:fontFamily="sans-serif-black"
-                            android:text="450 local residents"
-                            android:textColor="#4ADE80"
-                            android:textSize="28sp" />
-                    </LinearLayout>
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:layout_marginBottom="24dp"
+                android:layout_marginHorizontal="24dp"
+                android:fontFamily="sans-serif-black"
+                android:text="Continue"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                app:backgroundTint="#005A92"
+                app:cornerRadius="32dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnContinueStep2"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="bottom"
-        android:layout_margin="24dp"
-        android:fontFamily="sans-serif-black"
-        android:text="Continue"
-        android:textAllCaps="false"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:backgroundTint="#005A92"
-        app:cornerRadius="32dp" />
 
     <!-- SUCCESS OVERLAY -->
     <androidx.constraintlayout.widget.ConstraintLayout

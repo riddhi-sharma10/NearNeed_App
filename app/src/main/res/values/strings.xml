@@ -188,7 +188,7 @@
     <string name="status_busy">Busy</string>
     <string name="status_offline">Offline</string>
     <string name="earnings_mtd">EARNINGS MTD</string>
-    <string name="earnings_amount">$1,250.00</string>
+    <string name="earnings_amount">₹1,250.00</string>
     <string name="earnings_growth">+12% from last month</string>
     <string name="active_jobs_label">Active Jobs</string>
     <string name="active_jobs_count">4</string>
@@ -210,8 +210,8 @@
     <string name="job_light">Light Installation</string>
     <string name="distance_0_8">0.8 mi</string>
     <string name="distance_2_4">2.4 mi</string>
-    <string name="price_45_est">$45 Est.</string>
-    <string name="price_80_est">$80 Est.</string>
+    <string name="price_45_est">₹45 Est.</string>
+    <string name="price_80_est">₹80 Est.</string>
     <string name="btn_decline">Decline</string>
     <string name="btn_accept">Accept</string>
     <string name="view_earnings_history">View Earnings History</string>

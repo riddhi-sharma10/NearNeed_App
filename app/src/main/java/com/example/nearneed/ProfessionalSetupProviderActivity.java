@@ -110,6 +110,14 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                         startActivity(intent);
                     });
                 }
+
+                // CLOSE BUTTON IN MODAL
+                View btnSuccessClose = findViewById(R.id.btnSuccessClose);
+                if (btnSuccessClose != null) {
+                    btnSuccessClose.setOnClickListener(v2 -> {
+                        layoutSuccessOverlay.setVisibility(View.GONE);
+                    });
+                }
             } else {
                 // Fallback if overlay not found
                 Intent intent = new Intent(this, HomeProviderActivity.class);

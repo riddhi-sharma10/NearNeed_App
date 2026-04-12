@@ -128,40 +128,6 @@
                             android:textSize="16sp" />
                     </LinearLayout>
 
-                    <RelativeLayout
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:layout_alignParentEnd="true">
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            app:cardCornerRadius="30dp"
-                            app:strokeColor="#CBD5E1"
-                            app:strokeWidth="1dp">
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_profile_grey"
-                                android:padding="12dp"
-                                android:background="#F1F5F9" />
-                        </com.google.android.material.card.MaterialCardView>
-                        <com.google.android.material.card.MaterialCardView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentBottom="true"
-                            app:cardBackgroundColor="#065F46"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="4dp">
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_id_camera"
-                                android:padding="5dp"
-                                app:tint="#FFFFFF" />
-                        </com.google.android.material.card.MaterialCardView>
-                    </RelativeLayout>
-
                     <EditText
                         android:id="@+id/etClientName"
                         android:layout_width="match_parent"
@@ -176,33 +142,64 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/etClientName"
-                        android:layout_marginTop="16dp"
-                        android:orientation="vertical">
+                        android:layout_marginTop="20dp"
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.chip.Chip
+                        <LinearLayout
+                            android:id="@+id/chipPremiumTask"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Premium Task"
-                            app:chipBackgroundColor="#EFF6FF"
-                            app:chipIcon="@drawable/ic_dot_blue"
-                            app:chipIconVisible="true"
-                            app:chipStrokeWidth="0dp"
-                            android:textColor="#1E40AF"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-medium" />
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_pill_waiting"
+                            android:backgroundTint="#EFF6FF"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <View
+                                android:id="@+id/dotPremium"
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:background="@drawable/bg_circle_blue_solid"
+                                android:backgroundTint="#2563EB" />
+                            <TextView
+                                android:id="@+id/tvPremium"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="Premium Task"
+                                android:textColor="#2563EB"
+                                android:textSize="13sp"
+                                android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
 
-                        <com.google.android.material.chip.Chip
+                        <LinearLayout
+                            android:id="@+id/chipCommunityHelp"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Community Help"
-                            app:chipBackgroundColor="#FFF7ED"
-                            app:chipIcon="@drawable/ic_dot_orange"
-                            app:chipIconVisible="true"
-                            app:chipStrokeWidth="0dp"
-                            android:textColor="#9A3412"
-                            android:textSize="12sp"
-                            android:fontFamily="sans-serif-medium" />
+                            android:layout_height="36dp"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/bg_pill_waiting"
+                            android:backgroundTint="#FFF7ED"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="12dp"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <View
+                                android:id="@+id/dotCommunity"
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:background="@drawable/bg_circle_blue_solid"
+                                android:backgroundTint="#EA580C" />
+                            <TextView
+                                android:id="@+id/tvCommunity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="Community Help"
+                                android:textColor="#EA580C"
+                                android:textSize="13sp"
+                                android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+
                     </LinearLayout>
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -217,35 +214,7 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-black"
-                    android:text="Task Category"
-                    android:textColor="#1E293B"
-                    android:textSize="12sp" />
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_input_field"
-                    android:paddingHorizontal="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="Garden Restoration"
-                        android:textColor="#1E293B"
-                        android:textSize="14sp" />
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_chevron_right_thin"
-                        app:tint="#64748B" />
-                </RelativeLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -319,12 +288,16 @@
                         android:textColor="#64748B"
                         android:textSize="10sp" />
                     <RelativeLayout
+                        android:id="@+id/layoutDate"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input_field"
-                        android:paddingHorizontal="16dp">
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
                         <TextView
+                            android:id="@+id/tvSelectedDate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -363,12 +336,16 @@
                         android:textColor="#64748B"
                         android:textSize="10sp" />
                     <RelativeLayout
+                        android:id="@+id/layoutTime"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/bg_input_field"
-                        android:paddingHorizontal="16dp">
+                        android:paddingHorizontal="16dp"
+                        android:clickable="true"
+                        android:focusable="true">
                         <TextView
+                            android:id="@+id/tvSelectedTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"

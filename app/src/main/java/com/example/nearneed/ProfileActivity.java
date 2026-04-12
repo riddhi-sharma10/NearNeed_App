@@ -90,12 +90,18 @@ public class ProfileActivity extends AppCompatActivity {
         // On provider mode it might be named differently
         View btnEditProfileProvider = findViewById(R.id.btn_edit_profile_provider);
         if (btnEditProfileProvider != null) {
-            btnEditProfileProvider.setOnClickListener(v -> openEditProfile());
+            btnEditProfileProvider.setOnClickListener(v -> openEditProviderProfile());
         }
     }
 
     private void openEditProfile() {
         Intent intent = new Intent(this, EditProfileActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    private void openEditProviderProfile() {
+        Intent intent = new Intent(this, EditProfileProviderActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }

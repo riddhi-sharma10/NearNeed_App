@@ -87,6 +87,28 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                 return;
             }
             
+            // Save to SharedPreferences
+            android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
+            android.content.SharedPreferences.Editor editor = prefs.edit();
+            
+            Set<String> catIds = new HashSet<>();
+            for (TextView tv : selectedCategories) catIds.add(String.valueOf(tv.getId()));
+            editor.putStringSet("categories", catIds);
+            
+            if (selectedExperience != null) {
+                editor.putInt("experience", selectedExperience.getId());
+            }
+            
+            Set<String> dayIds = new HashSet<>();
+            for (TextView tv : selectedDays) dayIds.add(String.valueOf(tv.getId()));
+            editor.putStringSet("days", dayIds);
+            
+            Set<String> slotIds = new HashSet<>();
+            for (TextView tv : selectedTimeSlots) slotIds.add(String.valueOf(tv.getId()));
+            editor.putStringSet("timeSlots", slotIds);
+            
+            editor.apply();
+
             // SHOW THE OVERLAP MODAL
             if (layoutSuccessOverlay != null) {
                 layoutSuccessOverlay.setVisibility(View.VISIBLE);

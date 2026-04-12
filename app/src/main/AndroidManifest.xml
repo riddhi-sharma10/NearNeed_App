@@ -59,6 +59,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".EditProfileProviderActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".CreateNewPasswordActivity"
             android:exported="false" />
 

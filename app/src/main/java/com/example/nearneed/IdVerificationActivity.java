@@ -69,8 +69,8 @@ public class IdVerificationActivity extends AppCompatActivity {
         int start = fullText.indexOf("Terms");
         int end = fullText.length();
 
-        // Specific blue for links
-        int linkColor = 0xFF2563EB;
+        // Specific dark blue for links
+        int linkColor = 0xFF1E3A8A;
 
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
@@ -103,12 +103,12 @@ public class IdVerificationActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(v -> {
             btnSubmit.setEnabled(false);
             btnSubmit.setText("Verifying Authenticity...");
-            btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF4F46E5));
+            btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
 
             new android.os.Handler().postDelayed(() -> {
                 isFullyVerified = true;
                 btnSubmit.setText("ID Verified Successfully");
-                btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1D5EF3));
+                btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
 
                 new android.os.Handler().postDelayed(() -> {
                     if (isFullyVerified) {
@@ -171,7 +171,7 @@ public class IdVerificationActivity extends AppCompatActivity {
             fDesc.setText("Extracting security features...");
             fIcon.setVisibility(View.VISIBLE);
             fIcon.setImageResource(R.drawable.ic_search_grey);
-            fIcon.setColorFilter(0xFF2563EB);
+            fIcon.setColorFilter(0xFF1E3A8A);
             fIcon.setPadding(0, 0, 0, 0);
             fIcon.setBackground(null);
             
@@ -182,10 +182,9 @@ public class IdVerificationActivity extends AppCompatActivity {
             new android.os.Handler().postDelayed(() -> {
                 card.setBackgroundResource(R.drawable.bg_id_uploaded);
                 fIcon.setVisibility(View.GONE);
-                fTitle.setText(side + " verified");
-                fTitle.setTextColor(0xFF1D5EF3);
+                fTitle.setTextColor(0xFF1E3A8A);
                 fDesc.setText("Data extracted successfully");
-                fDesc.setTextColor(0xFF1D5EF3);
+                fDesc.setTextColor(0xFF1E3A8A);
                 
                 if (fTick != null) {
                     fTick.setVisibility(View.VISIBLE);
@@ -203,7 +202,7 @@ public class IdVerificationActivity extends AppCompatActivity {
         if (frontUploaded && backUploaded && cbTerms.isChecked()) {
             btnSubmit.setEnabled(true);
             btnSubmit.setAlpha(1.0f);
-            btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1D5EF3));
+            btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
         } else {
             btnSubmit.setEnabled(false);
             btnSubmit.setAlpha(0.6f);

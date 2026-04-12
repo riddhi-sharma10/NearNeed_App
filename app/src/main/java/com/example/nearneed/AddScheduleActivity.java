@@ -74,10 +74,11 @@ public class AddScheduleActivity extends AppCompatActivity {
         
         chip.getBackground().setTint(bgColor);
         
-        android.view.View dot = chip.findViewWithTag("dot") != null ? chip.findViewWithTag("dot") : chip.getChildAt(0);
+        android.view.ViewGroup group = (android.view.ViewGroup) chip;
+        android.view.View dot = group.getChildAt(0);
         dot.getBackground().setTint(color);
         
-        android.widget.TextView tv = (android.widget.TextView) chip.getChildAt(1);
+        android.widget.TextView tv = (android.widget.TextView) group.getChildAt(1);
         tv.setTextColor(color);
         tv.setAlpha(selected ? 1.0f : 0.6f);
     }

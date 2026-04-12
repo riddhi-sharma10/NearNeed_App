@@ -164,10 +164,30 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        // Earnings
+        // Earnings Menu
         if (providerBinding.menuEarnings != null) {
             providerBinding.menuEarnings.setOnClickListener(v -> {
-                Snackbar.make(requireView(), "Fetching Your Revenue Reports...", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(requireContext(), MyEarningsActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
+        // View Earnings Button
+        if (providerBinding.btnViewEarnings != null) {
+            providerBinding.btnViewEarnings.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), MyEarningsActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
+        // Settings
+        if (providerBinding.menuSettingsProvider != null) {
+            providerBinding.menuSettingsProvider.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), SettingsActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 

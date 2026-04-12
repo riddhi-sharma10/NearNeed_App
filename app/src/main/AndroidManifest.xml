@@ -169,6 +169,10 @@
         <activity
             android:name=".CommunityPostStep2Activity"
             android:exported="false" />
+
+        <activity
+            android:name=".MyEarningsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

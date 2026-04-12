@@ -59,6 +59,17 @@ public class ProfileActivity extends AppCompatActivity {
             providerSettings.setOnClickListener(v -> openSettings());
         }
 
+        // Earnings
+        View menuEarnings = findViewById(R.id.menu_earnings);
+        if (menuEarnings != null) {
+            menuEarnings.setOnClickListener(v -> openEarnings());
+        }
+
+        View btnViewEarnings = findViewById(R.id.btn_view_earnings);
+        if (btnViewEarnings != null) {
+            btnViewEarnings.setOnClickListener(v -> openEarnings());
+        }
+
         // Logout
         View seekerLogout = findViewById(R.id.menu_logout);
         if (seekerLogout != null) {
@@ -127,6 +138,12 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void openHelpSupport() {
         Intent intent = new Intent(this, HelpSupportActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    private void openEarnings() {
+        Intent intent = new Intent(this, MyEarningsActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }

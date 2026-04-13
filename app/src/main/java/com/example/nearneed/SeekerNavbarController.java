@@ -118,7 +118,15 @@ public final class SeekerNavbarController {
         }
 
         if (bookingsContainer != null) {
-            bookingsContainer.setOnClickListener(v -> Toast.makeText(activity, "Bookings coming soon", Toast.LENGTH_SHORT).show());
+            bookingsContainer.setOnClickListener(v -> {
+                if (!(activity instanceof BookingsActivity)) {
+                    Intent intent = new Intent(activity, BookingsActivity.class);
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    // Don't finish activity for stack preservation, or finish depending on current?
+                    // Home usually finishes itself, but since Bookings is a top-level tab, let's follow the chat/profile pattern which doesn't finish Home.
+                }
+            });
         }
 
         if (chatContainer != null) {

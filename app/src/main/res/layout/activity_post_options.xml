@@ -26,10 +26,12 @@
 
                 <ImageView
                     android:id="@+id/btnBack"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
+                    android:layout_marginStart="-12dp"
+                    android:scaleType="centerInside"
                     android:src="@drawable/ic_back_arrow"
                     app:tint="@color/text_header"
                     android:contentDescription="@string/back_description" />

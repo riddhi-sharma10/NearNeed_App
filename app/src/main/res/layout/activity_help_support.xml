@@ -23,9 +23,11 @@
 
             <ImageView
                 android:id="@+id/btnBack"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="-12dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="centerInside"
                 android:clickable="true"
                 android:contentDescription="Back"
                 android:src="@drawable/ic_back_arrow"

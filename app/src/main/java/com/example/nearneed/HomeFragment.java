@@ -103,6 +103,51 @@ public class HomeFragment extends Fragment {
                 startActivity(intent);
             });
         }
+
+        // Location picker
+        View locationSection = view.findViewById(R.id.locationSection);
+        if (locationSection != null) {
+            locationSection.setOnClickListener(v ->
+                LocationPickerHelper.show(requireActivity(), displayText -> {
+                    android.widget.TextView tvDelivery = view.findViewById(R.id.tvDeliveryLocation);
+                    if (tvDelivery != null) {
+                        tvDelivery.setText(displayText);
+                        // Also save to SharedPreferences
+                        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("LocationPrefs", android.content.Context.MODE_PRIVATE);
+                        android.content.SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("delivery_location", displayText);
+                        editor.apply();
+                    }
+                }));
+        }
+
+        // Load saved location into header
+        android.widget.TextView tvDelivery = view.findViewById(R.id.tvDeliveryLocation);
+        if (tvDelivery != null) {
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("LocationPrefs", android.content.Context.MODE_PRIVATE);
+            String saved = prefs.getString("delivery_location", null);
+            if (saved != null) {
+                tvDelivery.setText(saved);
+            }
+        }
+
+        // Earnings card → My Earnings
+        View earningsCard = view.findViewById(R.id.earningsCard);
+        if (earningsCard != null) {
+            earningsCard.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), MyEarningsActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // View All Requests → Map Activity
+        View viewAllRequestsContainer = view.findViewById(R.id.viewAllRequestsContainer);
+        if (viewAllRequestsContainer != null) {
+            viewAllRequestsContainer.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), MapsActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────────

@@ -1,10 +1,13 @@
 package com.example.nearneed;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -134,6 +137,33 @@ public class HomeFragment extends Fragment {
                 Intent intent = new Intent(requireContext(), PostOptionsActivity.class);
                 startActivity(intent);
             });
+        }
+
+        // Location picker
+        View locationSection = view.findViewById(R.id.locationSection);
+        if (locationSection != null) {
+            locationSection.setOnClickListener(v ->
+                LocationPickerHelper.show(requireActivity(), displayText -> {
+                    TextView tvDelivery = view.findViewById(R.id.tvDeliveryLocation);
+                    if (tvDelivery != null) {
+                        tvDelivery.setText(displayText);
+                        // Also save to SharedPreferences
+                        SharedPreferences prefs = requireContext().getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("delivery_location", displayText);
+                        editor.apply();
+                    }
+                }));
+        }
+
+        // Load saved location into header
+        TextView tvDelivery = view.findViewById(R.id.tvDeliveryLocation);
+        if (tvDelivery != null) {
+            SharedPreferences prefs = requireContext().getSharedPreferences("LocationPrefs", Context.MODE_PRIVATE);
+            String saved = prefs.getString("delivery_location", null);
+            if (saved != null) {
+                tvDelivery.setText(saved);
+            }
         }
     }
 }

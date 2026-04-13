@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.playServicesMaps)
     implementation(libs.gmsPlayServicesMaps)
+    implementation(libs.playServicesLocation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

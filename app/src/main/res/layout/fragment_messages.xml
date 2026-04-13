@@ -153,6 +153,6 @@
 
     </LinearLayout>
 
-    <include layout="@layout/layout_main_navbar_page" />
+    <include layout="@layout/layout_floating_navbar_seeker" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

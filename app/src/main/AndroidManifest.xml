@@ -12,6 +12,10 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,7 +27,8 @@
         android:theme="@style/Theme.NearNeed">
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="true"
+            android:theme="@style/Theme.NearNeed" />
 
         <activity
             android:name=".LoadingActivity"
@@ -177,6 +182,14 @@
         <activity
             android:name=".MyEarningsActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_API_KEY_HERE" />
     </application>
 
 </manifest>

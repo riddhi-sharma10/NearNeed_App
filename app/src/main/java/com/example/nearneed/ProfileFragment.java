@@ -96,9 +96,7 @@ public class ProfileFragment extends Fragment {
         // My Posts
         if (seekerBinding.menuMyPosts != null) {
             seekerBinding.menuMyPosts.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), MyPostsActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Snackbar.make(requireView(), "Loading Your Active Requests...", Snackbar.LENGTH_SHORT).show();
             });
         }
 
@@ -122,9 +120,14 @@ public class ProfileFragment extends Fragment {
         // Help & Support
         if (seekerBinding.menuHelp != null) {
             seekerBinding.menuHelp.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Need Help?")
+                        .setMessage("Our support team is available 24/7. Would you like to view the FAQ or contact support directly?")
+                        .setPositiveButton("Contact Support", (dialog, which) -> {
+                            Snackbar.make(requireView(), "Opening Support Chat...", Snackbar.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("FAQ", null)
+                        .show();
             });
         }
 
@@ -164,39 +167,10 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        // Earnings Menu
+        // Earnings
         if (providerBinding.menuEarnings != null) {
             providerBinding.menuEarnings.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), MyEarningsActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
-        }
-
-        // View Earnings Button
-        if (providerBinding.btnViewEarnings != null) {
-            providerBinding.btnViewEarnings.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), MyEarningsActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
-        }
-
-        // Settings
-        if (providerBinding.menuSettingsProvider != null) {
-            providerBinding.menuSettingsProvider.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), SettingsActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
-        }
-
-        // Help & Support
-        if (providerBinding.menuHelpProvider != null) {
-            providerBinding.menuHelpProvider.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), HelpSupportActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                Snackbar.make(requireView(), "Fetching Your Revenue Reports...", Snackbar.LENGTH_SHORT).show();
             });
         }
 

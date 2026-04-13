@@ -1,22 +1,17 @@
 package com.example.nearneed;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.material.button.MaterialButton;
-
-public class HomeSeekerActivity extends AppCompatActivity {
+public class MapsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         // Premium transparent status bar
         Window window = getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -24,17 +19,13 @@ public class HomeSeekerActivity extends AppCompatActivity {
         window.setStatusBarColor(ContextCompat.getColor(this, android.R.color.transparent));
         window.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
-        setContentView(R.layout.activity_home_seeker);
+        setContentView(R.layout.activity_maps_host);
 
-        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
-
-        // Connect FAB to PostOptionsActivity (or CreatePostActivity)
-        MaterialButton fab = findViewById(R.id.fab_add_seeker);
-        if (fab != null) {
-            fab.setOnClickListener(v -> {
-                Intent intent = new Intent(this, PostOptionsActivity.class);
-                startActivity(intent);
-            });
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.maps_fragment_container, new MapsFragment())
+                    .commit();
         }
     }
 }

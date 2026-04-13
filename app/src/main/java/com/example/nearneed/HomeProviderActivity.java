@@ -1,57 +1,42 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * @deprecated Replaced by {@link HomeFragment}.
+ * Layout logic has been migrated; this class is kept only for back-compat.
+ */
+@Deprecated
 public class HomeProviderActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_provider);
-        
-        findViewById(R.id.viewCalendar).setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, CalendarProviderActivity.class);
-            startActivity(intent);
-        });
 
-        findViewById(R.id.btnPostCommunityRequest).setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, CommunityPostActivity.class);
-            startActivity(intent);
-        });
-
-        setupNavbar();
-    }
-
-    private void setupNavbar() {
-        android.view.View navbar = findViewById(R.id.floatingNavbar);
-        if (navbar == null) {
-            // If the include doesn't have the ID, try finding containers directly
-            navbar = findViewById(android.R.id.content);
+        // Ensure user is in the correct role for this activity
+        if (RoleManager.ROLE_SEEKER.equals(RoleManager.getRole(this))) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
         }
 
-        android.view.View iconHome = findViewById(R.id.nav_home_container);
-        android.view.View iconCalendar = findViewById(R.id.nav_bookings_container);
-        android.view.View iconChat = findViewById(R.id.nav_chat_container);
-        android.view.View iconProfile = findViewById(R.id.nav_profile_container);
+        setContentView(R.layout.activity_home_provider);
 
-        if (iconHome != null) iconHome.setOnClickListener(v -> {
-            // Already here
-        });
-
-        if (iconCalendar != null) iconCalendar.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, CalendarProviderActivity.class);
+        // Today's schedule → Calendar
+        findViewById(R.id.viewCalendar).setOnClickListener(v -> {
+            Intent intent = new Intent(this, CalendarProviderActivity.class);
             startActivity(intent);
         });
 
-        if (iconChat != null) iconChat.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, MessagesActivity.class);
+        // Post community request
+        findViewById(R.id.btnPostCommunityRequest).setOnClickListener(v -> {
+            Intent intent = new Intent(this, CommunityPostActivity.class);
             startActivity(intent);
         });
 
-        if (iconProfile != null) iconProfile.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(this, ProfileActivity.class);
-            startActivity(intent);
-        });
+        // Bind the unified navbar – Home tab active
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
     }
 }

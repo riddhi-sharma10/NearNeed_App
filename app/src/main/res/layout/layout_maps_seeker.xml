@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_background">
+
+    <!-- 1. Google Map Background -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 2. Top Header & Search Overlay -->
+    <LinearLayout
+        android:id="@+id/seeker_top_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Header: Settings Only -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:paddingBottom="8dp"/>
+
+        <!-- Search Bar with Glass Effect -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="62dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_glass_search_bar"
+            android:elevation="4dp">
+            
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="20dp">
+
+                <ImageView
+                    android:id="@+id/ic_search"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_search_grey"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#64748B" />
+
+                <EditText
+                    android:id="@+id/search_edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="14dp"
+                    android:background="@android:color/transparent"
+                    android:hint="Find services near you..."
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:textColor="#334155"
+                    android:textColorHint="#94A3B8"
+                    android:textSize="15sp"
+                    app:layout_constraintEnd_toStartOf="@id/ic_compass"
+                    app:layout_constraintStart_toEndOf="@id/ic_search" />
+
+                <ImageView
+                    android:id="@+id/ic_compass"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_nav_map_final"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/sapphire_primary" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Seeker Filter Chips with Colored Glass Effect -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="8dp">
+
+                <!-- Active Chip (Category) -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_glass_chip_active"
+                    android:elevation="2dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="18dp"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_toolbox_seeker"
+                        app:tint="@color/white" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Category"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Rating Chip -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_glass_chip_inactive"
+                    android:elevation="2dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="18dp"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_star_yellow" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Rating"
+                        android:textColor="@color/text_body_dark"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Distance Chip -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_glass_chip_inactive"
+                    android:elevation="2dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="18dp"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_loc_pin_small"
+                        app:tint="@color/text_body_dark" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Distance"
+                        android:textColor="@color/text_body_dark"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+    <!-- 3. Seeker Info Card (Provider Details) - Improved -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/seeker_info_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="108dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="12dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:paddingBottom="20dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/provider_image"
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/avatar_david"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+
+            <TextView
+                android:id="@+id/provider_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Marcus Watts"
+                android:textColor="@color/text_header"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.01"
+                app:layout_constraintEnd_toStartOf="@id/tag_top_rated"
+                app:layout_constraintStart_toEndOf="@id/provider_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tag_top_rated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill_waiting"
+                android:backgroundTint="#D1FAE5"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="TOP RATED"
+                android:textColor="#059669"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/provider_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/provider_name" />
+
+            <ImageView
+                android:id="@+id/ic_provider_cat"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_plug_blue"
+                app:layout_constraintStart_toStartOf="@id/provider_name"
+                app:layout_constraintTop_toBottomOf="@id/provider_name"
+                app:tint="@color/text_muted" />
+
+            <TextView
+                android:id="@+id/provider_desc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Master Electrician • 0.8 miles away"
+                android:textColor="@color/text_subheadline"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@id/ic_provider_cat"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ic_provider_cat"
+                app:layout_constraintTop_toTopOf="@id/ic_provider_cat" />
+
+            <ImageView
+                android:id="@+id/ic_star_rating"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/ic_star_yellow"
+                app:layout_constraintStart_toStartOf="@id/provider_name"
+                app:layout_constraintTop_toBottomOf="@id/provider_desc" />
+
+            <TextView
+                android:id="@+id/provider_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="4.9"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/ic_star_rating"
+                app:layout_constraintStart_toEndOf="@id/ic_star_rating"
+                app:layout_constraintTop_toTopOf="@id/ic_star_rating" />
+
+            <TextView
+                android:id="@+id/provider_review_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="(128 reviews)"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@id/provider_rating"
+                app:layout_constraintStart_toEndOf="@id/provider_rating"
+                app:layout_constraintTop_toTopOf="@id/provider_rating" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="@id/ic_star_rating"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STARTS AT"
+                    android:textColor="@color/text_muted"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="bottom">
+                    <TextView
+                        android:id="@+id/provider_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$65"
+                        android:textColor="@color/sapphire_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/hr"
+                        android:textColor="@color/sapphire_primary"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="3dp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/provider_rating">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_view_profile"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="58dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#F1F5F9"
+                    android:text="View Profile"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_header"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="18dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_book_now"
+                    android:layout_width="0dp"
+                    android:layout_height="58dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/sapphire_primary"
+                    android:text="Book Now"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="18dp" />
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 4. Seeker Navbar -->
+    <include
+        android:id="@+id/seeker_navbar"
+        layout="@layout/layout_floating_navbar_seeker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

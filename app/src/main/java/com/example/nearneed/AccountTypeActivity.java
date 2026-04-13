@@ -43,8 +43,9 @@ public class AccountTypeActivity extends AppCompatActivity {
     private void completeRegistration(String role) {
         if ("seeker".equals(role)) {
             RoleManager.setRole(this, RoleManager.ROLE_SEEKER);
-            // Direct navigation to the Seeker No Posts page as requested
-            Intent intent = new Intent(this, HomeSeekerNoPostsActivity.class);
+            // Navigate to main seeker home screen (empty state handled within the activity)
+            Intent intent = new Intent(this, HomeSeekerActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
             RoleManager.setRole(this, RoleManager.ROLE_PROVIDER);

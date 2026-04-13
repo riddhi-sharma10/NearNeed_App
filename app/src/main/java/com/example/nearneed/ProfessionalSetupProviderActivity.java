@@ -117,7 +117,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                 MaterialButton btnSuccessHome = findViewById(R.id.btnSuccessHome);
                 if (btnSuccessHome != null) {
                     btnSuccessHome.setOnClickListener(v2 -> {
-                        Intent intent = new Intent(this, HomeProviderActivity.class);
+                        Intent intent = new Intent(this, MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finishAffinity();
@@ -142,7 +142,7 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
                 }
             } else {
                 // Fallback if overlay not found
-                Intent intent = new Intent(this, HomeProviderActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finishAffinity();

@@ -341,20 +341,29 @@
 
             </LinearLayout>
 
-            <!-- Terms Checkbox -->
+            <!-- Terms Checkbox Row -->
             <LinearLayout
+                android:id="@+id/layoutTerms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="20dp"
-                android:gravity="center_vertical">
+                android:paddingVertical="8dp"
+                android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
                 <CheckBox
                     android:id="@+id/cbTerms"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:button="@drawable/sel_custom_checkbox"
+                    android:buttonTint="@null"
+                    app:buttonTint="@null"
                     android:padding="0dp"
+                    android:clickable="false"
+                    android:focusable="false"
                     android:layout_gravity="center_vertical" />
 
                 <TextView
@@ -362,7 +371,7 @@
                     style="@style/AppFormText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="12dp"
                     android:text="I agree to the Terms &amp; Conditions"
                     android:textColor="@color/text_subheadline"
                     android:textSize="13sp" />

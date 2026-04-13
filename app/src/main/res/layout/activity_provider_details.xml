@@ -719,9 +719,14 @@
 
                 <!-- Terms Checkbox row -->
                 <LinearLayout
+                    android:id="@+id/layoutTermsRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingVertical="8dp"
                     android:orientation="horizontal">
 
                     <CheckBox
@@ -731,6 +736,8 @@
                         android:button="@drawable/sel_custom_checkbox"
                         android:buttonTint="@null"
                         app:buttonTint="@null"
+                        android:clickable="false"
+                        android:focusable="false"
                         android:padding="0dp" />
 
                     <LinearLayout

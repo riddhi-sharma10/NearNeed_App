@@ -98,6 +98,15 @@ public class IdVerificationActivity extends AppCompatActivity {
 
         cardUploadFront.setOnClickListener(v -> openImagePicker(REQUEST_PICK_FRONT));
         cardUploadBack.setOnClickListener(v  -> openImagePicker(REQUEST_PICK_BACK));
+        
+        // Make the entire row clickable to toggle checkbox
+        android.view.View layoutTerms = findViewById(R.id.layoutTerms);
+        if (layoutTerms != null) {
+            layoutTerms.setOnClickListener(v -> {
+                cbTerms.setChecked(!cbTerms.isChecked());
+            });
+        }
+
         cbTerms.setOnCheckedChangeListener((bv, checked) -> checkReadyToSubmit());
 
         btnSubmit.setOnClickListener(v -> {

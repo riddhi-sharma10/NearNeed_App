@@ -348,9 +348,19 @@ public class ChatActivity extends AppCompatActivity {
         // EMOJI button - removed per user request
 
         // PROFILE / INFO area
-        findViewById(R.id.topBar).setOnClickListener(v -> 
-            Toast.makeText(this, "Viewing " + tvChatName.getText() + "'s profile", Toast.LENGTH_SHORT).show()
-        );
+        findViewById(R.id.topBar).setOnClickListener(v -> {
+            Intent intent = new Intent(this, PersonProfileActivity.class);
+            intent.putExtra("PERSON_NAME", tvChatName.getText().toString());
+            intent.putExtra("PERSON_EMAIL", getIntent().getStringExtra("PERSON_EMAIL"));
+            intent.putExtra("PERSON_PHONE", getIntent().getStringExtra("PERSON_PHONE"));
+            intent.putExtra("PERSON_GENDER", getIntent().getStringExtra("PERSON_GENDER"));
+            intent.putExtra("PERSON_EXPERIENCE", getIntent().getStringExtra("PERSON_EXPERIENCE"));
+            intent.putExtra("PERSON_RATING", getIntent().getStringExtra("PERSON_RATING"));
+            intent.putExtra("PERSON_REVIEWS", getIntent().getStringExtra("PERSON_REVIEWS"));
+            intent.putExtra("PERSON_BIO", getIntent().getStringExtra("PERSON_BIO"));
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        });
     }
 
     private void showAttachmentOptions() {

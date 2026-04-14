@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import java.util.List;
 public class HomeProviderActivity extends AppCompatActivity {
 
     private TextView tvDeliveryLocation;
+    private TextView tvDashboardNotificationBadge;
     private static final String PREFS = "LocationPrefs";
     private static final String KEY_LOCATION = "delivery_location";
 
@@ -50,6 +52,8 @@ public class HomeProviderActivity extends AppCompatActivity {
         if (locationSection != null) {
             locationSection.setOnClickListener(v -> showLocationPicker());
         }
+
+        setupDashboardNotifications();
 
         // Today's schedule → Calendar
         findViewById(R.id.viewCalendar).setOnClickListener(v -> {
@@ -103,6 +107,12 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         // Bind the unified navbar – Home tab active
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshNotificationBadge();
     }
 
     private void setupNearbyRequests() {
@@ -191,6 +201,34 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void showLocationPicker() {
         LocationPickerHelper.show(this, displayText -> saveLocation(displayText));
+    }
+
+    private void setupDashboardNotifications() {
+        ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
+        tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
+
+        if (ivDashboardNotifications != null) {
+            ivDashboardNotifications.setOnClickListener(v ->
+                DashboardNotificationPopup.show(this, v, this::refreshNotificationBadge)
+            );
+        }
+
+        refreshNotificationBadge();
+    }
+
+    private void refreshNotificationBadge() {
+        if (tvDashboardNotificationBadge == null) {
+            return;
+        }
+
+        int unread = NotificationCenter.unreadCount(this);
+        if (unread <= 0) {
+            tvDashboardNotificationBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
+        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(unread, 9)));
     }
 
     /**

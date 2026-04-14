@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -56,9 +55,7 @@ public class ProviderJobDetailActivity extends AppCompatActivity {
 
         // Apply button logic
         btnApplyGig.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening apply form...", Toast.LENGTH_SHORT).show();
-            // This will trigger the gig apply sheet when we call it from MapsFragment
-            finish();
+            new RequestApplyBottomSheet().show(getSupportFragmentManager(), "provider_gig_apply_sheet");
         });
     }
 }

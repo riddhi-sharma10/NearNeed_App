@@ -76,8 +76,11 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
             tvPostedBy.setText(post.postedBy);
             tvDescription.setText(post.description);
 
+            boolean isProvider = RoleManager.isProvider(itemView.getContext());
+            btnView.setText(isProvider ? "Volunteer" : "View Responses");
+
             btnView.setOnClickListener(v -> {
-                Intent intent = new Intent(itemView.getContext(), CommunityVolunteerDetailActivity.class);
+                Intent intent = new Intent(itemView.getContext(), CommunityPostDetailActivity.class);
                 intent.putExtra("title", post.title);
                 intent.putExtra("description", post.description);
                 intent.putExtra("postedBy", post.postedBy);

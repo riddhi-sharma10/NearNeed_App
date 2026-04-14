@@ -28,16 +28,25 @@ public class VolunteersActivity extends AppCompatActivity {
     private VolunteersAdapter adapter;
     private List<Volunteer> allVolunteers, filteredVolunteers;
     private String currentFilter = "all";
+    private int maxSlots = 0;
+    private int confirmedCount = 0;
+    private boolean isSeeker = false;
+    private String postTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_volunteers);
 
+        // Get intent extras
+        maxSlots = getIntent().getIntExtra("max_slots", 0);
+        isSeeker = getIntent().getBooleanExtra("is_seeker", false);
+        postTitle = getIntent().getStringExtra("post_title");
+
         initViews();
         setupToolbar();
-        setupFilters();
         loadVolunteers();
+        setupFilters();
         setupRecyclerView();
     }
 
@@ -112,6 +121,15 @@ public class VolunteersActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         rvVolunteers.setLayoutManager(new LinearLayoutManager(this));
+
+        // Count already confirmed volunteers
+        confirmedCount = 0;
+        for (Volunteer v : allVolunteers) {
+            if ("confirmed".equals(v.getStatus())) {
+                confirmedCount++;
+            }
+        }
+
         adapter = new VolunteersAdapter(filteredVolunteers, new VolunteersAdapter.OnVolunteerActionListener() {
             @Override
             public void onViewProfile(String volunteerId) {
@@ -122,11 +140,36 @@ public class VolunteersActivity extends AppCompatActivity {
 
             @Override
             public void onMessage(String volunteerId) {
-                // TODO: Open chat with volunteer
+                Intent chatIntent = new Intent(VolunteersActivity.this, ChatActivity.class);
+                chatIntent.putExtra("CHAT_NAME", "Volunteer " + volunteerId);
+                chatIntent.putExtra("CHAT_ONLINE", true);
+                startActivity(chatIntent);
             }
-        });
+
+            @Override
+            public void onAccept(Volunteer volunteer) {
+                if (isSeeker && canAcceptMore()) {
+                    volunteer.setStatus("confirmed");
+                    confirmedCount++;
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onReject(Volunteer volunteer) {
+                if (isSeeker) {
+                    volunteer.setStatus("rejected");
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }, isSeeker, maxSlots);
         rvVolunteers.setAdapter(adapter);
         updateEmptyState();
+    }
+
+    private boolean canAcceptMore() {
+        if (maxSlots <= 0) return true; // No limit
+        return confirmedCount < maxSlots;
     }
 
     private void applyFilter(String filter) {

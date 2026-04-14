@@ -2,9 +2,7 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -55,8 +53,9 @@ public class GigPostDetailActivity extends AppCompatActivity {
 
         btnViewApplicants.setOnClickListener(v -> {
             String postTitle = tvTitle.getText().toString();
-            Intent applicantsIntent = new Intent(this, ResponsesActivity.class);
+            Intent applicantsIntent = new Intent(GigPostDetailActivity.this, ResponsesActivity.class);
             applicantsIntent.putExtra("post_title", postTitle);
+            applicantsIntent.putExtra("is_gig", true);
             startActivity(applicantsIntent);
         });
     }

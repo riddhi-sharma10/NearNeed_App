@@ -50,50 +50,25 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Filter Chips -->
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupFilter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            app:singleSelection="true"
-            app:singleLine="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="all"
-                android:text="All"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipNew"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="new"
-                android:text="New"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAccepted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="accepted"
-                android:text="Accepted"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
-
-        </com.google.android.material.chip.ChipGroup>
-
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/border_light" />
+
+        <!-- Header Placeholder Image -->
+        <ImageView
+            android:id="@+id/ivResponsesHero"
+            android:layout_width="match_parent"
+            android:layout_height="148dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="6dp"
+            android:adjustViewBounds="true"
+            android:background="@drawable/bg_rounded_rect_placeholder"
+            android:contentDescription="Responses header image"
+            android:scaleType="centerCrop"
+            tools:src="@drawable/welcome_bg_1" />
 
         <!-- Responses RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView

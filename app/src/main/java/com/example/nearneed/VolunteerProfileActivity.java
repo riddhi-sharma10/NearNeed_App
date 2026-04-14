@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -74,14 +75,32 @@ public class VolunteerProfileActivity extends AppCompatActivity {
 
         // Button listeners
         btnMessage.setOnClickListener(v -> {
-            Toast.makeText(this, "Opening chat with volunteer", Toast.LENGTH_SHORT).show();
-            // TODO: Open chat activity
+            String volunteerName = tvName.getText() != null ? tvName.getText().toString() : "Volunteer";
+            android.content.Intent intent = new android.content.Intent(this, ChatActivity.class);
+            intent.putExtra("CHAT_NAME", volunteerName);
+            intent.putExtra("CHAT_ONLINE", true);
+            startActivity(intent);
         });
 
         btnReport.setOnClickListener(v -> {
-            Toast.makeText(this, "Report submitted", Toast.LENGTH_SHORT).show();
-            // TODO: Show report dialog
+            showReportDialog();
         });
+    }
+
+    private void showReportDialog() {
+        final String[] reasons = new String[] {
+            "No-show",
+            "Inappropriate behavior",
+            "Spam or scam",
+            "Other"
+        };
+
+        new AlertDialog.Builder(this)
+            .setTitle("Report volunteer")
+            .setItems(reasons, (dialog, which) ->
+                Toast.makeText(this, "Report submitted: " + reasons[which], Toast.LENGTH_SHORT).show())
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void setupReviewsList() {

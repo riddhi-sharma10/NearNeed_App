@@ -8,9 +8,25 @@ public class Response {
     private String location;
     private long timestamp;
     private String status; // new, accepted, declined
+    private int proposedBudget; // for gigs (optional)
+    private String paymentMethod; // for gigs (optional)
+    private String applicantPhone; // optional contact number
 
     public Response(String responseId, String applicantName, float applicantRating,
                    String message, String location, long timestamp, String status) {
+        this(responseId, applicantName, applicantRating, message, location, timestamp, status, 0, null);
+    }
+
+    public Response(String responseId, String applicantName, float applicantRating,
+                   String message, String location, long timestamp, String status,
+                   int proposedBudget, String paymentMethod) {
+        this(responseId, applicantName, applicantRating, message, location, timestamp, status,
+            proposedBudget, paymentMethod, "");
+    }
+
+    public Response(String responseId, String applicantName, float applicantRating,
+                   String message, String location, long timestamp, String status,
+                   int proposedBudget, String paymentMethod, String applicantPhone) {
         this.responseId = responseId;
         this.applicantName = applicantName;
         this.applicantRating = applicantRating;
@@ -18,6 +34,9 @@ public class Response {
         this.location = location;
         this.timestamp = timestamp;
         this.status = status;
+        this.proposedBudget = proposedBudget;
+        this.paymentMethod = paymentMethod;
+        this.applicantPhone = applicantPhone;
     }
 
     // Getters and Setters
@@ -41,4 +60,13 @@ public class Response {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public int getProposedBudget() { return proposedBudget; }
+    public void setProposedBudget(int proposedBudget) { this.proposedBudget = proposedBudget; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getApplicantPhone() { return applicantPhone; }
+    public void setApplicantPhone(String applicantPhone) { this.applicantPhone = applicantPhone; }
 }

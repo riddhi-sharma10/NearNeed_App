@@ -1,5 +1,6 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class CommunityVolunteerDetailActivity extends AppCompatActivity {
         String description = getIntent().getStringExtra("description");
         String postedBy = getIntent().getStringExtra("postedBy");
         String location = getIntent().getStringExtra("location");
+        int slots = getIntent().getIntExtra("slots", 0);
 
         // Set data
         tvTitle.setText(title != null ? title : "Community Need");
@@ -43,15 +45,18 @@ public class CommunityVolunteerDetailActivity extends AppCompatActivity {
         tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
         tvLocation.setText(location != null ? location : "Location unknown");
 
-        // Volunteer button click
-        btnVolunteer.setOnClickListener(v -> showVolunteerSheet());
+        // View Volunteers button click
+        btnVolunteer.setOnClickListener(v -> openVolunteersList(slots, title));
     }
 
     /**
-     * Shows the volunteer sheet with message input only (no budget/payment).
+     * Opens the volunteers list where seeker can accept/reject applicants.
      */
-    private void showVolunteerSheet() {
-        CommunityVolunteerBottomSheet sheet = new CommunityVolunteerBottomSheet();
-        sheet.show(getSupportFragmentManager(), "volunteer_sheet");
+    private void openVolunteersList(int maxSlots, String postTitle) {
+        Intent intent = new Intent(this, VolunteersActivity.class);
+        intent.putExtra("max_slots", maxSlots);
+        intent.putExtra("post_title", postTitle);
+        intent.putExtra("is_seeker", true); // Flag to show accept/reject buttons
+        startActivity(intent);
     }
 }

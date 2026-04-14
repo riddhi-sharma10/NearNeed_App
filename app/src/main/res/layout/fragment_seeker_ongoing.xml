@@ -157,58 +157,15 @@
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Elapsed Time Row -->
-                <TextView
-                    android:id="@+id/tvElapsedLabel1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ELAPSED TIME"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/tvTimer1"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvTimer1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="00:42:15"
-                    android:textColor="#1E3A8A"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/clProfileBlock1" />
-
-                <!-- Progress Bar -->
-                <View
-                    android:id="@+id/vProgressBase1"
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_progress_bar_base_bookings"
-                    app:layout_constraintTop_toBottomOf="@id/tvTimer1" />
-
-                <View
-                    android:id="@+id/vProgressFill1"
-                    android:layout_width="0dp"
-                    android:layout_height="6dp"
-                    android:background="@drawable/bg_progress_bar_fill_bookings"
-                    app:layout_constraintBottom_toBottomOf="@id/vProgressBase1"
-                    app:layout_constraintStart_toStartOf="@id/vProgressBase1"
-                    app:layout_constraintTop_toTopOf="@id/vProgressBase1"
-                    app:layout_constraintWidth_percent="0.65" />
-
                 <!-- Live Map Link -->
                 <ImageView
                     android:id="@+id/ivMap1"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:src="@android:drawable/ic_dialog_map"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/vProgressBase1"
+                    app:layout_constraintTop_toBottomOf="@id/clProfileBlock1"
                     app:tint="#1E3A8A" />
 
                 <TextView
@@ -445,58 +402,15 @@
                     </LinearLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Elapsed Time Row -->
-                <TextView
-                    android:id="@+id/tvElapsedLabel2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ELAPSED TIME"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/tvTimer2"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvTimer2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="00:18:45"
-                    android:textColor="#1E3A8A"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/clProfileBlock2" />
-
-                <!-- Progress Bar -->
-                <View
-                    android:id="@+id/vProgressBase2"
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_progress_bar_base_bookings"
-                    app:layout_constraintTop_toBottomOf="@id/tvTimer2" />
-
-                <View
-                    android:id="@+id/vProgressFill2"
-                    android:layout_width="0dp"
-                    android:layout_height="6dp"
-                    android:background="@drawable/bg_progress_bar_fill_bookings"
-                    app:layout_constraintBottom_toBottomOf="@id/vProgressBase2"
-                    app:layout_constraintStart_toStartOf="@id/vProgressBase2"
-                    app:layout_constraintTop_toTopOf="@id/vProgressBase2"
-                    app:layout_constraintWidth_percent="0.35" />
-
                 <!-- Live Map Link -->
                 <ImageView
                     android:id="@+id/ivMap2"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="24dp"
                     android:src="@android:drawable/ic_dialog_map"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/vProgressBase2"
+                    app:layout_constraintTop_toBottomOf="@id/clProfileBlock2"
                     app:tint="#1E3A8A" />
 
                 <TextView

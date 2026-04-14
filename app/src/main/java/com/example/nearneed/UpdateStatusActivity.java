@@ -1,10 +1,12 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,15 +24,17 @@ import java.util.List;
 
 public class UpdateStatusActivity extends AppCompatActivity {
 
-    private String currentStatus = "in_progress";
-    private String selectedStatus = "in_progress";
-    private MaterialButton btnStatusProgress, btnStatusOnHold, btnStatusCompleted, btnStatusCancelled;
+    private String currentStatus = "pending";
+    private String selectedStatus = "pending";
+    private MaterialButton btnStatusPending, btnStatusOngoing, btnStatusCompleted, btnStatusCancelled;
     private MaterialButton btnSubmitStatus;
     private TextInputEditText etCompletionNotes;
     private MaterialCardView btnUploadPhoto;
-    private MaterialCardView btnClose;
+    private ImageView btnClose;
     private RecyclerView rvStatusHistory;
     private StatusHistoryAdapter statusHistoryAdapter;
+    private String bookingId;
+    private String bookingTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +51,13 @@ public class UpdateStatusActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_update_status);
 
+        // Get data from intent
+        bookingId = getIntent().getStringExtra("booking_id");
+        bookingTitle = getIntent().getStringExtra("booking_title");
+
         // Initialize views
-        btnStatusProgress = findViewById(R.id.btnStatusProgress);
-        btnStatusOnHold = findViewById(R.id.btnStatusOnHold);
+        btnStatusPending = findViewById(R.id.btnStatusProgress);
+        btnStatusOngoing = findViewById(R.id.btnStatusOnHold);
         btnStatusCompleted = findViewById(R.id.btnStatusCompleted);
         btnStatusCancelled = findViewById(R.id.btnStatusCancelled);
         btnSubmitStatus = findViewById(R.id.btnSubmitStatus);
@@ -78,10 +86,14 @@ public class UpdateStatusActivity extends AppCompatActivity {
     }
 
     private void setupStatusButtons() {
-        btnStatusProgress.setOnClickListener(v -> selectStatus("in_progress", btnStatusProgress));
-        btnStatusOnHold.setOnClickListener(v -> selectStatus("on_hold", btnStatusOnHold));
+        btnStatusPending.setOnClickListener(v -> selectStatus("pending", btnStatusPending));
+        btnStatusOngoing.setOnClickListener(v -> selectStatus("ongoing", btnStatusOngoing));
         btnStatusCompleted.setOnClickListener(v -> selectStatus("completed", btnStatusCompleted));
         btnStatusCancelled.setOnClickListener(v -> selectStatus("cancelled", btnStatusCancelled));
+
+        // Update button labels
+        btnStatusPending.setText("Pending");
+        btnStatusOngoing.setText("Ongoing");
 
         // Set initial state
         updateStatusButtonStyles();
@@ -98,25 +110,25 @@ public class UpdateStatusActivity extends AppCompatActivity {
         int textMutedColor = ContextCompat.getColor(this, R.color.text_muted);
 
         // Reset all buttons
-        btnStatusProgress.setStrokeColor(ColorStateList.valueOf(mutedColor));
-        btnStatusOnHold.setStrokeColor(ColorStateList.valueOf(mutedColor));
+        btnStatusPending.setStrokeColor(ColorStateList.valueOf(mutedColor));
+        btnStatusOngoing.setStrokeColor(ColorStateList.valueOf(mutedColor));
         btnStatusCompleted.setStrokeColor(ColorStateList.valueOf(mutedColor));
         btnStatusCancelled.setStrokeColor(ColorStateList.valueOf(mutedColor));
 
-        btnStatusProgress.setTextColor(textMutedColor);
-        btnStatusOnHold.setTextColor(textMutedColor);
+        btnStatusPending.setTextColor(textMutedColor);
+        btnStatusOngoing.setTextColor(textMutedColor);
         btnStatusCompleted.setTextColor(textMutedColor);
         btnStatusCancelled.setTextColor(textMutedColor);
 
         // Highlight selected button
         switch (selectedStatus) {
-            case "in_progress":
-                btnStatusProgress.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusProgress.setTextColor(primaryColor);
+            case "pending":
+                btnStatusPending.setStrokeColor(ColorStateList.valueOf(primaryColor));
+                btnStatusPending.setTextColor(primaryColor);
                 break;
-            case "on_hold":
-                btnStatusOnHold.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusOnHold.setTextColor(primaryColor);
+            case "ongoing":
+                btnStatusOngoing.setStrokeColor(ColorStateList.valueOf(primaryColor));
+                btnStatusOngoing.setTextColor(primaryColor);
                 break;
             case "completed":
                 btnStatusCompleted.setStrokeColor(ColorStateList.valueOf(primaryColor));
@@ -164,20 +176,22 @@ public class UpdateStatusActivity extends AppCompatActivity {
     }
 
     private void submitStatusUpdate() {
-        String notes = etCompletionNotes.getText().toString().trim();
+        String notes = etCompletionNotes.getText() != null
+            ? etCompletionNotes.getText().toString().trim()
+            : "";
 
         if (selectedStatus.equals(currentStatus)) {
             Toast.makeText(this, "Please select a different status", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validate that completed or on-hold statuses have notes
-        if (("completed".equals(selectedStatus) || "on_hold".equals(selectedStatus)) && notes.isEmpty()) {
-            Toast.makeText(this, "Please add completion notes", Toast.LENGTH_SHORT).show();
+        // If completed, navigate to payment flow
+        if ("completed".equals(selectedStatus)) {
+            navigateToPaymentFlow(notes);
             return;
         }
 
-        // TODO: Submit status update to backend/database
+        // For other statuses, just update and finish
         Toast.makeText(this, "Status updated to " + formatStatusType(selectedStatus), Toast.LENGTH_SHORT).show();
 
         // Update current status
@@ -186,6 +200,17 @@ public class UpdateStatusActivity extends AppCompatActivity {
         // Reset form
         etCompletionNotes.setText("");
 
+        finish();
+    }
+
+    private void navigateToPaymentFlow(String completionNotes) {
+        Intent intent = new Intent(this, PaymentFlowActivity.class);
+        intent.putExtra("booking_id", bookingId != null ? bookingId : "");
+        intent.putExtra("service_name", bookingTitle != null ? bookingTitle : "Service");
+        intent.putExtra("provider_name", "Provider Name");
+        intent.putExtra("service_amount", 500.0); // Default amount, can be customized
+        intent.putExtra("completion_notes", completionNotes);
+        startActivity(intent);
         finish();
     }
 

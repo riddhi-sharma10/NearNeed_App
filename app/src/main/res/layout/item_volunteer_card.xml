@@ -106,13 +106,15 @@
         android:textSize="11sp"
         android:layout_marginBottom="12dp" />
 
-    <!-- Action Buttons -->
+    <!-- View Profile / Message Buttons (Provider/Default mode) -->
     <LinearLayout
+        android:id="@+id/llDefaultActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:spacing="12dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:visibility="visible">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnViewProfile"
@@ -134,6 +136,45 @@
             android:layout_height="40dp"
             android:layout_weight="1"
             android:text="Message"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/border_light" />
+
+    </LinearLayout>
+
+    <!-- Accept / Reject Buttons (Seeker mode) -->
+    <LinearLayout
+        android:id="@+id/llSeekerActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:spacing="12dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAccept"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Accept"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:backgroundTint="@color/brand_success"
+            app:cornerRadius="20dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReject"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Reject"
             android:textColor="@color/text_muted"
             android:textSize="13sp"
             android:textAllCaps="false"

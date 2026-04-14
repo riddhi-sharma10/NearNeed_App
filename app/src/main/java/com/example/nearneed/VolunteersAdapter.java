@@ -20,15 +20,26 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
 
     private List<Volunteer> volunteers;
     private OnVolunteerActionListener listener;
+    private boolean isSeeker;
+    private int maxSlots;
 
     public interface OnVolunteerActionListener {
         void onViewProfile(String volunteerId);
         void onMessage(String volunteerId);
+        void onAccept(Volunteer volunteer);
+        void onReject(Volunteer volunteer);
     }
 
     public VolunteersAdapter(List<Volunteer> volunteers, OnVolunteerActionListener listener) {
+        this(volunteers, listener, false, 0);
+    }
+
+    public VolunteersAdapter(List<Volunteer> volunteers, OnVolunteerActionListener listener,
+                            boolean isSeeker, int maxSlots) {
         this.volunteers = volunteers;
         this.listener = listener;
+        this.isSeeker = isSeeker;
+        this.maxSlots = maxSlots;
     }
 
     @NonNull
@@ -42,7 +53,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
     @Override
     public void onBindViewHolder(@NonNull VolunteerViewHolder holder, int position) {
         Volunteer volunteer = volunteers.get(position);
-        holder.bind(volunteer, listener);
+        holder.bind(volunteer, listener, isSeeker, maxSlots);
     }
 
     @Override
@@ -58,7 +69,8 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         private TextView tvMessage;
         private TextView tvStatus;
         private TextView tvVolunteerDate;
-        private MaterialButton btnViewProfile, btnMessage;
+        private MaterialButton btnViewProfile, btnMessage, btnAccept, btnReject;
+        private LinearLayout llDefaultActions, llSeekerActions;
 
         public VolunteerViewHolder(@NonNull LinearLayout itemView) {
             super(itemView);
@@ -71,9 +83,13 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             tvVolunteerDate = itemView.findViewById(R.id.tvVolunteerDate);
             btnViewProfile = itemView.findViewById(R.id.btnViewProfile);
             btnMessage = itemView.findViewById(R.id.btnMessage);
+            btnAccept = itemView.findViewById(R.id.btnAccept);
+            btnReject = itemView.findViewById(R.id.btnReject);
+            llDefaultActions = itemView.findViewById(R.id.llDefaultActions);
+            llSeekerActions = itemView.findViewById(R.id.llSeekerActions);
         }
 
-        public void bind(Volunteer volunteer, OnVolunteerActionListener listener) {
+        public void bind(Volunteer volunteer, OnVolunteerActionListener listener, boolean isSeeker, int maxSlots) {
             tvName.setText(volunteer.getVolunteerName());
             tvRating.setText(String.format("★ %.1f", volunteer.getVolunteerRating()));
             tvBio.setText(volunteer.getBio());
@@ -85,17 +101,44 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             tvStatus.setText(status.toUpperCase());
             updateStatusBadge(status);
 
-            btnViewProfile.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onViewProfile(volunteer.getVolunteerId());
-                }
-            });
+            if (isSeeker) {
+                // Show accept/reject buttons for seekers
+                llDefaultActions.setVisibility(LinearLayout.GONE);
+                llSeekerActions.setVisibility(LinearLayout.VISIBLE);
 
-            btnMessage.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onMessage(volunteer.getVolunteerId());
-                }
-            });
+                // Disable accept button if status is already confirmed or rejected
+                boolean canAccept = "interested".equals(status);
+                btnAccept.setEnabled(canAccept);
+                btnAccept.setAlpha(canAccept ? 1.0f : 0.5f);
+
+                btnAccept.setOnClickListener(v -> {
+                    if (listener != null && canAccept) {
+                        listener.onAccept(volunteer);
+                    }
+                });
+
+                btnReject.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onReject(volunteer);
+                    }
+                });
+            } else {
+                // Show view profile and message buttons for default view
+                llDefaultActions.setVisibility(LinearLayout.VISIBLE);
+                llSeekerActions.setVisibility(LinearLayout.GONE);
+
+                btnViewProfile.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onViewProfile(volunteer.getVolunteerId());
+                    }
+                });
+
+                btnMessage.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onMessage(volunteer.getVolunteerId());
+                    }
+                });
+            }
         }
 
         private void updateStatusBadge(String status) {

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 public class HomeSeekerActivity extends AppCompatActivity {
 
     private TextView tvDeliveryLocation;
+    private TextView tvDashboardNotificationBadge;
     private static final String PREFS = "LocationPrefs";
     private static final String KEY_LOCATION = "delivery_location";
 
@@ -63,6 +65,14 @@ public class HomeSeekerActivity extends AppCompatActivity {
         if (locationSection != null) {
             locationSection.setOnClickListener(v -> showLocationPicker());
         }
+
+        setupDashboardNotifications();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshNotificationBadge();
     }
 
     private void loadSavedLocation() {
@@ -88,6 +98,34 @@ public class HomeSeekerActivity extends AppCompatActivity {
         LocationPickerHelper.show(this, displayText -> saveLocation(displayText));
     }
 
+    private void setupDashboardNotifications() {
+        ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
+        tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
+
+        if (ivDashboardNotifications != null) {
+            ivDashboardNotifications.setOnClickListener(v ->
+                DashboardNotificationPopup.show(this, v, this::refreshNotificationBadge)
+            );
+        }
+
+        refreshNotificationBadge();
+    }
+
+    private void refreshNotificationBadge() {
+        if (tvDashboardNotificationBadge == null) {
+            return;
+        }
+
+        int unread = NotificationCenter.unreadCount(this);
+        if (unread <= 0) {
+            tvDashboardNotificationBadge.setVisibility(View.GONE);
+            return;
+        }
+
+        tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
+        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(unread, 9)));
+    }
+
     /**
      * Sets up community volunteer buttons and My Posts view all.
      */
@@ -103,11 +141,11 @@ public class HomeSeekerActivity extends AppCompatActivity {
             });
         }
 
-        // Wire "View All" community → Maps
+        // Wire "View All" community → Bookings (community only)
         View viewAllCommunity = findViewById(R.id.btn_view_all_community);
         if (viewAllCommunity != null) {
             viewAllCommunity.setOnClickListener(v -> {
-                Intent intent = new Intent(this, MapsActivity.class);
+                Intent intent = new Intent(this, BookingsActivity.class);
                 intent.putExtra("filter_type", "community");
                 startActivity(intent);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

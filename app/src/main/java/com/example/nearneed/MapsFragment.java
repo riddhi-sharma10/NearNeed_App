@@ -104,6 +104,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         public String type; // "GIG" or "COMMUNITY"
         public int slots;        // total slots for COMMUNITY jobs (0 = not applicable)
         public int slotsFilled;  // how many have applied
+        public boolean hasApplied;     // true if provider has already applied
+        public String applicationStatus; // "pending", "accepted", "rejected"
 
         public Job(String title, String description, String distance, String budget,
                    String category, int iconResId, int colorResId, LatLng location, String type) {
@@ -118,6 +120,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             this.type = type;
             this.slots = 0;
             this.slotsFilled = 0;
+            this.hasApplied = false;
+            this.applicationStatus = null;
         }
     }
 
@@ -269,10 +273,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         View viewJobBtn = view.findViewById(R.id.btn_accept_job);
         if (viewJobBtn != null) {
             viewJobBtn.setOnClickListener(v -> {
-                if (currentDetailJob != null && "COMMUNITY".equals(currentDetailJob.type)) {
-                    showVolunteerSheet(currentDetailJob.title);
-                } else if (currentDetailJob != null) {
-                    showGigApplySheet(currentDetailJob);
+                if (currentDetailJob != null) {
+                    // Check if provider has already applied
+                    if (currentDetailJob.hasApplied) {
+                        // Show application status dialog
+                        showApplicationStatusDialog(currentDetailJob);
+                    } else {
+                        // Allow application
+                        if ("COMMUNITY".equals(currentDetailJob.type)) {
+                            showVolunteerSheet(currentDetailJob.title);
+                        } else {
+                            showGigApplySheet(currentDetailJob);
+                        }
+                    }
                 }
             });
         }
@@ -502,16 +515,38 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(color));
         }
 
-        // Update action button based on job type
+        // Update action button based on job type and application status
         if (actionBtn != null) {
-            if ("COMMUNITY".equals(job.type)) {
-                actionBtn.setText("Help");
+            if (job.hasApplied) {
+                // Provider has already applied - show status
+                actionBtn.setEnabled(false);
+                actionBtn.setAlpha(0.6f);
+
+                if ("pending".equals(job.applicationStatus)) {
+                    actionBtn.setText("Application Pending");
+                } else if ("accepted".equals(job.applicationStatus)) {
+                    actionBtn.setText("✓ Selected");
+                } else if ("rejected".equals(job.applicationStatus)) {
+                    actionBtn.setText("Application Rejected");
+                } else {
+                    actionBtn.setText("Already Applied");
+                }
                 actionBtn.setBackgroundTintList(ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), R.color.brand_success)));
+                    ContextCompat.getColor(requireContext(), R.color.text_muted)));
             } else {
-                actionBtn.setText("View Job");
-                actionBtn.setBackgroundTintList(ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), R.color.sapphire_primary)));
+                // Provider hasn't applied yet - show apply option
+                actionBtn.setEnabled(true);
+                actionBtn.setAlpha(1.0f);
+
+                if ("COMMUNITY".equals(job.type)) {
+                    actionBtn.setText("Help");
+                    actionBtn.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.brand_success)));
+                } else {
+                    actionBtn.setText("View Job");
+                    actionBtn.setBackgroundTintList(ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.sapphire_primary)));
+                }
             }
         }
 
@@ -711,13 +746,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         MaterialButton applyBtn = sheetView.findViewById(R.id.btn_apply_volunteer);
         if (applyBtn != null) {
             applyBtn.setOnClickListener(v -> {
-                // Increment slot count if available
-                if (currentDetailJob != null && currentDetailJob.slots > 0) {
-                    currentDetailJob.slotsFilled = Math.min(currentDetailJob.slotsFilled + 1, currentDetailJob.slots);
-                    showJobDetailCard(currentDetailJob);  // Refresh card with new count
+                // Mark job as applied with pending status
+                if (currentDetailJob != null) {
+                    currentDetailJob.hasApplied = true;
+                    currentDetailJob.applicationStatus = "pending";
+
+                    // Increment slot count if available
+                    if (currentDetailJob.slots > 0) {
+                        currentDetailJob.slotsFilled = Math.min(currentDetailJob.slotsFilled + 1, currentDetailJob.slots);
+                    }
                 }
                 dialog.dismiss();
                 showSuccessDialog();
+
+                // Update the detail card to show application status
+                if (currentDetailJob != null) {
+                    showJobDetailCard(currentDetailJob);
+                }
             });
         }
 
@@ -777,8 +822,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     return;
                 }
 
+                // Mark job as applied with pending status
+                job.hasApplied = true;
+                job.applicationStatus = "pending";
+
                 dialog.dismiss();
                 showGigApplicationSuccessDialog();
+
+                // Update the detail card to show application status
+                if (currentDetailJob != null) {
+                    showJobDetailCard(currentDetailJob);
+                }
             });
         }
 
@@ -850,6 +904,30 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 dialog.dismiss();
             }
         }, 3000);
+    }
+
+    /**
+     * Shows a dialog displaying the provider's current application status.
+     */
+    private void showApplicationStatusDialog(Job job) {
+        String title = "Application Status";
+        String message;
+
+        if ("pending".equals(job.applicationStatus)) {
+            message = "Your application is pending review. The seeker will notify you soon.";
+        } else if ("accepted".equals(job.applicationStatus)) {
+            message = "Congratulations! You have been selected for this job.";
+        } else if ("rejected".equals(job.applicationStatus)) {
+            message = "Unfortunately, your application was not selected for this opportunity.";
+        } else {
+            message = "You have already applied for this job. Check back for updates.";
+        }
+
+        new MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show();
     }
 
     /**

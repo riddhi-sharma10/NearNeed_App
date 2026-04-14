@@ -204,13 +204,13 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Volunteer Button (Fixed at bottom) -->
+    <!-- View Applicants Button (Fixed at bottom) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_volunteer"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:text="Volunteer"
+        android:text="View Responses"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="16sp"

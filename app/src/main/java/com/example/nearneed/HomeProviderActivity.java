@@ -5,8 +5,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +39,9 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_home_provider);
 
+        // Setup role toggle
+        setupRoleToggle();
+
         // Location picker setup
         tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
         loadSavedLocation();
@@ -49,10 +57,14 @@ public class HomeProviderActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Post community request
+        // Post community request - restricted to seeker mode
         findViewById(R.id.btnPostCommunityRequest).setOnClickListener(v -> {
-            Intent intent = new Intent(this, CommunityPostActivity.class);
-            startActivity(intent);
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Switch to Seeker Mode")
+                    .setMessage("To post a community request, please switch to Seeker mode.")
+                    .setPositiveButton("Switch Now", (d, w) -> switchRole(RoleManager.ROLE_SEEKER))
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
 
         // Earnings card → My Earnings
@@ -128,5 +140,66 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void showLocationPicker() {
         LocationPickerHelper.show(this, displayText -> saveLocation(displayText));
+    }
+
+    /**
+     * Switches role and navigates to appropriate home screen.
+     */
+    private void switchRole(String newRole) {
+        if (newRole.equals(RoleManager.getRole(this))) {
+            return; // Already in this role
+        }
+
+        // Persist choice
+        RoleManager.setRole(this, newRole);
+
+        // Show toast notification
+        String msg = RoleManager.ROLE_SEEKER.equals(newRole)
+                ? "Switched to Seeker mode"
+                : "Switched to Provider mode";
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+
+        // Navigate to MainActivity (dispatcher)
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    /**
+     * Sets up the role toggle (Seeker/Provider) button functionality.
+     */
+    private void setupRoleToggle() {
+        TextView tabSeeker = findViewById(R.id.tab_seeker);
+        TextView tabProvider = findViewById(R.id.tab_provider);
+
+        if (tabSeeker != null) {
+            tabSeeker.setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
+        }
+
+        if (tabProvider != null) {
+            tabProvider.setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
+        }
+
+        // Update visual state to show Provider is active
+        updateToggleAppearance();
+    }
+
+    /**
+     * Updates the visual state of the toggle to reflect current role.
+     */
+    private void updateToggleAppearance() {
+        TextView tabSeeker = findViewById(R.id.tab_seeker);
+        TextView tabProvider = findViewById(R.id.tab_provider);
+
+        if (tabSeeker != null) {
+            tabSeeker.setBackground(null);
+            tabSeeker.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
+        }
+
+        if (tabProvider != null) {
+            tabProvider.setBackgroundResource(R.drawable.bg_seeker_tab_active);
+            tabProvider.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
+        }
     }
 }

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 /**
@@ -39,6 +40,31 @@ public class HomeFragment extends Fragment {
      * Set to {@code false} to show the empty-state layout.
      */
     private boolean hasPosts = true; // ← toggle for demo / connect to real data
+
+    /**
+     * Switches role and navigates to appropriate home screen.
+     * Reuses ProfileModeSwitcher logic.
+     */
+    private void switchRole(String newRole) {
+        if (newRole.equals(RoleManager.getRole(requireContext()))) {
+            return; // Already in this role
+        }
+
+        // Persist choice
+        RoleManager.setRole(requireContext(), newRole);
+
+        // Show toast notification
+        String msg = RoleManager.ROLE_SEEKER.equals(newRole)
+                ? "Switched to Seeker mode"
+                : "Switched to Provider mode";
+        Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+
+        // Navigate to MainActivity (dispatcher)
+        Intent intent = new Intent(requireContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
 
     // ──────────────────────────────────────────────────────────────────────────
     // Lifecycle
@@ -148,6 +174,9 @@ public class HomeFragment extends Fragment {
                 startActivity(intent);
             });
         }
+
+        // Setup role toggle
+        setupRoleToggle(view);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -208,6 +237,58 @@ public class HomeFragment extends Fragment {
             String saved = prefs.getString("delivery_location", null);
             if (saved != null) {
                 tvDelivery.setText(saved);
+            }
+        }
+
+        // Setup role toggle
+        setupRoleToggle(view);
+    }
+
+    /**
+     * Sets up the role toggle (Seeker/Provider) in the home screen.
+     * Initializes click listeners and visual state.
+     */
+    private void setupRoleToggle(View view) {
+        TextView tabSeeker = view.findViewById(R.id.tab_seeker);
+        TextView tabProvider = view.findViewById(R.id.tab_provider);
+
+        if (tabSeeker != null) {
+            tabSeeker.setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
+        }
+
+        if (tabProvider != null) {
+            tabProvider.setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
+        }
+
+        // Update visual state
+        updateToggleAppearance(view);
+    }
+
+    /**
+     * Updates the visual state of the toggle to reflect current role.
+     */
+    private void updateToggleAppearance(View view) {
+        TextView tabSeeker = view.findViewById(R.id.tab_seeker);
+        TextView tabProvider = view.findViewById(R.id.tab_provider);
+        boolean seekerActive = RoleManager.ROLE_SEEKER.equals(currentRole);
+
+        if (tabSeeker != null) {
+            if (seekerActive) {
+                tabSeeker.setBackgroundResource(R.drawable.bg_seeker_tab_active);
+                tabSeeker.setTextColor(ContextCompat.getColor(view.getContext(), R.color.brand_primary));
+            } else {
+                tabSeeker.setBackground(null);
+                tabSeeker.setTextColor(ContextCompat.getColor(view.getContext(), R.color.text_muted));
+            }
+        }
+
+        if (tabProvider != null) {
+            if (!seekerActive) {
+                tabProvider.setBackgroundResource(R.drawable.bg_seeker_tab_active);
+                tabProvider.setTextColor(ContextCompat.getColor(view.getContext(), R.color.brand_primary));
+            } else {
+                tabProvider.setBackground(null);
+                tabProvider.setTextColor(ContextCompat.getColor(view.getContext(), R.color.text_muted));
             }
         }
     }

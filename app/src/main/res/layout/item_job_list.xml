@@ -55,7 +55,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="4dp"
         android:text="Pipe repair in kitchen"
-        android:textColor="@color/text_body"
+        android:textColor="@color/text_body_dark"
         android:textSize="13sp"
         android:maxLines="1"
         android:ellipsize="end"

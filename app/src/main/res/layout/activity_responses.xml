@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/surface_background">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="2dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:paddingHorizontal="20dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="-12dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back_description"
+                android:src="@drawable/ic_back_arrow"
+                android:scaleType="centerInside"
+                app:tint="@color/black" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:fontFamily="sans-serif-black"
+                android:text="Responses"
+                android:textColor="@color/text_header"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Filter Chips -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            app:singleSelection="true"
+            app:singleLine="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="all"
+                android:text="All"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                app:chipBackgroundColor="@color/surface_background" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipNew"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="new"
+                android:text="New"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                app:chipBackgroundColor="@color/surface_background" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAccepted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tag="accepted"
+                android:text="Accepted"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                app:chipBackgroundColor="@color/surface_background" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/border_light" />
+
+        <!-- Responses RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvResponses"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_response_card" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/emptyStateLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_nav_profile"
+                app:tint="@color/text_muted"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/emptyStateTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No responses yet"
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/emptyStateSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Check back soon for applicants!"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

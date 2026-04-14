@@ -96,6 +96,64 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <!-- Role toggle (Seeker / Provider) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical">
+
+                <!-- Section Label -->
+                <TextView
+                    style="@style/TextAppearance.NearNeed.SectionLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="YOUR MODE:"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Toggle Control -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_segmented_control"
+                    android:padding="4dp"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/tab_seeker"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="20dp"
+                        android:gravity="center"
+                        android:text="Seeker"
+                        android:textColor="@color/text_muted"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tab_provider"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="20dp"
+                        android:background="@drawable/bg_seeker_tab_active"
+                        android:gravity="center"
+                        android:text="Provider"
+                        android:textColor="@color/brand_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Helper Text -->
+                <TextView
+                    style="@style/TextAppearance.NearNeed.HelperText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Switch between requesting services and offering your skills" />
+            </LinearLayout>
 
             <!-- SEARCH BAR -->
             <androidx.cardview.widget.CardView

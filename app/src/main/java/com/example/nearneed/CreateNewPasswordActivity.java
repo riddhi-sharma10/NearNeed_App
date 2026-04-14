@@ -1,9 +1,13 @@
 package com.example.nearneed;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -11,6 +15,11 @@ public class CreateNewPasswordActivity extends AppCompatActivity {
 
     private TextInputLayout tilNewPassword, tilConfirmPassword;
     private TextInputEditText etNewPassword, etConfirmPassword;
+    private MaterialButton btnUpdatePassword;
+
+    private TextView tvPasswordLength, tvPasswordUppercase, tvPasswordLowercase, tvPasswordNumber, tvPasswordSpecial;
+
+    private boolean hasLength = false, hasUppercase = false, hasLowercase = false, hasNumber = false, hasSpecial = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +35,76 @@ public class CreateNewPasswordActivity extends AppCompatActivity {
         tilConfirmPassword = findViewById(R.id.tilConfirmPassword);
         etNewPassword = findViewById(R.id.etNewPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
+        btnUpdatePassword = findViewById(R.id.btnUpdatePassword);
 
-        findViewById(R.id.btnUpdatePassword).setOnClickListener(v -> validateAndUpdate());
+        // Initialize validation checklist views
+        tvPasswordLength = findViewById(R.id.tvPasswordLength);
+        tvPasswordUppercase = findViewById(R.id.tvPasswordUppercase);
+        tvPasswordLowercase = findViewById(R.id.tvPasswordLowercase);
+        tvPasswordNumber = findViewById(R.id.tvPasswordNumber);
+        tvPasswordSpecial = findViewById(R.id.tvPasswordSpecial);
+
+        // Add text watcher for real-time validation
+        etNewPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                validatePasswordRealTime(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        btnUpdatePassword.setOnClickListener(v -> validateAndUpdate());
+    }
+
+    private void validatePasswordRealTime(String password) {
+        // Check length (8+ characters)
+        hasLength = password.length() >= 8;
+        updateValidationView(tvPasswordLength, hasLength, "8+ characters");
+
+        // Check uppercase
+        hasUppercase = password.matches(".*[A-Z].*");
+        updateValidationView(tvPasswordUppercase, hasUppercase, "Uppercase letter");
+
+        // Check lowercase
+        hasLowercase = password.matches(".*[a-z].*");
+        updateValidationView(tvPasswordLowercase, hasLowercase, "Lowercase letter");
+
+        // Check number
+        hasNumber = password.matches(".*[0-9].*");
+        updateValidationView(tvPasswordNumber, hasNumber, "Number");
+
+        // Check special character
+        hasSpecial = password.matches(".*[!@#$%^&*].*");
+        updateValidationView(tvPasswordSpecial, hasSpecial, "Special character (!@#$%^&*)");
+
+        // Enable/disable button based on all requirements met
+        updateButtonState();
+    }
+
+    private void updateValidationView(TextView tv, boolean isMet, String text) {
+        if (isMet) {
+            tv.setText("✓ " + text);
+            tv.setTextColor(getColor(R.color.community_green));
+        } else {
+            tv.setText("✗ " + text);
+            tv.setTextColor(getColor(R.color.text_muted));
+        }
+    }
+
+    private void updateButtonState() {
+        boolean isPasswordValid = hasLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+        btnUpdatePassword.setEnabled(isPasswordValid);
+
+        if (isPasswordValid) {
+            btnUpdatePassword.setBackgroundTintList(getColorStateList(R.color.brand_primary));
+        } else {
+            btnUpdatePassword.setBackgroundTintList(getColorStateList(R.color.text_muted));
+        }
     }
 
     private void validateAndUpdate() {
@@ -41,18 +118,17 @@ public class CreateNewPasswordActivity extends AppCompatActivity {
             tilNewPassword.setError("Enter new password");
             return;
         }
-        if (newPass.length() < 8) {
-            tilNewPassword.setError("Password must be at least 8 characters");
+
+        if (!validatePassword(newPass)) {
+            tilNewPassword.setError("Password does not meet all requirements");
             return;
         }
-        if (!newPass.matches(".*\\d.*")) {
-            tilNewPassword.setError("Password must contain at least one number");
-            return;
-        }
+
         if (TextUtils.isEmpty(confirmPass)) {
             tilConfirmPassword.setError("Confirm your password");
             return;
         }
+
         if (!newPass.equals(confirmPass)) {
             tilConfirmPassword.setError("Passwords do not match");
             etConfirmPassword.requestFocus();
@@ -60,7 +136,14 @@ public class CreateNewPasswordActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Password updated successfully!", Toast.LENGTH_SHORT).show();
-        // Return to EditProfileActivity (clear this activity from the stack)
         finish();
+    }
+
+    private boolean validatePassword(String password) {
+        return password.length() >= 8 &&
+                password.matches(".*[A-Z].*") &&
+                password.matches(".*[a-z].*") &&
+                password.matches(".*[0-9].*") &&
+                password.matches(".*[!@#$%^&*].*");
     }
 }

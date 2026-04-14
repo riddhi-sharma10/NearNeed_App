@@ -50,4 +50,24 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <!-- Profile & Dashboard Header Typography Styles -->
+
+    <!-- Section label (YOUR MODE:) -->
+    <style name="TextAppearance.NearNeed.SectionLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_meta</item>
+        <item name="android:fontFamily">@string/font_family_heading</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Helper text below toggle -->
+    <style name="TextAppearance.NearNeed.HelperText" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_helper</item>
+        <item name="android:fontFamily">@string/font_family_forms</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+        <item name="android:gravity">center</item>
+    </style>
+
 </resources>

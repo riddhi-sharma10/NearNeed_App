@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:elevation="2dp"
+    android:layout_marginVertical="8dp"
+    android:padding="16dp"
+    android:layoutDirection="ltr"
+    tools:ignore="HardcodedText,ContentDescription,SpUsage"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Header: Avatar + Name + Rating + Status -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <!-- Avatar -->
+        <ImageView
+            android:id="@+id/ivVolunteerAvatar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_nav_profile"
+            android:scaleType="centerCrop"
+            app:tint="@color/brand_primary"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Name + Rating -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvVolunteerName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="John Volunteer"
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvVolunteerRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="★ 4.7"
+                android:textColor="@color/rating_star"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Status Badge -->
+        <TextView
+            android:id="@+id/tvVolunteerStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="INTERESTED"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textColor="#1E3A8A"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_badge_status"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- Bio -->
+    <TextView
+        android:id="@+id/tvVolunteerBio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Passionate about community service, always ready to help!"
+        android:textColor="@color/text_body"
+        android:textSize="13sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Message -->
+    <TextView
+        android:id="@+id/tvVolunteerMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Help with grocery shopping"
+        android:textColor="@color/text_muted"
+        android:textSize="13sp"
+        android:layout_marginBottom="12dp"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Volunteer Date -->
+    <TextView
+        android:id="@+id/tvVolunteerDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 hours ago"
+        android:textColor="@color/text_muted"
+        android:textSize="11sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:spacing="12dp"
+        android:gravity="center">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnViewProfile"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="View Profile"
+            android:textColor="@color/brand_primary"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/brand_primary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMessage"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Message"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:cornerRadius="20dp"
+            app:strokeColor="@color/border_light" />
+
+    </LinearLayout>
+
+</LinearLayout>

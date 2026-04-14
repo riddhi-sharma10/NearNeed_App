@@ -112,11 +112,6 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        // Role Toggle - Switch to Provider
-        if (seekerBinding.tabProvider != null) {
-            seekerBinding.tabProvider.setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
-        }
-
         // Help & Support
         if (seekerBinding.menuHelp != null) {
             seekerBinding.menuHelp.setOnClickListener(v -> {
@@ -148,11 +143,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupProviderInteractions(LayoutProfileProviderBinding providerBinding) {
-        // Role Toggle - Switch to Seeker
-        if (providerBinding.tabSeeker != null) {
-            providerBinding.tabSeeker.setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
-        }
-
         // Edit Profile
         if (providerBinding.btnEditProfileProvider != null) {
             providerBinding.btnEditProfileProvider.setOnClickListener(v -> {

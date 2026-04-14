@@ -1,68 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <!-- 1. Google Map Background -->
+    <!-- 1. Google Map Background (Full Screen) -->
     <fragment
         android:id="@+id/provider_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 2. Top Header & Chips Overlay -->
+    <!-- 2. Top Header & Controls Overlay -->
     <LinearLayout
         android:id="@+id/provider_top_overlay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingTop="16dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_gravity="top">
 
         <!-- Header: Avatar, Title, Settings -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp">
+            android:layout_marginHorizontal="20dp"/>
 
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/provider_profile_avatar"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/avatar_alex"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+        <!-- Search Bar with Dropdown -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_glass_search_bar"
+            android:elevation="4dp">
 
-            <TextView
-                android:id="@+id/app_title_provider"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="Civic Pulse"
-                android:textColor="@color/sapphire_primary"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/provider_profile_avatar"
-                app:layout_constraintStart_toEndOf="@id/provider_profile_avatar"
-                app:layout_constraintTop_toTopOf="@id/provider_profile_avatar" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp">
 
-            <ImageView
-                android:id="@+id/btn_settings_provider"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_settings_outline"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/text_body_dark" />
+                <ImageView
+                    android:id="@+id/ic_search"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_search_grey"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#64748B" />
 
+                <EditText
+                    android:id="@+id/provider_search_edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
+                    android:background="@android:color/transparent"
+                    android:hint="Search locations or jobs"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:textColor="#334155"
+                    android:textColorHint="#94A3B8"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@id/ic_recenter_location"
+                    app:layout_constraintStart_toEndOf="@id/ic_search" />
+
+                <ImageView
+                    android:id="@+id/ic_recenter_location"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_nav_map_final"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/sapphire_primary" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Search Suggestions Dropdown (Initially Hidden) -->
+        <FrameLayout
+            android:id="@+id/search_suggestions_container"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="4dp"
+            android:background="@color/white"
+            android:elevation="8dp"
+            android:visibility="gone">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/search_suggestions_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </FrameLayout>
 
         <!-- Provider Switch: Gigs / Community -->
         <FrameLayout
@@ -102,64 +135,92 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Provider Filter Chips -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:scrollbars="none">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/provider_filter_chips"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                app:singleLine="true"
-                app:chipSpacingHorizontal="8dp">
-                
-                <com.google.android.material.chip.Chip
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Urgency"
-                    android:backgroundTint="@color/white"
-                    app:chipStrokeWidth="1dp"
-                    app:chipStrokeColor="@color/border_standard"
-                    app:chipIcon="@drawable/ic_alarm_orange" />
-
-                <com.google.android.material.chip.Chip
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Budget"
-                    android:backgroundTint="@color/white"
-                    app:chipStrokeWidth="1dp"
-                    app:chipStrokeColor="@color/border_standard"
-                    app:chipIcon="@drawable/ic_payment_wallet_blue" />
-
-                <com.google.android.material.chip.Chip
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0.5km"
-                    android:backgroundTint="@color/white"
-                    app:chipStrokeWidth="1dp"
-                    app:chipStrokeColor="@color/border_standard"
-                    app:chipIcon="@drawable/ic_loc_pin_small" />
-
-            </com.google.android.material.chip.ChipGroup>
-        </HorizontalScrollView>
+        <!-- Provider Filter Chips (Individual, Clickable) -->
 
     </LinearLayout>
 
-    <!-- 3. Provider Info Card (Job Request Details) -->
+    <!-- 3. Draggable Bottom Sheet Panel -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/provider_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:cardCornerRadius="32dp"
+        app:cardElevation="12dp"
+        app:strokeWidth="0dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="20dp">
+
+            <!-- Drag Handle Indicator -->
+            <View
+                android:id="@+id/bottom_sheet_handle"
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@drawable/bg_bottom_sheet_handle"
+                android:layout_gravity="center_horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Bottom Sheet Title + Count -->
+            <TextView
+                android:id="@+id/bottom_sheet_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Jobs near you"
+                android:textColor="@color/text_header"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bottom_sheet_handle" />
+
+            <TextView
+                android:id="@+id/bottom_sheet_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3 available"
+                android:textColor="@color/text_subheadline"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/bottom_sheet_title"
+                app:layout_constraintBottom_toBottomOf="@id/bottom_sheet_title" />
+
+            <!-- Jobs List (RecyclerView) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/provider_jobs_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:paddingBottom="8dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/bottom_sheet_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:itemCount="3" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 4. Floating Job Detail Card (Initially Hidden) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/provider_info_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="112dp"
+        android:layout_gravity="bottom"
         app:cardCornerRadius="24dp"
         app:cardElevation="10dp"
         app:strokeWidth="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone"
         tools:visibility="visible">
 
@@ -168,6 +229,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
+            <!-- Job Icon -->
             <ImageView
                 android:id="@+id/ic_job_type"
                 android:layout_width="48dp"
@@ -179,6 +241,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/sapphire_primary" />
 
+            <!-- Job Title -->
             <TextView
                 android:id="@+id/job_title"
                 android:layout_width="0dp"
@@ -192,6 +255,7 @@
                 app:layout_constraintStart_toEndOf="@id/ic_job_type"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Close Button -->
             <ImageView
                 android:id="@+id/ic_close_card"
                 android:layout_width="24dp"
@@ -200,6 +264,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Job Type Tag -->
             <TextView
                 android:id="@+id/tag_gig"
                 android:layout_width="wrap_content"
@@ -216,6 +281,7 @@
                 app:layout_constraintStart_toStartOf="@id/job_title"
                 app:layout_constraintTop_toBottomOf="@id/job_title" />
 
+            <!-- Job Distance -->
             <TextView
                 android:id="@+id/job_distance"
                 android:layout_width="wrap_content"
@@ -228,8 +294,9 @@
                 app:layout_constraintStart_toEndOf="@id/tag_gig"
                 app:layout_constraintTop_toTopOf="@id/tag_gig" />
 
+            <!-- Budget Box (No Urgency Field) -->
             <androidx.cardview.widget.CardView
-                android:id="@+id/budget_urgency_box"
+                android:id="@+id/budget_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -241,84 +308,65 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:padding="12dp">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="BUDGET RANGE"
+                        android:textColor="@color/text_muted"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="BUDGET RANGE"
-                            android:textColor="@color/text_muted"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/job_budget"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="₹500 - 800"
-                            android:textColor="@color/text_header"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/job_budget"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="end"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="RESPONSE"
-                            android:textColor="@color/text_muted"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/job_urgency"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="High Urgency"
-                            android:textColor="@color/brand_success"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:text="₹500 - 800"
+                        android:textColor="@color/text_header"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Job Description -->
+            <TextView
+                android:id="@+id/job_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Pipe repair in kitchen area, needs urgently"
+                android:textColor="@color/text_body_dark"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.4"
+                app:layout_constraintTop_toBottomOf="@id/budget_box" />
+
+            <!-- View Job Button (Changed from Accept Job) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_accept_job"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/sapphire_primary"
-                android:text="Accept Job"
+                android:text="View Job"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 app:cornerRadius="28dp"
                 app:icon="@drawable/ic_arrow_forward"
                 app:iconGravity="textEnd"
-                app:layout_constraintTop_toBottomOf="@id/budget_urgency_box" />
+                app:layout_constraintTop_toBottomOf="@id/job_description" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 4. Provider Navbar (Injected or standard) -->
+    <!-- 5. Provider Navbar (Bottom) -->
     <include
         android:id="@+id/provider_navbar"
         layout="@layout/layout_floating_navbar_seeker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_gravity="bottom" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

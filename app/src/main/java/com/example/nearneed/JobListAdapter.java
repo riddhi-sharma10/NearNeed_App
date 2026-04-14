@@ -1,5 +1,6 @@
 package com.example.nearneed;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,48 +8,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.model.Marker;
 import java.util.List;
 
 /**
- * Adapter for displaying jobs in the bottom sheet list
- * Shows: title, description, distance, budget
+ * Adapter for displaying jobs in the provider bottom sheet list
  */
 public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewHolder> {
 
-    private List<JobItem> jobList;
+    private List<MapsFragment.Job> jobList;
     private OnJobClickListener onJobClickListener;
 
     public interface OnJobClickListener {
-        void onJobClick(JobItem job, int position);
+        void onJobClick(MapsFragment.Job job, int position);
     }
 
-    public static class JobItem {
-        public String title;
-        public String description;
-        public String distance;
-        public String budget;
-        public String category;
-        public int iconResId;
-        public int colorResId;
-        public Marker marker;
-
-        public JobItem(String title, String description, String distance, String budget, String category, int iconResId, int colorResId, Marker marker) {
-            this.title = title;
-            this.description = description;
-            this.distance = distance;
-            this.budget = budget;
-            this.category = category;
-            this.iconResId = iconResId;
-            this.colorResId = colorResId;
-            this.marker = marker;
-        }
-    }
-
-    public JobListAdapter(List<JobItem> jobList, OnJobClickListener listener) {
+    public JobListAdapter(List<MapsFragment.Job> jobList, OnJobClickListener listener) {
         this.jobList = jobList;
         this.onJobClickListener = listener;
     }
@@ -63,7 +41,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
 
     @Override
     public void onBindViewHolder(@NonNull JobViewHolder holder, int position) {
-        JobItem job = jobList.get(position);
+        MapsFragment.Job job = jobList.get(position);
         holder.bind(job, position);
     }
 
@@ -72,7 +50,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
         return jobList.size();
     }
 
-    public void updateList(List<JobItem> newList) {
+    public void updateList(List<MapsFragment.Job> newList) {
         this.jobList = newList;
         notifyDataSetChanged();
     }
@@ -95,7 +73,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
             itemContainer = itemView.findViewById(R.id.item_job_container);
         }
 
-        public void bind(JobItem job, int position) {
+        public void bind(MapsFragment.Job job, int position) {
             jobTitle.setText(job.title);
             jobDescription.setText(job.description);
             jobDistance.setText(job.distance);
@@ -103,7 +81,8 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
 
             // Set icon with color
             jobIcon.setImageResource(job.iconResId);
-            jobIcon.setTint(ContextCompat.getColor(itemView.getContext(), job.colorResId));
+            int color = ContextCompat.getColor(itemView.getContext(), job.colorResId);
+            ImageViewCompat.setImageTintList(jobIcon, ColorStateList.valueOf(color));
 
             // Click listener
             itemContainer.setOnClickListener(v -> {

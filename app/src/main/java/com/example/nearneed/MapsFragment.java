@@ -1,6 +1,7 @@
 package com.example.nearneed;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -215,9 +216,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
 
         // Setup job list adapter
-        jobAdapter = new JobListAdapter(filteredJobs, (job, position) -> {
-            selectJob(job);
-            showJobDetailCard(job);
+        jobAdapter = new JobListAdapter(filteredJobs, new JobListAdapter.OnJobClickListener() {
+            @Override
+            public void onJobClick(Job job, int position) {
+                selectJob(job);
+                showJobDetailCard(job);
+            }
+
+            @Override
+            public void onViewPostClick(Job job) {
+                showProviderJobDetail(job);
+            }
         });
 
         if (jobsList != null) {
@@ -831,5 +840,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 dialog.dismiss();
             }
         }, 3000);
+    }
+
+    /**
+     * Navigates to ProviderJobDetailActivity with job details.
+     */
+    private void showProviderJobDetail(Job job) {
+        Intent intent = new Intent(requireContext(), ProviderJobDetailActivity.class);
+        intent.putExtra("title", job.title);
+        intent.putExtra("description", job.description);
+        intent.putExtra("category", job.category);
+        intent.putExtra("budget", job.budget);
+        intent.putExtra("distance", job.distance);
+        intent.putExtra("duration", "2-3 hours");
+        intent.putExtra("type", job.type);
+        startActivity(intent);
     }
 }

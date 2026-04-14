@@ -12,6 +12,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
+
 import java.util.List;
 
 /**
@@ -24,6 +26,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
 
     public interface OnJobClickListener {
         void onJobClick(MapsFragment.Job job, int position);
+        void onViewPostClick(MapsFragment.Job job);
     }
 
     public JobListAdapter(List<MapsFragment.Job> jobList, OnJobClickListener listener) {
@@ -62,6 +65,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
         private TextView jobDistance;
         private TextView jobBudget;
         private View itemContainer;
+        private MaterialButton btnViewPost;
 
         public JobViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,6 +75,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
             jobDistance = itemView.findViewById(R.id.item_job_distance);
             jobBudget = itemView.findViewById(R.id.item_job_budget);
             itemContainer = itemView.findViewById(R.id.item_job_container);
+            btnViewPost = itemView.findViewById(R.id.btn_view_post);
         }
 
         public void bind(MapsFragment.Job job, int position) {
@@ -84,7 +89,16 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.JobViewH
             int color = ContextCompat.getColor(itemView.getContext(), job.colorResId);
             ImageViewCompat.setImageTintList(jobIcon, ColorStateList.valueOf(color));
 
-            // Click listener
+            // View Post button click listener
+            if (btnViewPost != null) {
+                btnViewPost.setOnClickListener(v -> {
+                    if (onJobClickListener != null) {
+                        onJobClickListener.onViewPostClick(job);
+                    }
+                });
+            }
+
+            // Main container click listener
             itemContainer.setOnClickListener(v -> {
                 if (onJobClickListener != null) {
                     onJobClickListener.onJobClick(job, position);

@@ -11,15 +11,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.button.MaterialButton;
 
-public class GigPostDetailActivity extends AppCompatActivity {
+public class ProviderJobDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration;
-    private MaterialButton btnViewApplicants;
+    private MaterialButton btnApplyGig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gig_post_detail);
+        setContentView(R.layout.activity_provider_job_detail);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -28,13 +28,13 @@ public class GigPostDetailActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        tvTitle = findViewById(R.id.tv_gig_title);
-        tvCategory = findViewById(R.id.tv_gig_category);
-        tvBudget = findViewById(R.id.tv_gig_budget);
-        tvDescription = findViewById(R.id.tv_gig_description);
-        tvDistance = findViewById(R.id.tv_gig_distance);
-        tvDuration = findViewById(R.id.tv_gig_duration);
-        btnViewApplicants = findViewById(R.id.btn_view_applicants);
+        tvTitle = findViewById(R.id.tv_provider_job_title);
+        tvCategory = findViewById(R.id.tv_provider_job_category);
+        tvBudget = findViewById(R.id.tv_provider_job_budget);
+        tvDescription = findViewById(R.id.tv_provider_job_description);
+        tvDistance = findViewById(R.id.tv_provider_job_distance);
+        tvDuration = findViewById(R.id.tv_provider_job_duration);
+        btnApplyGig = findViewById(R.id.btn_apply_provider_gig);
 
         // Get data from intent
         Intent intent = getIntent();
@@ -44,20 +44,21 @@ public class GigPostDetailActivity extends AppCompatActivity {
         String description = intent.getStringExtra("description");
         String distance = intent.getStringExtra("distance");
         String duration = intent.getStringExtra("duration");
+        String type = intent.getStringExtra("type");
 
         // Set data to views
-        tvTitle.setText(title != null ? title : "Gig Details");
+        tvTitle.setText(title != null ? title : "Job Details");
         tvCategory.setText(category != null ? category : "Category");
         tvBudget.setText(budget != null ? budget : "Budget not specified");
         tvDescription.setText(description != null ? description : "No description available");
         tvDistance.setText(distance != null ? distance : "Distance unknown");
         tvDuration.setText(duration != null ? duration : "Duration not specified");
 
-        btnViewApplicants.setOnClickListener(v -> {
-            String postTitle = tvTitle.getText().toString();
-            Intent applicantsIntent = new Intent(this, ResponsesActivity.class);
-            applicantsIntent.putExtra("post_title", postTitle);
-            startActivity(applicantsIntent);
+        // Apply button logic
+        btnApplyGig.setOnClickListener(v -> {
+            Toast.makeText(this, "Opening apply form...", Toast.LENGTH_SHORT).show();
+            // This will trigger the gig apply sheet when we call it from MapsFragment
+            finish();
         });
     }
 }

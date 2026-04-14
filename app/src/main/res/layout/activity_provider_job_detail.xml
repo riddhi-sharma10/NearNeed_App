@@ -30,10 +30,10 @@
 
             <!-- Title -->
             <TextView
-                android:id="@+id/tv_gig_title"
+                android:id="@+id/tv_provider_job_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Gig Title"
+                android:text="Job Title"
                 android:textColor="@color/text_header"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -48,7 +48,7 @@
                 android:layout_marginTop="12dp">
 
                 <TextView
-                    android:id="@+id/tv_gig_category"
+                    android:id="@+id/tv_provider_job_category"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Category"
@@ -98,7 +98,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:id="@+id/tv_gig_distance"
+                        android:id="@+id/tv_provider_job_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.5 km away"
@@ -122,7 +122,7 @@
                         android:textSize="12sp" />
 
                     <TextView
-                        android:id="@+id/tv_gig_duration"
+                        android:id="@+id/tv_provider_job_duration"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="2-3 hours"
@@ -157,7 +157,7 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tv_gig_budget"
+                        android:id="@+id/tv_provider_job_budget"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="₹500 - 800"
@@ -179,7 +179,7 @@
                 android:layout_marginTop="24dp" />
 
             <TextView
-                android:id="@+id/tv_gig_description"
+                android:id="@+id/tv_provider_job_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Detailed description of the gig work..."
@@ -197,13 +197,13 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- View Applicants Button (Fixed at bottom) -->
+    <!-- Apply Button (Fixed at bottom) -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_view_applicants"
+        android:id="@+id/btn_apply_provider_gig"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:text="View Applicants"
+        android:text="Apply for this Gig"
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="16sp"

@@ -76,6 +76,22 @@
         app:layout_constraintTop_toTopOf="@id/item_job_description"
         app:layout_constraintBottom_toBottomOf="@id/item_job_description" />
 
+    <!-- View Post Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_view_post"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:paddingHorizontal="20dp"
+        android:text="View Post"
+        android:textSize="12sp"
+        android:textAllCaps="false"
+        app:cornerRadius="18dp"
+        app:backgroundTint="@color/sapphire_primary"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/item_job_icon"
+        app:layout_constraintBottom_toBottomOf="@id/item_job_description" />
+
     <!-- Divider -->
     <View
         android:layout_width="match_parent"

@@ -227,6 +227,10 @@
             android:name=".CommunityPostDetailActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ProviderJobDetailActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="YOUR_API_KEY_HERE" />

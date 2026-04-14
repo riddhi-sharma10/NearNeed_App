@@ -40,6 +40,10 @@ public class ProfessionalSetupProviderActivity extends AppCompatActivity {
 
         MaterialButton btnContinue = findViewById(R.id.btnContinue);
         CheckBox cbTerms = findViewById(R.id.cbTerms);
+        View layoutTermsRow = findViewById(R.id.layoutTermsRow);
+        if (layoutTermsRow != null) {
+            layoutTermsRow.setOnClickListener(v -> cbTerms.setChecked(!cbTerms.isChecked()));
+        }
         View layoutSuccessOverlay = findViewById(R.id.layout_success_overlay);
 
         btnContinue.setOnClickListener(v -> {

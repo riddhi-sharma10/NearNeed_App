@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp"
+    android:height="22dp"
+    android:viewportWidth="22"
+    android:viewportHeight="22">
+
+    <!-- Outlined rounded border (same as unchecked, but primary color) -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="1.8"
+        android:pathData="M4,0 L18,0 Q22,0 22,4 L22,18 Q22,22 18,22 L4,22 Q0,22 0,18 L0,4 Q0,0 4,0 Z" />
+
+    <!-- Bold white tick mark — no fill, stroke only -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1E3A8A"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4.5,11.5 L8.5,15.5 L17.5,6.5" />
+
+</vector>

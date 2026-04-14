@@ -43,6 +43,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -734,10 +735,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         EditText messageField = sheetView.findViewById(R.id.et_gig_message);
         View cardCash = sheetView.findViewById(R.id.card_cash);
         View cardUpi = sheetView.findViewById(R.id.card_upi);
+        Slider budgetSlider = sheetView.findViewById(R.id.slider_budget);
+        TextView budgetValue = sheetView.findViewById(R.id.tv_budget_value);
         MaterialButton submitBtn = sheetView.findViewById(R.id.btn_submit_application);
 
         // Track selected payment method (default to Cash)
         final String[] selectedPayment = {"CASH"};
+
+        // Handle budget slider
+        if (budgetSlider != null && budgetValue != null) {
+            budgetSlider.addOnChangeListener((slider, value, fromUser) -> {
+                budgetValue.setText("₹" + String.format("%.0f", value));
+            });
+        }
 
         // Handle Cash card selection
         if (cardCash != null) {

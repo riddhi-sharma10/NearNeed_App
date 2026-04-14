@@ -87,18 +87,71 @@
         android:textStyle="bold"
         android:layout_marginTop="20dp" />
 
-    <EditText
-        android:id="@+id/et_request_budget"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:hint="e.g. ₹500"
-        android:background="@drawable/bg_glass_search_bar"
-        android:padding="12dp"
-        android:textColor="@color/text_body_dark"
-        android:textColorHint="@color/text_muted"
-        android:textSize="14sp"
-        android:inputType="text"
-        android:layout_marginTop="8dp" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Budget"
+                android:textColor="@color/text_header"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_request_budget_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="₹500"
+                android:textColor="@color/sapphire_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_request_budget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="100"
+            android:valueTo="10000"
+            android:value="500"
+            app:trackHeight="4dp"
+            app:thumbRadius="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="₹100"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="₹10,000"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- Payment Method Section Label -->
     <TextView

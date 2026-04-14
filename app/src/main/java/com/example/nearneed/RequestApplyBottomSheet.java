@@ -16,14 +16,16 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 
 public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
 
     private EditText etMessage;
-    private EditText etBudget;
+    private Slider budgetSlider;
     private MaterialCardView cardCash, cardUpi;
     private MaterialButton btnSubmit;
     private TextView tvCharCount;
+    private TextView tvBudgetValue;
     private String selectedPayment = "CASH";
 
     @Nullable
@@ -38,7 +40,8 @@ public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
 
         etMessage = view.findViewById(R.id.et_request_message);
-        etBudget = view.findViewById(R.id.et_request_budget);
+        budgetSlider = view.findViewById(R.id.slider_request_budget);
+        tvBudgetValue = view.findViewById(R.id.tv_request_budget_value);
         cardCash = view.findViewById(R.id.card_request_cash);
         cardUpi = view.findViewById(R.id.card_request_upi);
         btnSubmit = view.findViewById(R.id.btn_submit_request_application);
@@ -60,6 +63,13 @@ public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
 
                 @Override
                 public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
+
+        // Budget slider listener
+        if (budgetSlider != null && tvBudgetValue != null) {
+            budgetSlider.addOnChangeListener((slider, value, fromUser) -> {
+                tvBudgetValue.setText("₹" + String.format("%.0f", value));
             });
         }
 
@@ -118,19 +128,11 @@ public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
      */
     private void submitApplication() {
         String message = etMessage != null ? etMessage.getText().toString().trim() : "";
-        String budget = etBudget != null ? etBudget.getText().toString().trim() : "";
 
-        // Validation
+        // Validation - only message is required
         if (message.isEmpty()) {
             if (etMessage != null) {
                 etMessage.setError("Please write why you want to apply (max 200 characters)");
-            }
-            return;
-        }
-
-        if (budget.isEmpty()) {
-            if (etBudget != null) {
-                etBudget.setError("Please enter your approximate budget");
             }
             return;
         }

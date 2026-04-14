@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="24dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:background="@drawable/bg_bottom_sheet_handle"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volunteer for this Task"
+        android:textColor="@color/text_header"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-black" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tell them why you'd like to help"
+        android:textColor="@color/text_muted"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp" />
+
+    <!-- Message Input Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Why do you want to volunteer?"
+        android:textColor="@color/text_header"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp" />
+
+    <EditText
+        android:id="@+id/et_volunteer_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minLines="3"
+        android:hint="e.g. I have experience with this and would love to help the community..."
+        android:background="@drawable/bg_glass_search_bar"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/text_body_dark"
+        android:textColorHint="@color/text_muted"
+        android:textSize="14sp"
+        android:inputType="textMultiLine"
+        android:gravity="top"
+        android:maxLength="200" />
+
+    <TextView
+        android:id="@+id/tv_volunteer_char_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0/200"
+        android:textColor="@color/text_muted"
+        android:textSize="11sp"
+        android:layout_marginTop="4dp" />
+
+    <!-- Submit Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_submit_volunteer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
+        android:text="Submit"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/brand_success"
+        app:cornerRadius="28dp" />
+
+</LinearLayout>

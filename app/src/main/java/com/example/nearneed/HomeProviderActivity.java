@@ -73,6 +73,25 @@ public class HomeProviderActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Active Jobs card → Bookings (ongoing tab)
+        View activeJobsCard = findViewById(R.id.statsGridActiveJobs);
+        if (activeJobsCard != null) {
+            activeJobsCard.setOnClickListener(v -> {
+                Intent intent = new Intent(this, BookingsActivity.class);
+                intent.putExtra("active_tab", "ongoing");
+                startActivity(intent);
+            });
+        }
+
+        // Rating card → Profile
+        View ratingCard = findViewById(R.id.statsGridRating);
+        if (ratingCard != null) {
+            ratingCard.setOnClickListener(v -> {
+                Intent intent = new Intent(this, ProfileActivity.class);
+                startActivity(intent);
+            });
+        }
+
         // View All Requests → Map Activity
         findViewById(R.id.viewAllRequestsContainer).setOnClickListener(v -> {
             Intent intent = new Intent(this, MapsActivity.class);
@@ -119,6 +138,36 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         adapter.setRequests(requests);
         rvNearbyRequests.setAdapter(adapter);
+
+        // Setup community volunteering section
+        setupCommunityVolunteering();
+    }
+
+    private void setupCommunityVolunteering() {
+        RecyclerView rvCommunityVolunteering = findViewById(R.id.rvCommunityVolunteering);
+        CommunityVolunteeringAdapter adapter = new CommunityVolunteeringAdapter();
+
+        // Sample community posts
+        List<CommunityVolunteeringAdapter.CommunityPost> communityPosts = new ArrayList<>();
+        communityPosts.add(new CommunityVolunteeringAdapter.CommunityPost(
+            "Park Cleanup Drive",
+            "Sarah Johnson",
+            "Help us clean and beautify the neighborhood park. Bring gloves and energy!",
+            "0.6 km away",
+            "8 volunteers needed"
+        ));
+        communityPosts.add(new CommunityVolunteeringAdapter.CommunityPost(
+            "Free Coaching Session",
+            "Rajesh Kumar",
+            "Teaching basic English to underprivileged kids. Make a difference!",
+            "1.5 km away",
+            "3 volunteers needed"
+        ));
+
+        adapter.setPosts(communityPosts);
+        if (rvCommunityVolunteering != null) {
+            rvCommunityVolunteering.setAdapter(adapter);
+        }
     }
 
     private void loadSavedLocation() {

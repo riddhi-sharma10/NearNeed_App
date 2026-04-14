@@ -251,10 +251,13 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/statsGridActiveJobs"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
@@ -286,10 +289,13 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/statsGridRating"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
@@ -552,6 +558,76 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="2"
                 tools:listitem="@layout/item_request_card" />
+
+            <!-- COMMUNITY VOLUNTEERING SECTION -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="0dp">
+
+                <TextView
+                    android:id="@+id/tvCommunityVolunteeringTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/viewAllCommunityContainer"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Community Volunteering"
+                    android:textColor="@color/text_header"
+                    android:textSize="19sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:paddingStart="20dp" />
+
+                <LinearLayout
+                    android:id="@+id/viewAllCommunityContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="View All"
+                        android:textColor="@color/brand_success"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="6dp"
+                        android:src="@drawable/ic_arrow_forward"
+                        app:tint="@color/brand_success"
+                        android:scaleType="centerInside" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- COMMUNITY POST CARDS - HORIZONTAL SCROLL -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCommunityVolunteering"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_community_post_card" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

@@ -3,6 +3,7 @@ package com.example.nearneed;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -13,6 +14,7 @@ import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -185,9 +187,11 @@ public class IdVerificationActivity extends AppCompatActivity {
                 fTitle.setTextColor(0xFF1E3A8A);
                 fDesc.setText("Data extracted successfully");
                 fDesc.setTextColor(0xFF1E3A8A);
-                
+
                 if (fTick != null) {
                     fTick.setVisibility(View.VISIBLE);
+                    // Apply smooth scale-in animation to tick mark
+                    fTick.startAnimation(AnimationUtils.loadAnimation(IdVerificationActivity.this, R.anim.scale_in_tick));
                 }
 
                 if (side.contains("Front")) frontUploaded = true;

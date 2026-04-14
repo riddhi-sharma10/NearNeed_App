@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="1dp"
+    app:strokeWidth="2dp"
+    app:strokeColor="@color/divider_subtle">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="14dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <!-- Radio Button -->
+        <RadioButton
+            android:id="@+id/rbPaymentMethod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Icon -->
+        <ImageView
+            android:id="@+id/ivMethodIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_payment_wallet_blue"
+            android:layout_marginEnd="12dp"
+            app:tint="@color/sapphire_primary" />
+
+        <!-- Method Details -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvMethodName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Credit Card"
+                android:textColor="@color/text_header"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvMethodDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="****  ****  ****  4242"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Badge for Default -->
+        <TextView
+            android:id="@+id/tvDefaultBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DEFAULT"
+            android:textColor="@color/sapphire_primary"
+            android:textSize="9sp"
+            android:fontFamily="sans-serif-medium"
+            android:background="@drawable/bg_trending_badge"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:visibility="gone" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

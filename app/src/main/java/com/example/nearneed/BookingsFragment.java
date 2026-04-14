@@ -18,6 +18,7 @@ public class BookingsFragment extends Fragment {
     private TabLayout tabLayout;
     private ViewPager2 viewPager;
     private BookingsPagerAdapter adapter;
+    private String filterType = null; // "gigs", "community", or null for all
 
     @Nullable
     @Override
@@ -25,6 +26,12 @@ public class BookingsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_bookings, container, false);
         tabLayout = view.findViewById(R.id.tabLayout);
         viewPager = view.findViewById(R.id.viewPager);
+
+        // Get filter type from Activity intent
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            filterType = getActivity().getIntent().getStringExtra("filter_type");
+        }
+
         return view;
     }
 
@@ -38,8 +45,9 @@ public class BookingsFragment extends Fragment {
         // Read user role from SharedPreferences via RoleManager
         String currentRole = RoleManager.getRole(requireContext());
 
-        // Initialize and set adapter
+        // Initialize and set adapter with filter type
         adapter = new BookingsPagerAdapter(this, currentRole);
+        adapter.setFilterType(filterType);
         viewPager.setAdapter(adapter);
 
         // Link TabLayout with ViewPager2
@@ -56,7 +64,7 @@ public class BookingsFragment extends Fragment {
                     break;
             }
         }).attach();
-        
+
         // Select "Upcoming" by default (position 0)
         viewPager.setCurrentItem(0, false);
     }

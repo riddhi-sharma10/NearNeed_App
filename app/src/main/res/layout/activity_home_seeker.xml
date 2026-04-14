@@ -404,35 +404,17 @@
                                 android:lineHeight="18sp"
                                 android:minLines="2" />
 
-                            <RelativeLayout
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_view_post_gig_1"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="20dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_centerVertical="true"
-                                    android:background="@color/white"
-                                    android:paddingHorizontal="10dp"
-                                    android:paddingVertical="6dp"
-                                    android:text="This week"
-                                    android:textColor="#475569"
-                                    android:textSize="11sp"
-                                    android:fontFamily="sans-serif-medium" />
-
-                                <com.google.android.material.button.MaterialButton
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="40dp"
-                                    android:layout_alignParentEnd="true"
-                                    android:text="View Post"
-                                    android:textColor="@color/white"
-                                    android:textSize="12sp"
-                                    android:textAllCaps="false"
-                                    android:paddingHorizontal="16dp"
-                                    app:backgroundTint="@color/sapphire_primary"
-                                    app:cornerRadius="20dp" />
-                            </RelativeLayout>
+                                android:layout_height="40dp"
+                                android:layout_marginTop="20dp"
+                                android:text="View Post"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:textAllCaps="false"
+                                app:backgroundTint="@color/sapphire_primary"
+                                app:cornerRadius="20dp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -509,6 +491,7 @@
                                     android:fontFamily="sans-serif-medium" />
 
                                 <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btn_view_post_gig_2"
                                     android:layout_width="wrap_content"
                                     android:layout_height="40dp"
                                     android:layout_alignParentEnd="true"
@@ -657,16 +640,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    app:cardCornerRadius="14dp"
-                    app:cardElevation="0dp">
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="@color/brand_success">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="12dp">
+                        android:padding="14dp">
 
                         <RelativeLayout
                             android:layout_width="56dp"
@@ -677,7 +662,8 @@
                                 android:layout_height="48dp"
                                 android:layout_centerInParent="true"
                                 app:cardCornerRadius="24dp"
-                                app:cardElevation="0dp">
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E0F7F4">
 
                                 <ImageView
                                     android:layout_width="match_parent"
@@ -715,10 +701,11 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:background="@drawable/bg_trending_badge"
+                                    android:backgroundTint="@color/brand_success"
                                     android:paddingHorizontal="6dp"
                                     android:paddingVertical="2dp"
                                     android:text="COMMUNITY"
-                                    android:textColor="@color/trending_amber"
+                                    android:textColor="@color/white"
                                     android:textSize="9sp"
                                     android:fontFamily="sans-serif-black" />
                             </LinearLayout>
@@ -726,9 +713,9 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
+                                android:layout_marginTop="4dp"
                                 android:text="Sarah J. needs help picking..."
-                                android:textColor="@color/text_subheadline"
+                                android:textColor="@color/text_body"
                                 android:textSize="13sp"
                                 android:maxLines="1"
                                 android:ellipsize="end" />
@@ -747,12 +734,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:paddingHorizontal="16dp"
-                            android:text="Help"
+                            android:text="View"
                             android:textColor="@color/white"
                             android:textSize="12sp"
                             android:textAllCaps="false"
                             app:backgroundTint="@color/brand_success"
-                            app:cornerRadius="20dp" />
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_arrow_forward"
+                            app:iconGravity="textEnd" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -762,16 +751,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    app:cardCornerRadius="14dp"
-                    app:cardElevation="0dp">
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="@color/brand_success">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="12dp">
+                        android:padding="14dp">
 
                         <RelativeLayout
                             android:layout_width="56dp"
@@ -782,7 +773,8 @@
                                 android:layout_height="48dp"
                                 android:layout_centerInParent="true"
                                 app:cardCornerRadius="24dp"
-                                app:cardElevation="0dp">
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="#E0F7F4">
 
                                 <ImageView
                                     android:layout_width="match_parent"
@@ -820,10 +812,11 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:background="@drawable/bg_trending_badge"
+                                    android:backgroundTint="@color/brand_success"
                                     android:paddingHorizontal="6dp"
                                     android:paddingVertical="2dp"
                                     android:text="COMMUNITY"
-                                    android:textColor="@color/trending_amber"
+                                    android:textColor="@color/white"
                                     android:textSize="9sp"
                                     android:fontFamily="sans-serif-black" />
                             </LinearLayout>
@@ -831,9 +824,9 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
+                                android:layout_marginTop="4dp"
                                 android:text="David M. is looking for..."
-                                android:textColor="@color/text_subheadline"
+                                android:textColor="@color/text_body"
                                 android:textSize="13sp"
                                 android:maxLines="1"
                                 android:ellipsize="end" />
@@ -852,12 +845,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
                             android:paddingHorizontal="16dp"
-                            android:text="Help"
+                            android:text="View"
                             android:textColor="@color/white"
                             android:textSize="12sp"
                             android:textAllCaps="false"
                             app:backgroundTint="@color/brand_success"
-                            app:cornerRadius="20dp" />
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_arrow_forward"
+                            app:iconGravity="textEnd" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

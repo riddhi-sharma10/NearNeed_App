@@ -342,6 +342,34 @@
                 android:lineSpacingMultiplier="1.4"
                 app:layout_constraintTop_toBottomOf="@id/budget_box" />
 
+            <!-- Slots Row (Community Only) -->
+            <LinearLayout
+                android:id="@+id/row_slots"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/job_description">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_toolbox_seeker"
+                    app:tint="@color/sapphire_primary"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tvSlotsAvailable"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="3 / 5 slots filled"
+                    android:textColor="@color/text_body"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
             <!-- View Job Button (Changed from Accept Job) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_accept_job"
@@ -355,7 +383,7 @@
                 app:cornerRadius="28dp"
                 app:icon="@drawable/ic_arrow_forward"
                 app:iconGravity="textEnd"
-                app:layout_constraintTop_toBottomOf="@id/job_description" />
+                app:layout_constraintTop_toBottomOf="@id/row_slots" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

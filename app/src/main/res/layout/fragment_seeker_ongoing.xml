@@ -229,48 +229,72 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     app:layout_constraintTop_toBottomOf="@id/ivMap1">
 
-                    <!-- Chat Button (Cyan) -->
+                    <!-- Top Row: Chat + Track -->
                     <LinearLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/bg_button_chat_bookings"
-                        android:gravity="center">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_dialog_email"
-                            app:tint="#047857" />
+                        <!-- Chat Button (Cyan) -->
+                        <LinearLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_button_chat_bookings"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@android:drawable/ic_dialog_email"
+                                app:tint="#047857" />
+                        </LinearLayout>
+
+                        <!-- Track Live Location Button (Filled Dark Blue) -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_button_dark_blue_12dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:src="@android:drawable/ic_menu_send"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Track Live Location"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Track Live Location Button (Filled Dark Blue) -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- Update Status Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpdateStatus1"
+                        android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_button_dark_blue_12dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:layout_marginEnd="8dp"
-                            android:src="@android:drawable/ic_menu_send"
-                            app:tint="#FFFFFF" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Track Live Location"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:text="Update Status &amp; Pay"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/brand_success"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_check_circle_green"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp" />
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -493,48 +517,72 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     app:layout_constraintTop_toBottomOf="@id/ivMap2">
 
-                    <!-- Chat Button (Cyan) -->
+                    <!-- Top Row: Chat + Track -->
                     <LinearLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/bg_button_chat_bookings"
-                        android:gravity="center">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/ic_dialog_email"
-                            app:tint="#047857" />
+                        <!-- Chat Button (Cyan) -->
+                        <LinearLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="12dp"
+                            android:background="@drawable/bg_button_chat_bookings"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:src="@android:drawable/ic_dialog_email"
+                                app:tint="#047857" />
+                        </LinearLayout>
+
+                        <!-- Track Live Location Button (Filled Dark Blue) -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/bg_button_dark_blue_12dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_marginEnd="8dp"
+                                android:src="@android:drawable/ic_menu_send"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Track Live Location"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Track Live Location Button (Filled Dark Blue) -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- Update Status Button -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnUpdateStatus2"
+                        android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_button_dark_blue_12dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:layout_marginEnd="8dp"
-                            android:src="@android:drawable/ic_menu_send"
-                            app:tint="#FFFFFF" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Track Live Location"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:text="Update Status &amp; Pay"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/brand_success"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_check_circle_green"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp" />
                 </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>

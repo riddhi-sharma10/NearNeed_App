@@ -114,6 +114,22 @@
             android:exported="false" />
 
         <activity
+            android:name=".NotificationsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".UpdateStatusActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".PaymentFlowActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".PaymentSuccessActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".HelpSupportActivity"
             android:exported="false" />
 
@@ -201,6 +217,14 @@
 
         <activity
             android:name=".VolunteerProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GigPostDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CommunityPostDetailActivity"
             android:exported="false" />
 
         <meta-data

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/white">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Complete Service"
+            android:textColor="@color/text_header"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-black" />
+
+        <ImageView
+            android:id="@+id/btnCloseDialog"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_close"
+            android:contentDescription="@null"
+            android:padding="4dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="@color/text_muted" />
+    </LinearLayout>
+
+    <!-- Service Summary Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:cardBackgroundColor="#F8F9FA"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="#E5E7EB">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Details"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:id="@+id/tvServiceName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Deep Kitchen Sanitization"
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Amount to Pay"
+                    android:textColor="@color/text_body"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₹1,500"
+                    android:textColor="@color/sapphire_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Service Provider"
+                    android:textColor="@color/text_body"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvProviderName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sarah Jenkins"
+                    android:textColor="@color/text_header"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Work Completion Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Work Completion"
+        android:textColor="@color/text_header"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Quality Rating -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="How satisfied are you with the work?"
+            android:textColor="@color/text_body"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Star Rating -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/ivStar1"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@null"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:tint="@color/text_muted" />
+
+            <ImageView
+                android:id="@+id/ivStar2"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@null"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:tint="@color/text_muted" />
+
+            <ImageView
+                android:id="@+id/ivStar3"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@null"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:tint="@color/text_muted" />
+
+            <ImageView
+                android:id="@+id/ivStar4"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@null"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:tint="@color/text_muted" />
+
+            <ImageView
+                android:id="@+id/ivStar5"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/star_big_off"
+                android:contentDescription="@null"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                app:tint="@color/text_muted" />
+
+            <TextView
+                android:id="@+id/tvRatingValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not rated"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Completion Notes -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Additional Notes (Optional)"
+        android:textColor="@color/text_body"
+        android:textSize="13sp"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:boxBackgroundColor="#F8F9FA"
+        app:boxCornerRadiusBottomEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusTopStart="10dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCompletionNotes"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:hint="Any feedback about the service..."
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:textSize="13sp"
+            android:textColorHint="@color/text_muted"
+            android:textColor="@color/text_body" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="12dp"
+            android:text="Cancel"
+            android:textColor="@color/sapphire_primary"
+            app:strokeColor="@color/sapphire_primary"
+            app:cornerRadius="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnProceedToPayment"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Proceed to Payment"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            app:backgroundTint="@color/sapphire_primary"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_subtle"
+        android:layout_marginVertical="16dp" />
+
+    <!-- Info Text -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="After payment, a notification will be sent to the service provider to confirm receipt. The amount will be added to their earnings."
+        android:textColor="@color/text_muted"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp" />
+
+</LinearLayout>

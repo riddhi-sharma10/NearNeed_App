@@ -100,6 +100,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         public int colorResId;
         public LatLng location;
         public String type; // "GIG" or "COMMUNITY"
+        public int slots;        // total slots for COMMUNITY jobs (0 = not applicable)
+        public int slotsFilled;  // how many have applied
 
         public Job(String title, String description, String distance, String budget,
                    String category, int iconResId, int colorResId, LatLng location, String type) {
@@ -112,6 +114,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             this.colorResId = colorResId;
             this.location = location;
             this.type = type;
+            this.slots = 0;
+            this.slotsFilled = 0;
         }
     }
 
@@ -257,8 +261,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             viewJobBtn.setOnClickListener(v -> {
                 if (currentDetailJob != null && "COMMUNITY".equals(currentDetailJob.type)) {
                     showVolunteerSheet(currentDetailJob.title);
-                } else {
-                    Toast.makeText(getContext(), "Viewing job details...", Toast.LENGTH_SHORT).show();
+                } else if (currentDetailJob != null) {
+                    showGigApplySheet(currentDetailJob);
                 }
             });
         }
@@ -302,7 +306,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         ));
 
         // Add community volunteer posts
-        allJobs.add(new Job(
+        Job communityJob1 = new Job(
             "Grocery Assistance",
             "Help an elderly neighbor with weekly grocery run",
             "0.4km away",
@@ -312,9 +316,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             R.color.brand_success,
             new LatLng(19.0790, 72.8720),
             "COMMUNITY"
-        ));
+        );
+        communityJob1.slots = 5;
+        communityJob1.slotsFilled = 1;
+        allJobs.add(communityJob1);
 
-        allJobs.add(new Job(
+        Job communityJob2 = new Job(
             "Park Cleanup",
             "Community park cleaning drive this Saturday",
             "0.9km away",
@@ -324,7 +331,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             R.color.brand_success,
             new LatLng(19.0720, 72.8810),
             "COMMUNITY"
-        ));
+        );
+        communityJob2.slots = 8;
+        communityJob2.slotsFilled = 0;
+        allJobs.add(communityJob2);
 
         filteredJobs.addAll(allJobs);
         updateBottomSheetCount();
@@ -493,6 +503,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 actionBtn.setBackgroundTintList(ColorStateList.valueOf(
                     ContextCompat.getColor(requireContext(), R.color.sapphire_primary)));
             }
+        }
+
+        // Display slots for COMMUNITY jobs
+        View rowSlots = jobDetailCard.findViewById(R.id.row_slots);
+        TextView tvSlots = jobDetailCard.findViewById(R.id.tvSlotsAvailable);
+        if ("COMMUNITY".equals(job.type) && job.slots > 0) {
+            if (rowSlots != null) rowSlots.setVisibility(View.VISIBLE);
+            if (tvSlots != null) tvSlots.setText(job.slotsFilled + " / " + job.slots + " slots filled");
+        } else {
+            if (rowSlots != null) rowSlots.setVisibility(View.GONE);
         }
     }
 
@@ -681,12 +701,118 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         MaterialButton applyBtn = sheetView.findViewById(R.id.btn_apply_volunteer);
         if (applyBtn != null) {
             applyBtn.setOnClickListener(v -> {
+                // Increment slot count if available
+                if (currentDetailJob != null && currentDetailJob.slots > 0) {
+                    currentDetailJob.slotsFilled = Math.min(currentDetailJob.slotsFilled + 1, currentDetailJob.slots);
+                    showJobDetailCard(currentDetailJob);  // Refresh card with new count
+                }
                 dialog.dismiss();
                 showSuccessDialog();
             });
         }
 
         dialog.show();
+    }
+
+    /**
+     * Shows the gig application bottom sheet for GIG type jobs.
+     */
+    private void showGigApplySheet(Job job) {
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View sheetView = getLayoutInflater().inflate(R.layout.layout_gig_apply_sheet, null);
+        dialog.setContentView(sheetView);
+
+        EditText messageField = sheetView.findViewById(R.id.et_gig_message);
+        View cardCash = sheetView.findViewById(R.id.card_cash);
+        View cardUpi = sheetView.findViewById(R.id.card_upi);
+        MaterialButton submitBtn = sheetView.findViewById(R.id.btn_submit_application);
+
+        // Track selected payment method (default to Cash)
+        final String[] selectedPayment = {"CASH"};
+
+        // Handle Cash card selection
+        if (cardCash != null) {
+            cardCash.setOnClickListener(v -> {
+                selectedPayment[0] = "CASH";
+                updatePaymentCardUI(cardCash, cardUpi, true);
+            });
+        }
+
+        // Handle UPI card selection
+        if (cardUpi != null) {
+            cardUpi.setOnClickListener(v -> {
+                selectedPayment[0] = "UPI";
+                updatePaymentCardUI(cardCash, cardUpi, false);
+            });
+        }
+
+        // Handle submit
+        if (submitBtn != null) {
+            submitBtn.setOnClickListener(v -> {
+                String message = messageField != null ? messageField.getText().toString().trim() : "";
+
+                if (message.isEmpty()) {
+                    if (messageField != null) {
+                        messageField.setError("Please write a short message about yourself");
+                    }
+                    return;
+                }
+
+                dialog.dismiss();
+                showGigApplicationSuccessDialog();
+            });
+        }
+
+        dialog.show();
+    }
+
+    /**
+     * Updates the visual state of payment method cards.
+     */
+    private void updatePaymentCardUI(View cardCash, View cardUpi, boolean isCashSelected) {
+        if (cardCash != null) {
+            MaterialCardView cashCard = (MaterialCardView) cardCash;
+            if (isCashSelected) {
+                cashCard.setStrokeWidth(2);
+                cashCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.sapphire_primary));
+                cashCard.setCardElevation(2);
+            } else {
+                cashCard.setStrokeWidth(1);
+                cashCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
+                cashCard.setCardElevation(0);
+            }
+        }
+
+        if (cardUpi != null) {
+            MaterialCardView upiCard = (MaterialCardView) cardUpi;
+            if (!isCashSelected) {
+                upiCard.setStrokeWidth(2);
+                upiCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.sapphire_primary));
+                upiCard.setCardElevation(2);
+            } else {
+                upiCard.setStrokeWidth(1);
+                upiCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
+                upiCard.setCardElevation(0);
+            }
+        }
+    }
+
+    /**
+     * Shows success dialog for gig application.
+     */
+    private void showGigApplicationSuccessDialog() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Application Sent!")
+                .setMessage("The seeker will review your request. You'll be notified when they respond.")
+                .setIcon(android.R.drawable.ic_dialog_info);
+
+        Dialog dialog = builder.show();
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }, 3000);
     }
 
     /**

@@ -3,10 +3,12 @@ package com.example.nearneed;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -131,14 +133,17 @@ public final class SeekerNavbarController {
 
         if (chatContainer != null) {
             chatContainer.setOnClickListener(v -> {
-                if (!(activity instanceof MessagesActivity)) {
-                    Intent intent = new Intent(activity, MessagesActivity.class);
+                if (!(activity instanceof NotificationsActivity)) {
+                    Intent intent = new Intent(activity, NotificationsActivity.class);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                     // Don't finish Home activity so user can come back easily
                 }
             });
         }
+
+        // Update notification badge
+        updateNotificationBadge(activity, root);
 
         if (profileContainer != null) {
             profileContainer.setOnClickListener(v -> {
@@ -155,5 +160,23 @@ public final class SeekerNavbarController {
     // Legacy method for backward compatibility
     public static void bind(@NonNull Activity activity, @NonNull View root, boolean homeActive) {
         bind(activity, root, homeActive ? TAB_HOME : TAB_PROFILE);
+    }
+
+    // Update notification badge with unread count
+    private static void updateNotificationBadge(@NonNull Activity activity, @NonNull View root) {
+        FrameLayout badgeContainer = root.findViewById(R.id.notificationBadgeContainer);
+        TextView tvBadgeCount = root.findViewById(R.id.tvNotificationBadgeCount);
+
+        if (badgeContainer != null && tvBadgeCount != null) {
+            SharedPreferences prefs = activity.getSharedPreferences("app_state", Context.MODE_PRIVATE);
+            int unreadCount = prefs.getInt("unread_count", 0);
+
+            if (unreadCount > 0) {
+                badgeContainer.setVisibility(View.VISIBLE);
+                tvBadgeCount.setText(String.valueOf(Math.min(unreadCount, 9))); // Cap at 9
+            } else {
+                badgeContainer.setVisibility(View.GONE);
+            }
+        }
     }
 }

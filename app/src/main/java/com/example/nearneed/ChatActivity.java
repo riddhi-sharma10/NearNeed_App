@@ -127,7 +127,7 @@ public class ChatActivity extends AppCompatActivity {
             if (vOnlineDot != null) vOnlineDot.setVisibility(View.GONE);
         }
 
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         // Realistic alternating conversation
         messageList.add(new ChatMessage("Hey! Are you available today?", false, false));       // received

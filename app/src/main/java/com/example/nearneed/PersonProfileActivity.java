@@ -13,7 +13,13 @@ public class PersonProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_profile);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnBack).setOnClickListener(v -> {
+            if (getOnBackPressedDispatcher().hasEnabledCallbacks()) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else {
+                finish();
+            }
+        });
 
         String name = readExtra("PERSON_NAME", "NearNeed User");
         String email = readExtra("PERSON_EMAIL", "user@nearneed.app");

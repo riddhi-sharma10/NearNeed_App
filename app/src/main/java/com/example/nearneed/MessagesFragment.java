@@ -287,11 +287,17 @@ public class MessagesFragment extends Fragment {
             holder.tvMessageSnippet.setText(chat.snippet);
             holder.tvTime.setText(chat.time);
             holder.vUnreadIndicator.setVisibility(chat.isUnread ? View.VISIBLE : View.GONE);
+            if (holder.ivAvatar != null) {
+                holder.ivAvatar.setImageResource(resolveAvatarForName(chat.name));
+            }
 
             holder.itemView.setOnClickListener(v -> openChat(chat));
             holder.tvName.setOnClickListener(v -> openPersonProfile(chat));
             if (holder.avatarContainer != null) {
                 holder.avatarContainer.setOnClickListener(v -> openPersonProfile(chat));
+            }
+            if (holder.ivAvatar != null) {
+                holder.ivAvatar.setOnClickListener(v -> openPersonProfile(chat));
             }
         }
 
@@ -304,6 +310,7 @@ public class MessagesFragment extends Fragment {
             TextView tvName, tvMessageSnippet, tvTime;
             View vUnreadIndicator;
             View avatarContainer;
+            ImageView ivAvatar;
 
             ViewHolder(View itemView) {
                 super(itemView);
@@ -312,7 +319,19 @@ public class MessagesFragment extends Fragment {
                 tvTime = itemView.findViewById(R.id.tvTime);
                 vUnreadIndicator = itemView.findViewById(R.id.vUnreadIndicator);
                 avatarContainer = itemView.findViewById(R.id.avatarContainer);
+                ivAvatar = itemView.findViewById(R.id.ivAvatar);
             }
+        }
+
+        private int resolveAvatarForName(String name) {
+            String lower = name == null ? "" : name.toLowerCase();
+            if (lower.endsWith("a") || lower.contains("sharma") || lower.contains("gupta") || lower.contains("kapoor") || lower.contains("jain")) {
+                return R.drawable.avatar_sarah;
+            }
+            if (lower.contains("rahul") || lower.contains("aarav") || lower.contains("aditya") || lower.contains("karan") || lower.contains("deepak") || lower.contains("vishu") || lower.contains("kabir")) {
+                return R.drawable.avatar_david;
+            }
+            return R.drawable.avatar_alex;
         }
     }
 }

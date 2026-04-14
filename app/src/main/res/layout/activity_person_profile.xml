@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@color/surface_background"
     tools:context=".PersonProfileActivity">
 
@@ -20,7 +21,11 @@
             android:layout_height="48dp"
             android:layout_centerVertical="true"
             android:layout_marginStart="6dp"
+            android:padding="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Back"
             android:src="@drawable/ic_back_arrow"
             app:tint="@color/text_body_dark" />
     </RelativeLayout>

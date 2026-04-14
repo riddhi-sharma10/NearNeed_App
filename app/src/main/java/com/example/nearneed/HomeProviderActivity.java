@@ -106,12 +106,14 @@ public class HomeProviderActivity extends AppCompatActivity {
             "Leaky Faucet Repair",
             "0.8 km",
             "₹45 est",
+            "Fixing leaky faucets in kitchen area. Water is dripping from underneath the sink.",
             R.drawable.ic_plumber
         ));
         requests.add(new NearbyRequestsAdapter.RequestItem(
             "Light Installation",
             "2.4 km",
             "₹80 est",
+            "Installing LED lights in the bedroom. Need someone with basic electrical knowledge.",
             R.drawable.ic_electrician
         ));
 

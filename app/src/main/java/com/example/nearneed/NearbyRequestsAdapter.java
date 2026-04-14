@@ -1,5 +1,6 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,12 +18,14 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
         public String title;
         public String distance;
         public String price;
+        public String description;
         public int iconDrawable;
 
-        public RequestItem(String title, String distance, String price, int iconDrawable) {
+        public RequestItem(String title, String distance, String price, String description, int iconDrawable) {
             this.title = title;
             this.distance = distance;
             this.price = price;
+            this.description = description;
             this.iconDrawable = iconDrawable;
         }
     }
@@ -66,33 +69,28 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
     public class RequestViewHolder extends RecyclerView.ViewHolder {
         private TextView tvJobTitle;
         private TextView tvDistance;
-        private TextView tvPrice;
-        private ShapeableImageView thumbImage;
-        private MaterialButton btnAccept;
-        private MaterialButton btnDecline;
+        private TextView tvDescription;
+        private MaterialButton btnView;
 
         public RequestViewHolder(@NonNull android.view.View itemView) {
             super(itemView);
             tvJobTitle = itemView.findViewById(R.id.tvJobTitle);
             tvDistance = itemView.findViewById(R.id.tvDistance);
-            tvPrice = itemView.findViewById(R.id.tvPrice);
-            thumbImage = itemView.findViewById(R.id.thumbImage);
-            btnAccept = itemView.findViewById(R.id.btnAccept);
-            btnDecline = itemView.findViewById(R.id.btnDecline);
+            tvDescription = itemView.findViewById(R.id.tvDescription);
+            btnView = itemView.findViewById(R.id.btnView);
         }
 
         public void bind(RequestItem item, int position) {
             tvJobTitle.setText(item.title);
             tvDistance.setText(item.distance);
-            tvPrice.setText(item.price);
-            thumbImage.setImageResource(item.iconDrawable);
+            tvDescription.setText(item.description);
 
-            btnAccept.setOnClickListener(v -> {
-                if (listener != null) listener.onAccept(position);
-            });
-
-            btnDecline.setOnClickListener(v -> {
-                if (listener != null) listener.onDecline(position);
+            btnView.setOnClickListener(v -> {
+                Intent intent = new Intent(itemView.getContext(), RequestDetailActivity.class);
+                intent.putExtra("title", item.title);
+                intent.putExtra("distance", item.distance);
+                intent.putExtra("description", item.description);
+                itemView.getContext().startActivity(intent);
             });
         }
     }

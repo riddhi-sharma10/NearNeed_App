@@ -178,6 +178,80 @@ public class MessagesFragment extends Fragment {
         }
     }
 
+    private void openChat(ChatEntry chat) {
+        Intent intent = new Intent(requireContext(), ChatActivity.class);
+        intent.putExtra("CHAT_NAME", chat.name);
+        intent.putExtra("PERSON_NAME", chat.name);
+        intent.putExtra("CHAT_TIME", chat.time);
+        intent.putExtra("CHAT_ONLINE", chat.isOnline);
+        intent.putExtra("CHAT_SNIPPET", chat.snippet);
+        intent.putExtra("PERSON_EMAIL", buildEmail(chat.name));
+        intent.putExtra("PERSON_PHONE", buildPhone(chat.name));
+        intent.putExtra("PERSON_GENDER", buildGender(chat.name));
+        intent.putExtra("PERSON_EXPERIENCE", buildExperience(chat.name));
+        intent.putExtra("PERSON_RATING", buildRating(chat.name));
+        intent.putExtra("PERSON_REVIEWS", buildReviews(chat.name));
+        intent.putExtra("PERSON_BIO", buildBio(chat));
+        startActivity(intent);
+        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    private void openPersonProfile(ChatEntry chat) {
+        Intent intent = new Intent(requireContext(), PersonProfileActivity.class);
+        intent.putExtra("PERSON_NAME", chat.name);
+        intent.putExtra("PERSON_EMAIL", buildEmail(chat.name));
+        intent.putExtra("PERSON_PHONE", buildPhone(chat.name));
+        intent.putExtra("PERSON_GENDER", buildGender(chat.name));
+        intent.putExtra("PERSON_EXPERIENCE", buildExperience(chat.name));
+        intent.putExtra("PERSON_RATING", buildRating(chat.name));
+        intent.putExtra("PERSON_REVIEWS", buildReviews(chat.name));
+        intent.putExtra("PERSON_BIO", buildBio(chat));
+        startActivity(intent);
+        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    private String buildEmail(String name) {
+        String normalized = name.toLowerCase().replace(" ", ".").replaceAll("[^a-z.]", "");
+        if (normalized.isEmpty()) normalized = "nearneed.user";
+        return normalized + "@nearneed.app";
+    }
+
+    private String buildPhone(String name) {
+        int seed = Math.abs(name.hashCode());
+        int last4 = 1000 + (seed % 9000);
+        return "+91 98" + (seed % 90 + 10) + "" + (seed % 9) + "" + (seed % 9) + " " + last4;
+    }
+
+    private String buildGender(String name) {
+        String lower = name.toLowerCase();
+        if (lower.endsWith("a") || lower.contains("sharma") || lower.contains("gupta")) {
+            return "Female";
+        }
+        return "Male";
+    }
+
+    private String buildExperience(String name) {
+        int years = 2 + (Math.abs(name.hashCode()) % 9);
+        return years + " years";
+    }
+
+    private String buildRating(String name) {
+        int d = Math.abs(name.hashCode()) % 7;
+        double rating = 4.2 + (d / 10.0);
+        return String.format(java.util.Locale.getDefault(), "%.1f", Math.min(rating, 4.9));
+    }
+
+    private String buildReviews(String name) {
+        int reviews = 40 + (Math.abs(name.hashCode()) % 260);
+        return reviews + " reviews";
+    }
+
+    private String buildBio(ChatEntry chat) {
+        return chat.name + " is an active NearNeed member. " +
+                "Known for quick responses and helpful communication. " +
+                "Recent context: \"" + chat.snippet + "\"";
+    }
+
     private static class ChatEntry {
         String name, gig, snippet, time;
         boolean isOnline, isUnread;
@@ -213,16 +287,18 @@ public class MessagesFragment extends Fragment {
             holder.tvMessageSnippet.setText(chat.snippet);
             holder.tvTime.setText(chat.time);
             holder.vUnreadIndicator.setVisibility(chat.isUnread ? View.VISIBLE : View.GONE);
+            if (holder.ivAvatar != null) {
+                holder.ivAvatar.setImageResource(resolveAvatarForName(chat.name));
+            }
 
-            holder.itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), ChatActivity.class);
-                intent.putExtra("CHAT_NAME", chat.name);
-                intent.putExtra("CHAT_TIME", chat.time);
-                intent.putExtra("CHAT_ONLINE", chat.isOnline);
-                intent.putExtra("CHAT_SNIPPET", chat.snippet);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
+            holder.itemView.setOnClickListener(v -> openChat(chat));
+            holder.tvName.setOnClickListener(v -> openPersonProfile(chat));
+            if (holder.avatarContainer != null) {
+                holder.avatarContainer.setOnClickListener(v -> openPersonProfile(chat));
+            }
+            if (holder.ivAvatar != null) {
+                holder.ivAvatar.setOnClickListener(v -> openPersonProfile(chat));
+            }
         }
 
         @Override
@@ -233,6 +309,8 @@ public class MessagesFragment extends Fragment {
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvName, tvMessageSnippet, tvTime;
             View vUnreadIndicator;
+            View avatarContainer;
+            ImageView ivAvatar;
 
             ViewHolder(View itemView) {
                 super(itemView);
@@ -240,7 +318,20 @@ public class MessagesFragment extends Fragment {
                 tvMessageSnippet = itemView.findViewById(R.id.tvMessageSnippet);
                 tvTime = itemView.findViewById(R.id.tvTime);
                 vUnreadIndicator = itemView.findViewById(R.id.vUnreadIndicator);
+                avatarContainer = itemView.findViewById(R.id.avatarContainer);
+                ivAvatar = itemView.findViewById(R.id.ivAvatar);
             }
+        }
+
+        private int resolveAvatarForName(String name) {
+            String lower = name == null ? "" : name.toLowerCase();
+            if (lower.endsWith("a") || lower.contains("sharma") || lower.contains("gupta") || lower.contains("kapoor") || lower.contains("jain")) {
+                return R.drawable.avatar_sarah;
+            }
+            if (lower.contains("rahul") || lower.contains("aarav") || lower.contains("aditya") || lower.contains("karan") || lower.contains("deepak") || lower.contains("vishu") || lower.contains("kabir")) {
+                return R.drawable.avatar_david;
+            }
+            return R.drawable.avatar_alex;
         }
     }
 }

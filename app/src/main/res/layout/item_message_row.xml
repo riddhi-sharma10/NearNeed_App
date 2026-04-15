@@ -23,13 +23,20 @@
             android:layout_centerVertical="true">
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/avatarCard"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 app:cardBackgroundColor="#CCD6E6"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
-                <!-- Avatar icon removed as per screenshot showing plain solid squares -->
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/avatar_sarah" />
             </com.google.android.material.card.MaterialCardView>
 
 

@@ -215,4 +215,20 @@
     <string name="btn_decline">Decline</string>
     <string name="btn_accept">Accept</string>
     <string name="view_earnings_history">View Earnings History</string>
+
+    <!-- Provider Bookings - Ongoing empty state -->
+    <string name="provider_ongoing_empty_title">No ongoing jobs</string>
+    <string name="provider_ongoing_empty_subtitle">Accepted jobs in progress will appear here</string>
+
+    <!-- Provider Bookings - Past empty state -->
+    <string name="provider_past_empty_title">No past jobs</string>
+    <string name="provider_past_empty_subtitle">Completed jobs will appear here</string>
+
+    <!-- Provider Bookings - Upcoming empty state -->
+    <string name="provider_upcoming_empty_title">No upcoming jobs</string>
+    <string name="provider_upcoming_empty_subtitle">When you accept gigs or volunteer jobs, they\'ll appear here</string>
+    <string name="provider_upcoming_empty_title_gigs">No upcoming gigs</string>
+    <string name="provider_upcoming_empty_subtitle_gigs">When you accept gigs, they\'ll appear here</string>
+    <string name="provider_upcoming_empty_title_community">No community volunteer jobs</string>
+    <string name="provider_upcoming_empty_subtitle_community">When you accept community volunteer jobs, they\'ll appear here</string>
 </resources>

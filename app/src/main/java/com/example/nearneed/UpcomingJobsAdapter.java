@@ -1,6 +1,7 @@
 package com.example.nearneed;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,7 +28,7 @@ public class UpcomingJobsAdapter extends RecyclerView.Adapter<UpcomingJobsAdapte
     @NonNull
     @Override
     public UpcomingJobViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(parent.getContext())
             .inflate(R.layout.item_upcoming_job_card, parent, false);
         return new UpcomingJobViewHolder(view);
     }
@@ -52,11 +53,9 @@ public class UpcomingJobsAdapter extends RecyclerView.Adapter<UpcomingJobsAdapte
         private TextView tvPaymentMethod;
         private TextView tvStatus;
         private LinearLayout llBudgetInfo;
-        private LinearLayout mainContainer;
 
-        public UpcomingJobViewHolder(@NonNull LinearLayout itemView) {
+        public UpcomingJobViewHolder(@NonNull View itemView) {
             super(itemView);
-            mainContainer = itemView;
             tvJobTitle = itemView.findViewById(R.id.tvJobTitle);
             tvJobType = itemView.findViewById(R.id.tvJobType);
             tvAssignedName = itemView.findViewById(R.id.tvAssignedName);
@@ -89,7 +88,7 @@ public class UpcomingJobsAdapter extends RecyclerView.Adapter<UpcomingJobsAdapte
 
             // Click listener
             if (listener != null) {
-                mainContainer.setOnClickListener(v -> listener.onJobClicked(job));
+                itemView.setOnClickListener(v -> listener.onJobClicked(job));
             }
         }
 

@@ -12,6 +12,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 public class OtpVerifyActivity extends AppCompatActivity {
 
@@ -21,6 +24,7 @@ public class OtpVerifyActivity extends AppCompatActivity {
     private TextView btnResend;
 
     private EditText[] otpBoxes = new EditText[6];
+    private String mVerificationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +48,8 @@ public class OtpVerifyActivity extends AppCompatActivity {
         if (phone != null) {
             tvCodeSentTo.setText("Code sent to +91 " + phone);
         }
+        
+        mVerificationId = getIntent().getStringExtra("VERIFICATION_ID");
 
         // Keep verify locked until all OTP digits are entered.
         btnVerify.setEnabled(false);
@@ -57,22 +63,60 @@ public class OtpVerifyActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> onBackPressed());
 
         btnVerify.setOnClickListener(v -> {
-            boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-            Intent intent;
-            if (isSignup) {
-                // Redirect to Profile Setup (Step 1)
-                intent = new Intent(this, ProfileInfoActivity.class);
-            } else {
-                // Login flow: OTP -> Account Type
-                intent = new Intent(this, AccountTypeActivity.class);
+            StringBuilder codeBuilder = new StringBuilder();
+            for (EditText otpBox : otpBoxes) {
+                codeBuilder.append(otpBox.getText().toString());
             }
-            startActivity(intent);
-            finish();
+
+            String code = codeBuilder.toString();
+            if (code.length() != 6) {
+                Toast.makeText(this, "Please enter 6 digit code", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            verifySignInCode(code);
         });
 
         btnResend.setOnClickListener(v -> {
             Toast.makeText(this, getString(R.string.txt_code_sent), Toast.LENGTH_SHORT).show();
+            // TODO: In the future, re-trigger phoneAuth verification.
         });
+    }
+
+    private void verifySignInCode(String code) {
+        if (mVerificationId == null) {
+            Toast.makeText(this, "Error: Verification ID missing.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnVerify.setEnabled(false);
+        btnVerify.setText("Verifying...");
+
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
+        signInWithPhoneAuthCredential(credential);
+    }
+
+    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        FirebaseAuth.getInstance().signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
+                        Intent intent;
+                        if (isSignup) {
+                            // Redirect to Profile Setup (Step 1)
+                            intent = new Intent(this, ProfileInfoActivity.class);
+                        } else {
+                            // Login flow: OTP -> Account Type
+                            intent = new Intent(this, AccountTypeActivity.class);
+                        }
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Verification failed or Incorrect Code.", Toast.LENGTH_SHORT).show();
+                        btnVerify.setEnabled(true);
+                        btnVerify.setText("Verify"); // Reset text
+                    }
+                });
     }
 
     private void setupOtpInputLogic() {

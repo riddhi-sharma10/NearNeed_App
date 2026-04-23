@@ -26,17 +26,55 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import org.maplibre.android.location.LocationComponent;
+import org.maplibre.android.location.LocationComponentActivationOptions;
+import org.maplibre.android.location.modes.CameraMode;
+import org.maplibre.android.location.modes.RenderMode;
+
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.maps.MapView;
+import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.android.maps.Style;
+import org.maplibre.android.camera.CameraUpdateFactory;
+
+import org.maplibre.android.maps.OnMapReadyCallback;
+import org.maplibre.android.annotations.Icon;
+import org.maplibre.android.annotations.IconFactory;
+
+
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.json.JSONObject;
+import org.json.JSONArray;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.io.IOException;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import android.view.inputmethod.InputMethodManager;
+import android.content.Context;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.maplibre.android.geometry.LatLng;
+import org.maplibre.android.annotations.Marker;
+import org.maplibre.android.annotations.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -52,12 +90,14 @@ import java.util.Map;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
+    private MapLibreMap mMap;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private MapView mapView;
     private String currentRole;
     private boolean isGigsMode = true;
 
     // UI elements - Common
-    private TextView btnGigs, btnCommunity;
+    
     private View infoCard;
     private Marker selectedMarker;
 
@@ -81,9 +121,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     // Map of jobs to markers for syncing
     private Map<Job, Marker> jobToMarkerMap;
+    private Map<Marker, MarkerData> markerDataMap;
 
     // Track currently displayed job in detail card
     private Job currentDetailJob;
+
+    private RecyclerView rvPredictions;
+    private SearchPredictionAdapter searchPredictionAdapter;
+    private OkHttpClient httpClient;
+    private final ExecutorService geocodeExecutor = Executors.newFixedThreadPool(2);
+    private Handler searchHandler;
+    private Runnable searchRunnable;
+
 
     private static class MarkerData {
         int iconResId;
@@ -125,9 +174,45 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted && mMap != null && mMap.getStyle() != null) {
+                enableLocationComponent(mMap.getStyle());
+            } else if (!isGranted) {
+                Toast.makeText(requireContext(), "Location permission denied. Showing default location.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @SuppressWarnings({"MissingPermission"})
+    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationComponent locationComponent = mMap.getLocationComponent();
+            LocationComponentActivationOptions locationComponentActivationOptions =
+                    LocationComponentActivationOptions.builder(requireContext(), loadedMapStyle)
+                            .useDefaultLocationEngine(true)
+                            .build();
+
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
+            locationComponent.setLocationComponentEnabled(true);
+            locationComponent.setCameraMode(CameraMode.TRACKING);
+            locationComponent.setRenderMode(RenderMode.COMPASS);
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle bundle) {
+        // Initialize MapLibre before inflating layout
+        MapLibre.getInstance(requireContext());
+        
+        jobToMarkerMap = new HashMap<>();
+        markerDataMap = new HashMap<>();
         currentRole = RoleManager.getRole(requireContext());
 
         int layoutId = RoleManager.ROLE_SEEKER.equals(currentRole) ?
@@ -135,17 +220,37 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         View view = inflater.inflate(layoutId, container, false);
 
+        
+        httpClient = new OkHttpClient();
+        searchHandler = new Handler(Looper.getMainLooper());
+        
+        rvPredictions = view.findViewById(R.id.rv_search_predictions);
+        if (rvPredictions != null) {
+            rvPredictions.setLayoutManager(new LinearLayoutManager(requireContext()));
+            searchPredictionAdapter = new SearchPredictionAdapter((lat, lng, name) -> {
+                InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null && view.getWindowToken() != null) {
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+                rvPredictions.setVisibility(View.GONE);
+                if (mMap != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15f));
+                }
+            });
+            rvPredictions.setAdapter(searchPredictionAdapter);
+        }
+
         initUI(view);
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
             setupProviderMode(view);
         }
 
-        // Obtain the SupportMapFragment
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
-                .findFragmentById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.map : R.id.provider_map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
+        // Obtain the MapView
+        mapView = view.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.map : R.id.provider_map);
+        if (mapView != null) {
+            mapView.onCreate(bundle);
+            mapView.getMapAsync(this);
         }
 
         SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_MAP);
@@ -153,8 +258,51 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mapView != null) mapView.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mapView != null) mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mapView != null) mapView.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mapView != null) mapView.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mapView != null) mapView.onLowMemory();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mapView != null) mapView.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mapView != null) mapView.onSaveInstanceState(outState);
+    }
+
     private void initUI(View view) {
         if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+
             infoCard = view.findViewById(R.id.seeker_info_card);
 
             View bookNow = view.findViewById(R.id.btn_book_now);
@@ -176,23 +324,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             }
 
             EditText searchEdit = view.findViewById(R.id.search_edit_text);
-            if (searchEdit != null) {
-                searchEdit.setOnEditorActionListener((v, actionId, event) -> {
-                    if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
-                        Toast.makeText(getContext(), "Searching for: " + v.getText(), Toast.LENGTH_SHORT).show();
-                        return true;
-                    }
-                    return false;
-                });
+            setupSearchIntegration(searchEdit);
+            
+            ImageView icCompass = view.findViewById(R.id.ic_compass);
+            if (icCompass != null) {
+                icCompass.setOnClickListener(v -> recenterMapToUser());
             }
+
         } else {
-            btnGigs = view.findViewById(R.id.btn_provider_gigs);
-            btnCommunity = view.findViewById(R.id.btn_provider_community);
+
             infoCard = view.findViewById(R.id.provider_info_card);
         }
-
-        if (btnGigs != null) btnGigs.setOnClickListener(v -> toggleMode(true));
-        if (btnCommunity != null) btnCommunity.setOnClickListener(v -> toggleMode(false));
 
         View closeBtn = view.findViewById(R.id.ic_close_card);
         if (closeBtn != null) closeBtn.setOnClickListener(v -> {
@@ -201,7 +343,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void setupProviderMode(View view) {
-        jobToMarkerMap = new HashMap<>();
+        
         allJobs = new ArrayList<>();
         filteredJobs = new ArrayList<>();
 
@@ -240,6 +382,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         // Setup search
         providerSearchEdit = view.findViewById(R.id.provider_search_edit_text);
+        setupSearchIntegration(providerSearchEdit);
         if (providerSearchEdit != null) {
             providerSearchEdit.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -258,7 +401,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // Setup recenter button
         recenterButton = view.findViewById(R.id.ic_recenter_location);
         if (recenterButton != null) {
-            recenterButton.setOnClickListener(v -> recenterMap());
+            recenterButton.setOnClickListener(v -> recenterMapToUser());
         }
 
         // Setup job detail card
@@ -404,6 +547,129 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         updateBottomSheetCount();
     }
 
+    
+    private void recenterMapToUser() {
+        if (mMap != null && mMap.getLocationComponent() != null && mMap.getLocationComponent().isLocationComponentActivated()) {
+            mMap.getLocationComponent().setCameraMode(CameraMode.TRACKING);
+            mMap.getLocationComponent().setRenderMode(RenderMode.COMPASS);
+        }
+    }
+
+        private void performGeocoding(String query) {
+        if (query.trim().isEmpty() || rvPredictions == null || searchPredictionAdapter == null) {
+            if (rvPredictions != null) rvPredictions.setVisibility(View.GONE);
+            return;
+        }
+
+        geocodeExecutor.submit(() -> {
+            List<SearchPredictionAdapter.GeocodingResult> aggregated = new ArrayList<>();
+            CountDownLatch latch = new CountDownLatch(2);
+            
+            String encodedQuery = query;
+            try { encodedQuery = URLEncoder.encode(query, "UTF-8"); } catch (Exception ignored) {}
+
+            // 1. Photon Call (lang=en)
+            String photonUrl = "https://photon.komoot.io/api/?limit=5&lang=en&q=" + encodedQuery;
+            Request req1 = new Request.Builder().url(photonUrl).build();
+            httpClient.newCall(req1).enqueue(new Callback() {
+                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
+                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
+                    try {
+                        if (r.isSuccessful() && r.body() != null) {
+                            JSONObject obj = new JSONObject(r.body().string());
+                            JSONArray features = obj.optJSONArray("features");
+                            if (features != null) {
+                                for(int i=0; i<features.length(); i++) {
+                                    JSONObject f = features.getJSONObject(i);
+                                    JSONObject p = f.optJSONObject("properties");
+                                    if(p==null) continue;
+                                    String name = p.optString("name", p.optString("street", "Unknown location"));
+                                    String sec = p.optString("city", "");
+                                    if(!p.optString("state", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("state");
+                                    if(!p.optString("country", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("country");
+                                    JSONArray coords = f.getJSONObject("geometry").getJSONArray("coordinates");
+                                    aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, coords.getDouble(1), coords.getDouble(0)));
+                                }
+                            }
+                        }
+                    } catch(Exception ignored) {}
+                    finally { latch.countDown(); }
+                }
+            });
+
+            // 2. Nominatim Call (Accept-Language: en)
+            String nomUrl = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=" + encodedQuery;
+            Request req2 = new Request.Builder().url(nomUrl).addHeader("Accept-Language", "en").addHeader("User-Agent", "NearNeed-AndroidApp").build();
+            httpClient.newCall(req2).enqueue(new Callback() {
+                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
+                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
+                    try {
+                        if (r.isSuccessful() && r.body() != null) {
+                            JSONArray arr = new JSONArray(r.body().string());
+                            for(int i=0; i<arr.length(); i++) {
+                                JSONObject o = arr.getJSONObject(i);
+                                String[] parts = o.optString("display_name", "Unknown").split(",", 2);
+                                String name = parts[0].trim();
+                                String sec = parts.length > 1 ? parts[1].trim() : "";
+                                aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, o.getDouble("lat"), o.getDouble("lon")));
+                            }
+                        }
+                    } catch(Exception ignored) {}
+                    finally { latch.countDown(); }
+                }
+            });
+
+            try {
+                latch.await(4, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {}
+
+            List<SearchPredictionAdapter.GeocodingResult> finalList = new ArrayList<>();
+            for (SearchPredictionAdapter.GeocodingResult res : aggregated) {
+                boolean dup = false;
+                for (SearchPredictionAdapter.GeocodingResult existing : finalList) {
+                    float[] results = new float[1];
+                    android.location.Location.distanceBetween(res.lat, res.lng, existing.lat, existing.lng, results);
+                    if (results[0] < 500) { // Same place if within 500 meters
+                        dup = true; break;
+                    }
+                }
+                if (!dup && finalList.size() < 6) finalList.add(res);
+            }
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (!finalList.isEmpty()) {
+                    rvPredictions.setVisibility(View.VISIBLE);
+                    searchPredictionAdapter.setPredictions(finalList);
+                } else {
+                    rvPredictions.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
+
+    private void setupSearchIntegration(EditText editText) {
+        if (editText == null) return;
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchHandler != null && searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
+                }
+                
+                searchRunnable = () -> performGeocoding(s.toString());
+                if (searchHandler != null) {
+                    searchHandler.postDelayed(searchRunnable, 500); // 500ms debounce
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+
     private void performSearch(String query) {
         if (filteredJobs == null) return;
 
@@ -439,8 +705,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private void updateMapMarkers() {
         if (mMap == null) return;
-        mMap.clear();
+        mMap.removeAnnotations();
         jobToMarkerMap.clear();
+        markerDataMap.clear();
 
         int yellow = ContextCompat.getColor(requireContext(), R.color.sapphire_tertiary);
         int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
@@ -457,7 +724,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             if (marker != null) {
                 jobToMarkerMap.put(job, marker);
-                marker.setTag(new MarkerData(job.iconResId, markerColor));
+                if (markerDataMap != null) markerDataMap.put(marker, new MarkerData(job.iconResId, markerColor));
             }
         }
     }
@@ -470,8 +737,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         for (Map.Entry<Job, Marker> entry : jobToMarkerMap.entrySet()) {
             Marker marker = entry.getValue();
             Job j = entry.getKey();
-            if (marker.getTag() instanceof MarkerData) {
-                MarkerData data = (MarkerData) marker.getTag();
+            if (markerDataMap.containsKey(marker)) {
+                MarkerData data = markerDataMap.get(marker);
                 int markerColor = "COMMUNITY".equals(j.type) ? green : yellow;
                 marker.setIcon(getMarkerBitmapDescriptor(marker.getTitle(), data.iconResId, markerColor, false));
             }
@@ -571,37 +838,36 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         if (isGigsMode == gigs) return;
         isGigsMode = gigs;
 
-        if (btnGigs != null) {
-            btnGigs.setBackground(gigs ? ContextCompat.getDrawable(requireContext(), R.drawable.bg_segmented_thumb) : null);
-            btnGigs.setTextColor(gigs ? ContextCompat.getColor(requireContext(), R.color.sapphire_primary) : ContextCompat.getColor(requireContext(), R.color.text_body_light));
-            btnGigs.setTypeface(null, gigs ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
-        }
-
-        if (btnCommunity != null) {
-            btnCommunity.setBackground(!gigs ? ContextCompat.getDrawable(requireContext(), R.drawable.bg_segmented_thumb) : null);
-            btnCommunity.setTextColor(!gigs ? ContextCompat.getColor(requireContext(), R.color.sapphire_primary) : ContextCompat.getColor(requireContext(), R.color.text_body_light));
-            btnCommunity.setTypeface(null, !gigs ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
-        }
+        
 
         updateMarkers();
     }
 
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+    public void onMapReady(@NonNull MapLibreMap mapLibreMap) {
+        mMap = mapLibreMap;
+        mMap.getUiSettings().setCompassEnabled(false);
 
-        LatLng mumbai = new LatLng(19.0760, 72.8777);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
+        String styleUrl = "https://api.maptiler.com/maps/streets-v2/style.json?key=" + BuildConfig.MAPTILER_API_KEY;
+        mMap.setStyle(new Style.Builder().fromUri(styleUrl), new Style.OnStyleLoaded() {
+            @Override
+            public void onStyleLoaded(@NonNull Style style) {
+                // Default fallback to Mumbai
+                LatLng mumbai = new LatLng(19.0760, 72.8777);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
 
-        if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
-            updateMapMarkers();
-            setupProviderMapListeners();
-        } else {
-            updateMarkers();
-            setupSeekerMapListeners();
-        }
+                if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
+                    updateMapMarkers();
+                    setupProviderMapListeners();
+                } else {
+                    updateMarkers();
+                    setupSeekerMapListeners();
+                }
+                
+                // Now check for permissions and launch tracking if allowed
+                enableLocationComponent(style);
+            }
+        });
     }
 
     private void setupProviderMapListeners() {
@@ -617,22 +883,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             return true;
         });
 
-        mMap.setOnMapClickListener(latLng -> {
+        mMap.addOnMapClickListener(latLng -> {
             if (jobDetailCard != null) {
                 jobDetailCard.setVisibility(View.GONE);
             }
+            return true;
         });
     }
 
     private void setupSeekerMapListeners() {
         mMap.setOnMarkerClickListener(marker -> {
-            if (selectedMarker != null && selectedMarker.getTag() instanceof MarkerData) {
-                MarkerData oldData = (MarkerData) selectedMarker.getTag();
+            if (selectedMarker != null && markerDataMap.containsKey(selectedMarker)) {
+                MarkerData oldData = markerDataMap.get(selectedMarker);
                 selectedMarker.setIcon(getMarkerBitmapDescriptor(selectedMarker.getTitle(), oldData.iconResId, oldData.color, false));
             }
 
-            if (marker.getTag() instanceof MarkerData) {
-                MarkerData newData = (MarkerData) marker.getTag();
+            if (markerDataMap.containsKey(marker)) {
+                MarkerData newData = markerDataMap.get(marker);
                 marker.setIcon(getMarkerBitmapDescriptor(marker.getTitle(), newData.iconResId, newData.color, true));
             }
 
@@ -641,14 +908,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             return true;
         });
 
-        mMap.setOnMapClickListener(latLng -> {
+        mMap.addOnMapClickListener(latLng -> {
             if (infoCard != null) infoCard.setVisibility(View.GONE);
+            return true;
         });
     }
 
     private void updateMarkers() {
         if (mMap == null) return;
-        mMap.clear();
+        mMap.removeAnnotations();
 
         int blue = ContextCompat.getColor(requireContext(), R.color.sapphire_primary);
         int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
@@ -668,10 +936,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .title(title)
                 .snippet(snippet)
                 .icon(getMarkerBitmapDescriptor(title, iconResId, color, false)));
-        if (marker != null) marker.setTag(new MarkerData(iconResId, color));
+        if (marker != null) if (markerDataMap != null) markerDataMap.put(marker, new MarkerData(iconResId, color));
     }
 
-    private BitmapDescriptor getMarkerBitmapDescriptor(String title, int iconResId, int bgColor, boolean isSelected) {
+    private Icon getMarkerBitmapDescriptor(String title, int iconResId, int bgColor, boolean isSelected) {
         int iconSize = 100;
         int width = 240;
         int height = iconSize + 60;
@@ -718,13 +986,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         paint.setColor(isSelected ? Color.WHITE : Color.parseColor("#0F172A"));
         canvas.drawText(labelText, bubbleLeft + bubblePaddingH, bubbleTop + bubbleHeight - 10f, paint);
 
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
+        return IconFactory.getInstance(requireContext()).fromBitmap(bitmap);
     }
 
     private void showInfoCard(Marker marker) {
         if (infoCard == null) return;
         infoCard.setVisibility(View.VISIBLE);
         if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+
             TextView name = infoCard.findViewById(R.id.provider_name);
             TextView desc = infoCard.findViewById(R.id.provider_desc);
             if (name != null) name.setText(marker.getTitle());

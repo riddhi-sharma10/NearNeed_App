@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.services)
@@ -18,6 +20,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val properties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
+        }
+        val mapTilerKey = properties.getProperty("MAPTILER_API_KEY") ?: ""
+        buildConfigField("String", "MAPTILER_API_KEY", "\"$mapTilerKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -36,6 +46,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -51,10 +62,11 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.appcompat)
     implementation(libs.material)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation(libs.playServicesMaps)
-    implementation(libs.gmsPlayServicesMaps)
+    implementation("org.maplibre.gl:android-sdk:11.0.0")
+    implementation("org.maplibre.gl:android-plugin-annotation-v9:3.0.0")
     implementation(libs.playServicesLocation)
     implementation(libs.gson)
     testImplementation(libs.junit)

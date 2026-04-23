@@ -6,10 +6,9 @@
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <!-- 1. Google Map Background -->
-    <fragment
+    <!-- 1. MapLibre Map Background -->
+    <org.maplibre.android.maps.MapView
         android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -34,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="62dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/bg_glass_search_bar"
             android:elevation="4dp">
             
@@ -77,8 +76,12 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/sapphire_primary" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+        
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Seeker Filter Chips with Colored Glass Effect -->
         <HorizontalScrollView
@@ -366,7 +369,9 @@
                     app:cornerRadius="18dp" />
             </LinearLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
@@ -377,5 +382,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+
+
+
+
+    <!-- Autocomplete Results -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_search_predictions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="110dp"
+        android:background="@drawable/bg_glass_card"
+        android:elevation="16dp"
+        android:translationZ="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,10 +6,9 @@
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <!-- 1. Google Map Background (Full Screen) -->
-    <fragment
+    <!-- 1. MapLibre Map Background (Full Screen) -->
+    <org.maplibre.android.maps.MapView
         android:id="@+id/provider_map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -28,24 +27,24 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"/>
 
-        <!-- Search Bar with Dropdown -->
+                <!-- Search Bar with Glass Effect -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="62dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/bg_glass_search_bar"
             android:elevation="4dp">
-
+            
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:id="@+id/ic_search"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:src="@drawable/ic_search_grey"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -56,84 +55,33 @@
                     android:id="@+id/provider_search_edit_text"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:background="@android:color/transparent"
                     android:hint="Search locations or jobs"
                     android:imeOptions="actionSearch"
                     android:inputType="text"
                     android:textColor="#334155"
                     android:textColorHint="#94A3B8"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     app:layout_constraintEnd_toStartOf="@id/ic_recenter_location"
                     app:layout_constraintStart_toEndOf="@id/ic_search" />
 
                 <ImageView
                     android:id="@+id/ic_recenter_location"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:src="@drawable/ic_nav_map_final"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/sapphire_primary" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- Search Suggestions Dropdown (Initially Hidden) -->
-        <FrameLayout
-            android:id="@+id/search_suggestions_container"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="4dp"
-            android:background="@color/white"
-            android:elevation="8dp"
-            android:visibility="gone">
+        
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/search_suggestions_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-        </FrameLayout>
-
-        <!-- Provider Switch: Gigs / Community -->
-        <FrameLayout
-            android:id="@+id/provider_mode_switch"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginHorizontal="20dp"
-            android:background="@drawable/bg_segmented_control"
-            android:padding="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/btn_provider_gigs"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_segmented_thumb"
-                    android:gravity="center"
-                    android:text="Gigs"
-                    android:textColor="@color/sapphire_primary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btn_provider_community"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Community"
-                    android:textColor="@color/text_body_light" />
-
-            </LinearLayout>
-        </FrameLayout>
+        
 
         <!-- Provider Filter Chips (Individual, Clickable) -->
 
@@ -206,7 +154,9 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:itemCount="3" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
@@ -385,7 +335,11 @@
                 app:iconGravity="textEnd"
                 app:layout_constraintTop_toBottomOf="@id/row_slots" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
@@ -396,5 +350,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom" />
+
+
+    <!-- Autocomplete Results -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_search_predictions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="110dp"
+        android:background="@drawable/bg_glass_card"
+        android:elevation="16dp"
+        android:translationZ="16dp"
+        android:visibility="gone"
+        android:layout_gravity="top"
+        tools:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

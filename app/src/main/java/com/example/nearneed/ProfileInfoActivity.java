@@ -104,9 +104,38 @@ public class ProfileInfoActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Intent intent = new Intent(ProfileInfoActivity.this, ProfileSetupActivity.class);
-            startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            
+            btnContinue.setEnabled(false);
+            btnContinue.setText("Saving...");
+
+            com.google.firebase.auth.FirebaseAuth auth = com.google.firebase.auth.FirebaseAuth.getInstance();
+            if (auth.getCurrentUser() != null) {
+                String uid = auth.getCurrentUser().getUid();
+                java.util.Map<String, Object> user = new java.util.HashMap<>();
+                user.put("fullName", name);
+                user.put("bio", etBio.getText().toString().trim());
+                user.put("dob", etDob.getText().toString().trim());
+
+                com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        .collection("Users").document(uid)
+                        .set(user, com.google.firebase.firestore.SetOptions.merge())
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Intent intent = new Intent(ProfileInfoActivity.this, ProfileSetupActivity.class);
+                                startActivity(intent);
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                finish();
+                            } else {
+                                Toast.makeText(this, "Failed to save profile: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                btnContinue.setEnabled(true);
+                                btnContinue.setText("Continue");
+                            }
+                        });
+            } else {
+                 Toast.makeText(this, "Not authenticated.", Toast.LENGTH_SHORT).show();
+                 btnContinue.setEnabled(true);
+                 btnContinue.setText("Continue");
+            }
         });
     }
 

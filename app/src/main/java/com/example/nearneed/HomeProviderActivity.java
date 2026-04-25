@@ -142,10 +142,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void setupNearbyRequests() {
         RecyclerView rvNearbyRequests = findViewById(R.id.rvNearbyRequests);
-        nearbyRequestsAdapter = new NearbyRequestsAdapter(new NearbyRequestsAdapter.OnRequestActionListener() {
-            @Override public void onAccept(int position) {}
-            @Override public void onDecline(int position) {}
-        });
+        nearbyRequestsAdapter = new NearbyRequestsAdapter();
         rvNearbyRequests.setAdapter(nearbyRequestsAdapter);
         setupCommunityVolunteering();
     }
@@ -167,7 +164,7 @@ public class HomeProviderActivity extends AppCompatActivity {
                 if ("GIG".equals(p.type)) gigs.add(p);
                 else if ("COMMUNITY".equals(p.type)) community.add(p);
             }
-            nearbyRequestsAdapter.setRequests(gigs);
+            nearbyRequestsAdapter.setPosts(gigs);
             communityVolunteeringAdapter.setPosts(community);
         });
 

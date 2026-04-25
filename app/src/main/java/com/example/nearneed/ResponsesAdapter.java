@@ -88,13 +88,14 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
             tvRating.setText(String.format(Locale.getDefault(), "★ %.1f", app.applicantRating != null ? app.applicantRating : 0.0f));
             tvMessage.setText(app.message);
             tvLocation.setText(app.applicantLocation != null ? app.applicantLocation : "Nearby");
-            tvTime.setText(formatTime(app.timestamp));
+            tvTime.setText(formatTime(app.appliedAt));
 
             // Budget Info
-            if (app.proposedBudget != null && !app.proposedBudget.isEmpty()) {
+            if (app.proposedBudget != null && app.proposedBudget > 0) {
                 llBudgetCard.setVisibility(View.VISIBLE);
-                tvProposedBudget.setText(app.proposedBudget);
-                tvPriceAppliedValue.setText(app.proposedBudget);
+                String budgetStr = "₹" + String.format(Locale.getDefault(), "%.0f", app.proposedBudget);
+                tvProposedBudget.setText(budgetStr);
+                tvPriceAppliedValue.setText(budgetStr);
                 tvPaymentMethod.setText(app.paymentMethod != null ? app.paymentMethod : "CASH");
             } else {
                 llBudgetCard.setVisibility(View.GONE);

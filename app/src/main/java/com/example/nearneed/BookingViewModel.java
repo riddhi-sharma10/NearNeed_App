@@ -161,6 +161,13 @@ public class BookingViewModel extends AndroidViewModel {
     }
 
     /**
+     * Create a booking directly from an Application document.
+     */
+    public void createBookingFromApplication(com.example.nearneed.Application app) {
+        createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, null);
+    }
+
+    /**
      * Update booking status.
      */
     public void updateBookingStatus(String bookingId, String newStatus, BookingRepository.SaveCallback callback) {

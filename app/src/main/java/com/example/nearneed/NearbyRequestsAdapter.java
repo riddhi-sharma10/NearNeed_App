@@ -83,7 +83,7 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
                 intent.putExtra("post_id", post.postId);
                 intent.putExtra("title", post.title);
                 intent.putExtra("type", post.type);
-                intent.putExtra("creator_id", post.creatorId);
+                intent.putExtra("creator_id", post.userId);
                 intent.putExtra("description", post.description);
                 itemView.getContext().startActivity(intent);
             });

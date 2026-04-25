@@ -153,9 +153,10 @@ public class ApplicationViewModel extends AndroidViewModel {
      * Submit a new application.
      */
     public void submitApplication(String postId, String postTitle, String postType, 
-                                  String creatorId, String message, ApplicationRepository.SaveCallback callback) {
+                                  String creatorId, String message, String budget, 
+                                  String paymentMethod, com.example.nearneed.ApplicationRepository.SaveCallback callback) {
         isLoading.setValue(true);
-        ApplicationRepository.submitApplication(postId, postTitle, postType, creatorId, message, new ApplicationRepository.SaveCallback() {
+        com.example.nearneed.ApplicationRepository.submitApplication(postId, postTitle, postType, creatorId, message, budget, paymentMethod, new com.example.nearneed.ApplicationRepository.SaveCallback() {
             @Override
             public void onSuccess(String applicationId) {
                 isLoading.setValue(false);
@@ -168,6 +169,40 @@ public class ApplicationViewModel extends AndroidViewModel {
                 errorMessage.setValue("Failed to submit application: " + e.getMessage());
                 isLoading.setValue(false);
                 if (callback != null) callback.onFailure(e);
+            }
+        });
+    }
+
+    /**
+     * Get applications for a specific post (helper for observing).
+     */
+    public LiveData<List<com.example.nearneed.Application>> getApplicationsByPost(String postId) {
+        return postApplications;
+    }
+
+    /**
+     * Observe applications for a post (for UI convenience).
+     */
+    public void observeApplicationsByPost(androidx.lifecycle.LifecycleOwner owner, String postId) {
+        observeApplicationsForPost(postId);
+    }
+
+    /**
+     * Update application status (helper for UI).
+     */
+    public void updateApplicationStatus(String applicationId, String status) {
+        isLoading.setValue(true);
+        com.example.nearneed.ApplicationRepository.updateApplicationStatus(applicationId, status, new com.example.nearneed.ApplicationRepository.SaveCallback() {
+            @Override
+            public void onSuccess(String id) {
+                isLoading.setValue(false);
+                errorMessage.setValue(null);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                errorMessage.setValue("Failed to update status: " + e.getMessage());
+                isLoading.setValue(false);
             }
         });
     }

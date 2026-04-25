@@ -32,7 +32,9 @@ public class PersonProfileActivity extends AppCompatActivity {
         String reviews = readExtra("PERSON_REVIEWS", "100 reviews");
         String bio = readExtra("PERSON_BIO", "Active NearNeed member with positive community engagement.");
 
-        ((TextView) findViewById(R.id.tvName)).setText(name);
+        TextView tvName = findViewById(R.id.tvName);
+        tvName.setText(name);
+        VerifiedBadgeHelper.apply(this, tvName, getIntent().getBooleanExtra("IS_VERIFIED", false));
         ((TextView) findViewById(R.id.tvEmail)).setText(email);
         ((TextView) findViewById(R.id.tvPhone)).setText(phone);
         ((TextView) findViewById(R.id.tvGender)).setText(gender);

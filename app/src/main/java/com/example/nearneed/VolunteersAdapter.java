@@ -18,8 +18,8 @@ import java.util.Locale;
 
 public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.VolunteerViewHolder> {
 
-    private List<Volunteer> volunteers;
-    private OnVolunteerActionListener listener;
+    private final List<Volunteer> volunteers;
+    private final OnVolunteerActionListener listener;
     private boolean isSeeker;
     private int maxSlots;
 
@@ -91,6 +91,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
 
         public void bind(Volunteer volunteer, OnVolunteerActionListener listener, boolean isSeeker, int maxSlots) {
             tvName.setText(volunteer.getVolunteerName());
+            VerifiedBadgeHelper.apply(itemView.getContext(), tvName, volunteer.isVerified());
             tvRating.setText(String.format("★ %.1f", volunteer.getVolunteerRating()));
             tvBio.setText(volunteer.getBio());
             tvMessage.setText(volunteer.getMessage());

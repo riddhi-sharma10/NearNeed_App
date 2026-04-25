@@ -9,6 +9,7 @@ public final class UserPrefs {
     public static final String KEY_NAME = "profile_name";
     public static final String KEY_PHOTO_URI = "profile_photo_uri";
     public static final String KEY_LOCATION = "profile_location";
+    public static final String KEY_VERIFIED = "profile_verified";
 
     private UserPrefs() {}
 
@@ -38,5 +39,13 @@ public final class UserPrefs {
 
     public static String getLocation(Context ctx) {
         return prefs(ctx).getString(KEY_LOCATION, null);
+    }
+
+    public static void saveVerified(Context ctx, boolean verified) {
+        prefs(ctx).edit().putBoolean(KEY_VERIFIED, verified).apply();
+    }
+
+    public static boolean isVerified(Context ctx) {
+        return prefs(ctx).getBoolean(KEY_VERIFIED, false);
     }
 }

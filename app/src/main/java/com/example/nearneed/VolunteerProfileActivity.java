@@ -2,8 +2,6 @@ package com.example.nearneed;
 
 import android.os.Bundle;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,12 +18,10 @@ import java.util.List;
 public class VolunteerProfileActivity extends AppCompatActivity {
 
     private ImageButton btnBack;
-    private ImageView ivAvatar;
     private TextView tvName, tvRating, tvLocation, tvBio;
     private TextView tvVolunteeredCount, tvCompletedCount, tvRatingScore;
     private MaterialButton btnMessage, btnReport;
     private RecyclerView rvReviews;
-    private ReviewsAdapter reviewsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +36,6 @@ public class VolunteerProfileActivity extends AppCompatActivity {
 
     private void initViews() {
         btnBack = findViewById(R.id.btnBack);
-        ivAvatar = findViewById(R.id.ivAvatar);
         tvName = findViewById(R.id.tvName);
         tvRating = findViewById(R.id.tvRating);
         tvLocation = findViewById(R.id.tvLocation);
@@ -54,26 +49,21 @@ public class VolunteerProfileActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void loadVolunteerData() {
-        // Get volunteerId from intent
-        String volunteerId = getIntent().getStringExtra("volunteerId");
-
-        // Sample volunteer data (replace with database call)
         tvName.setText("Priya Sharma");
+        VerifiedBadgeHelper.apply(this, tvName, getIntent().getBooleanExtra("IS_VERIFIED", false));
         tvRating.setText("4.9");
         tvLocation.setText("2.5 km away");
-        tvBio.setText("Experienced volunteer with a passion for community service. " +
-            "I love helping neighbors and making a positive impact in our community.");
+        tvBio.setText("Experienced volunteer with a passion for community service. "
+            + "I love helping neighbors and making a positive impact in our community.");
 
-        // Stats
         tvVolunteeredCount.setText("12");
         tvCompletedCount.setText("12");
         tvRatingScore.setText("4.9");
 
-        // Button listeners
         btnMessage.setOnClickListener(v -> {
             String volunteerName = tvName.getText() != null ? tvName.getText().toString() : "Volunteer";
             android.content.Intent intent = new android.content.Intent(this, ChatActivity.class);
@@ -82,9 +72,7 @@ public class VolunteerProfileActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btnReport.setOnClickListener(v -> {
-            showReportDialog();
-        });
+        btnReport.setOnClickListener(v -> showReportDialog());
     }
 
     private void showReportDialog() {
@@ -106,7 +94,6 @@ public class VolunteerProfileActivity extends AppCompatActivity {
     private void setupReviewsList() {
         rvReviews.setLayoutManager(new LinearLayoutManager(this));
 
-        // Sample reviews
         List<Review> reviews = new ArrayList<>();
         reviews.add(new Review(
             "Sarah Johnson",
@@ -129,7 +116,7 @@ public class VolunteerProfileActivity extends AppCompatActivity {
             System.currentTimeMillis() - 86400000 * 14
         ));
 
-        reviewsAdapter = new ReviewsAdapter(reviews);
+        ReviewsAdapter reviewsAdapter = new ReviewsAdapter(reviews);
         rvReviews.setAdapter(reviewsAdapter);
     }
 }

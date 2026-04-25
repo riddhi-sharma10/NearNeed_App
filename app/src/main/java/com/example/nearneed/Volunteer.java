@@ -8,6 +8,7 @@ public class Volunteer {
     private String message;
     private String status; // interested, confirmed, completed
     private long volunteerDate;
+    private boolean isVerified;
 
     public Volunteer(String volunteerId, String volunteerName, float volunteerRating,
                     String bio, String message, String status, long volunteerDate) {
@@ -41,4 +42,7 @@ public class Volunteer {
 
     public long getVolunteerDate() { return volunteerDate; }
     public void setVolunteerDate(long volunteerDate) { this.volunteerDate = volunteerDate; }
+
+    public boolean isVerified() { return isVerified; }
+    public void setVerified(boolean verified) { this.isVerified = verified; }
 }

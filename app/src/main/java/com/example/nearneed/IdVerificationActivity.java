@@ -119,6 +119,8 @@ public class IdVerificationActivity extends AppCompatActivity {
 
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (isFullyVerified) {
+                        UserPrefs.saveVerified(this, true);
+                        saveVerifiedToFirestore();
                         Intent intent = new Intent(this, IdVerifiedActivity.class);
                         startActivity(intent);
                     }
@@ -205,6 +207,17 @@ public class IdVerificationActivity extends AppCompatActivity {
                 checkReadyToSubmit();
             }, 2000);
         }
+    }
+
+    private void saveVerifiedToFirestore() {
+        com.google.firebase.auth.FirebaseUser user =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("isVerified", true);
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("Users").document(user.getUid())
+                .set(data, com.google.firebase.firestore.SetOptions.merge());
     }
 
     private void checkReadyToSubmit() {

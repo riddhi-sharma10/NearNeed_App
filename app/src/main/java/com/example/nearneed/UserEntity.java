@@ -23,28 +23,25 @@ public class UserEntity {
     public static UserEntity fromProfile(UserProfile profile) {
         UserEntity entity = new UserEntity();
         entity.userId = profile.userId;
-        entity.name = profile.name;
+        entity.name = profile.fullName;
         entity.phone = profile.phone;
-        entity.address = profile.address;
-        entity.profileImageUrl = profile.profileImageUrl;
+        entity.address = profile.location;
+        entity.profileImageUrl = profile.photoUrl;
         entity.bio = profile.bio;
-        entity.role = profile.role;
-        entity.rating = profile.rating;
-        entity.jobsCompleted = profile.jobsCompleted;
+        entity.role = "User"; // default
+        entity.rating = 0.0; // default
+        entity.jobsCompleted = 0; // default
         return entity;
     }
 
     public UserProfile toProfile() {
         UserProfile profile = new UserProfile();
         profile.userId = this.userId;
-        profile.name = this.name;
+        profile.fullName = this.name;
         profile.phone = this.phone;
-        profile.address = this.address;
-        profile.profileImageUrl = this.profileImageUrl;
+        profile.location = this.address;
+        profile.photoUrl = this.profileImageUrl;
         profile.bio = this.bio;
-        profile.role = this.role;
-        profile.rating = this.rating;
-        profile.jobsCompleted = this.jobsCompleted;
         return profile;
     }
 }

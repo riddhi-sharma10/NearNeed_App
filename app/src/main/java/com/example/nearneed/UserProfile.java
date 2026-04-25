@@ -1,6 +1,7 @@
 package com.example.nearneed;
 
 public class UserProfile {
+    public String userId;
     public String fullName;
     public String location;
     public String photoUrl;

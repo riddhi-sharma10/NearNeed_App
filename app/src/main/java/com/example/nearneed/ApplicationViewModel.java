@@ -35,7 +35,7 @@ public class ApplicationViewModel extends AndroidViewModel {
     /**
      * Get live data for applications to a post (creator view).
      */
-    public LiveData<List<Application>> getPostApplications() {
+    public LiveData<List<com.example.nearneed.Application>> getPostApplications() {
         if (postApplications == null) {
             postApplications = new MutableLiveData<>();
             postApplications.setValue(new ArrayList<>());
@@ -46,7 +46,7 @@ public class ApplicationViewModel extends AndroidViewModel {
     /**
      * Get live data for user's own applications.
      */
-    public LiveData<List<Application>> getUserApplications() {
+    public LiveData<List<com.example.nearneed.Application>> getUserApplications() {
         if (userApplications == null) {
             userApplications = new MutableLiveData<>();
             userApplications.setValue(new ArrayList<>());

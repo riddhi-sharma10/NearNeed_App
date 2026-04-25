@@ -26,9 +26,9 @@ public class ApplicationEntity {
         entity.applicantId = app.applicantId;
         entity.applicantName = app.applicantName;
         entity.status = app.status;
-        entity.createdAt = app.createdAt;
+        entity.createdAt = app.appliedAt != null ? app.appliedAt : 0L;
         entity.message = app.message;
-        entity.proposedBudget = app.proposedBudget;
+        entity.proposedBudget = app.proposedBudget != null ? app.proposedBudget : 0.0;
         return entity;
     }
 
@@ -39,7 +39,7 @@ public class ApplicationEntity {
         app.applicantId = this.applicantId;
         app.applicantName = this.applicantName;
         app.status = this.status;
-        app.createdAt = this.createdAt;
+        app.appliedAt = this.createdAt;
         app.message = this.message;
         app.proposedBudget = this.proposedBudget;
         return app;

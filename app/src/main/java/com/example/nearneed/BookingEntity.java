@@ -31,8 +31,8 @@ public class BookingEntity {
         entity.providerId = booking.providerId;
         entity.providerName = booking.providerName;
         entity.status = booking.status;
-        entity.createdAt = booking.createdAt;
-        entity.price = booking.price;
+        entity.createdAt = booking.createdAt != null ? booking.createdAt : 0L;
+        entity.price = booking.amount != null ? String.valueOf(booking.amount) : "0.0";
         return entity;
     }
 
@@ -47,7 +47,11 @@ public class BookingEntity {
         b.providerName = this.providerName;
         b.status = this.status;
         b.createdAt = this.createdAt;
-        b.price = this.price;
+        try {
+            b.amount = Double.parseDouble(this.price);
+        } catch (NumberFormatException e) {
+            b.amount = 0.0;
+        }
         return b;
     }
 }

@@ -32,28 +32,9 @@ public class UpdateStatusActivity extends AppCompatActivity {
     private String selectedStatus = "pending";
     private MaterialButton btnStatusPending, btnStatusOngoing, btnStatusCompleted, btnStatusCancelled;
     private MaterialButton btnSubmitStatus;
-    private TextInputEditText etCompletionNotes;
-    private MaterialCardView btnUploadPhoto;
     private ImageView btnClose;
-    private RecyclerView rvStatusHistory;
-    private StatusHistoryAdapter statusHistoryAdapter;
     private String bookingId;
     private String bookingTitle;
-    private android.widget.LinearLayout llUploadPrompt;
-    private ImageView ivUploadedPhoto;
-    private Uri selectedPhotoUri;
-
-    private final ActivityResultLauncher<String> photoPickerLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> {
-                if (uri != null) {
-                    selectedPhotoUri = uri;
-                    ivUploadedPhoto.setImageURI(uri);
-                    ivUploadedPhoto.setVisibility(View.VISIBLE);
-                    llUploadPrompt.setVisibility(View.GONE);
-                }
-            }
-    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,12 +61,7 @@ public class UpdateStatusActivity extends AppCompatActivity {
         btnStatusCompleted = findViewById(R.id.btnStatusCompleted);
         btnStatusCancelled = findViewById(R.id.btnStatusCancelled);
         btnSubmitStatus = findViewById(R.id.btnSubmitStatus);
-        etCompletionNotes = findViewById(R.id.etCompletionNotes);
-        btnUploadPhoto = findViewById(R.id.btnUploadPhoto);
         btnClose = findViewById(R.id.btnClose);
-        rvStatusHistory = findViewById(R.id.rvStatusHistory);
-        llUploadPrompt = findViewById(R.id.llUploadPrompt);
-        ivUploadedPhoto = findViewById(R.id.ivUploadedPhoto);
 
         // Setup status button listeners
         setupStatusButtons();
@@ -95,15 +71,6 @@ public class UpdateStatusActivity extends AppCompatActivity {
 
         // Setup close button
         btnClose.setOnClickListener(v -> finish());
-
-        // Setup photo upload
-        btnUploadPhoto.setOnClickListener(v -> handlePhotoUpload());
-
-        // Setup status history
-        setupStatusHistory();
-
-        // Load sample status history
-        loadStatusHistory();
     }
 
     private void setupStatusButtons() {
@@ -111,10 +78,6 @@ public class UpdateStatusActivity extends AppCompatActivity {
         btnStatusOngoing.setOnClickListener(v -> selectStatus("ongoing", btnStatusOngoing));
         btnStatusCompleted.setOnClickListener(v -> selectStatus("completed", btnStatusCompleted));
         btnStatusCancelled.setOnClickListener(v -> selectStatus("cancelled", btnStatusCancelled));
-
-        // Update button labels
-        btnStatusPending.setText("Pending");
-        btnStatusOngoing.setText("Ongoing");
 
         // Set initial state
         updateStatusButtonStyles();
@@ -162,44 +125,9 @@ public class UpdateStatusActivity extends AppCompatActivity {
         }
     }
 
-    private void handlePhotoUpload() {
-        photoPickerLauncher.launch("image/*");
-    }
 
-    private void setupStatusHistory() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        rvStatusHistory.setLayoutManager(layoutManager);
-    }
-
-    private void loadStatusHistory() {
-        List<Status> statusHistory = new ArrayList<>();
-
-        // Add sample status history in reverse chronological order
-        statusHistory.add(new Status(
-            "1", "booking_1", "in_progress",
-            "Work started on the assigned task",
-            null,
-            System.currentTimeMillis() - 3600000,
-            "Provider Name"
-        ));
-
-        statusHistory.add(new Status(
-            "2", "booking_1", "not_started",
-            "Booking confirmed and scheduled",
-            null,
-            System.currentTimeMillis() - 86400000,
-            "System"
-        ));
-
-        statusHistoryAdapter = new StatusHistoryAdapter(statusHistory);
-        rvStatusHistory.setAdapter(statusHistoryAdapter);
-    }
 
     private void submitStatusUpdate() {
-        String notes = etCompletionNotes.getText() != null
-            ? etCompletionNotes.getText().toString().trim()
-            : "";
-
         if (selectedStatus.equals(currentStatus)) {
             Toast.makeText(this, "Please select a different status", Toast.LENGTH_SHORT).show();
             return;
@@ -210,7 +138,7 @@ public class UpdateStatusActivity extends AppCompatActivity {
 
         // If completed, navigate to payment flow
         if ("completed".equals(selectedStatus)) {
-            navigateToPaymentFlow(notes);
+            navigateToPaymentFlow("");
             return;
         }
 
@@ -218,14 +146,10 @@ public class UpdateStatusActivity extends AppCompatActivity {
         Intent result = new Intent();
         result.putExtra("booking_id", bookingId);
         result.putExtra("new_status", selectedStatus);
-        if (selectedPhotoUri != null) {
-            result.putExtra("completion_photo_uri", selectedPhotoUri.toString());
-        }
         setResult(RESULT_OK, result);
 
         Toast.makeText(this, "Status updated to " + formatStatusType(selectedStatus), Toast.LENGTH_SHORT).show();
         currentStatus = selectedStatus;
-        etCompletionNotes.setText("");
         finish();
     }
 
@@ -236,9 +160,6 @@ public class UpdateStatusActivity extends AppCompatActivity {
         intent.putExtra("provider_name", "Provider Name");
         intent.putExtra("service_amount", 500.0); // Default amount, can be customized
         intent.putExtra("completion_notes", completionNotes);
-        if (selectedPhotoUri != null) {
-            intent.putExtra("completion_photo_uri", selectedPhotoUri.toString());
-        }
         startActivity(intent);
         finish();
     }

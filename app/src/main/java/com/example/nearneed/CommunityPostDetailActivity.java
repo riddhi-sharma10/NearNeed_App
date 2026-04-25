@@ -29,8 +29,8 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
 
         tvTitle = findViewById(R.id.tv_community_title);
         tvDescription = findViewById(R.id.tv_community_description);
-//        tvPostedBy = findViewById(R.id.tv_posted_by);
-//        tvPostedTime = findViewById(R.id.tv_posted_time);
+        tvPostedBy = findViewById(R.id.tv_posted_by);
+        tvPostedTime = findViewById(R.id.tv_posted_time);
         tvLocation = findViewById(R.id.tv_community_location);
         tvSlotsAvailable = findViewById(R.id.tv_slots_available);
         btnVolunteer = findViewById(R.id.btn_volunteer);
@@ -48,8 +48,8 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         // Set data to views
         tvTitle.setText(title != null ? title : "Community Need");
         tvDescription.setText(description != null ? description : "No description available");
-//        tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
-//        tvPostedTime.setText(postedTime != null ? postedTime : "Recently");
+        tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
+        tvPostedTime.setText(postedTime != null ? postedTime : "Recently");
         tvLocation.setText(location != null ? location : "Location unknown");
         tvSlotsAvailable.setText(slots != null ? slots : "Volunteers needed");
 

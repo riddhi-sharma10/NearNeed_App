@@ -583,7 +583,7 @@
                         android:layout_height="wrap_content"
                         android:text="View All"
                         android:textColor="@color/sapphire_primary"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
                         android:fontFamily="sans-serif-medium" />
 
                     <ImageView
@@ -603,8 +603,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:clipToPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="2"
@@ -629,8 +627,7 @@
                     android:textColor="@color/text_header"
                     android:textSize="19sp"
                     android:maxLines="1"
-                    android:ellipsize="end"
-                    android:paddingStart="20dp" />
+                    android:ellipsize="end" />
 
                 <LinearLayout
                     android:id="@+id/viewAllCommunityContainer"
@@ -653,7 +650,7 @@
                         android:layout_height="wrap_content"
                         android:text="View All"
                         android:textColor="@color/brand_success"
-                        android:textSize="12sp"
+                        android:textSize="14sp"
                         android:fontFamily="sans-serif-medium" />
 
                     <ImageView
@@ -673,8 +670,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:clipToPadding="false"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="2"

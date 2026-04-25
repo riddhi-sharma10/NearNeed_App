@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private TextView tvDeliveryLocation;
     private TextView tvDashboardNotificationBadge;
+    private NearbyRequestsAdapter nearbyRequestsAdapter;
+    private CommunityVolunteeringAdapter communityVolunteeringAdapter;
     private static final String PREFS = "LocationPrefs";
     private static final String KEY_LOCATION = "delivery_location";
 
@@ -105,6 +108,10 @@ public class HomeProviderActivity extends AppCompatActivity {
         // Setup nearby requests RecyclerView
         setupNearbyRequests();
 
+        EditText searchEdit = findViewById(R.id.searchEditText);
+        TextView searchEmptyState = findViewById(R.id.tvSearchEmptyState);
+        DashboardSearchHelper.bindProviderSearch(searchEdit, nearbyRequestsAdapter, communityVolunteeringAdapter, searchEmptyState);
+
         // Bind the unified navbar – Home tab active
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
     }
@@ -117,7 +124,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void setupNearbyRequests() {
         RecyclerView rvNearbyRequests = findViewById(R.id.rvNearbyRequests);
-        NearbyRequestsAdapter adapter = new NearbyRequestsAdapter(new NearbyRequestsAdapter.OnRequestActionListener() {
+        nearbyRequestsAdapter = new NearbyRequestsAdapter(new NearbyRequestsAdapter.OnRequestActionListener() {
             @Override
             public void onAccept(int position) {
                 // Handle accept
@@ -146,8 +153,8 @@ public class HomeProviderActivity extends AppCompatActivity {
             R.drawable.ic_electrician
         ));
 
-        adapter.setRequests(requests);
-        rvNearbyRequests.setAdapter(adapter);
+        nearbyRequestsAdapter.setRequests(requests);
+        rvNearbyRequests.setAdapter(nearbyRequestsAdapter);
 
         // Setup community volunteering section
         setupCommunityVolunteering();
@@ -155,7 +162,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void setupCommunityVolunteering() {
         RecyclerView rvCommunityVolunteering = findViewById(R.id.rvCommunityVolunteering);
-        CommunityVolunteeringAdapter adapter = new CommunityVolunteeringAdapter();
+        communityVolunteeringAdapter = new CommunityVolunteeringAdapter();
 
         // Sample community posts
         List<CommunityVolunteeringAdapter.CommunityPost> communityPosts = new ArrayList<>();
@@ -174,9 +181,9 @@ public class HomeProviderActivity extends AppCompatActivity {
             "3 volunteers needed"
         ));
 
-        adapter.setPosts(communityPosts);
+        communityVolunteeringAdapter.setPosts(communityPosts);
         if (rvCommunityVolunteering != null) {
-            rvCommunityVolunteering.setAdapter(adapter);
+            rvCommunityVolunteering.setAdapter(communityVolunteeringAdapter);
         }
     }
 

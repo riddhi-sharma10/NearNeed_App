@@ -1,6 +1,7 @@
 package com.example.nearneed;
 
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -61,6 +62,9 @@ public class CommunityPostStep2Activity extends AppCompatActivity {
             }, cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE), false);
             tpd.show();
         });
+
+        EditText searchEdit = findViewById(R.id.searchEditText);
+        DashboardSearchHelper.bindMapSearchShortcut(searchEdit, this);
 
         // CONTINUE -> SUCCESS
         android.view.View successOverlay = findViewById(R.id.layout_success_overlay);

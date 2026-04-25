@@ -188,6 +188,7 @@
 
             <!-- SEARCH BAR -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/searchCard"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
@@ -207,16 +208,33 @@
                         android:src="@drawable/ic_search_grey"
                         app:tint="#64748B" />
 
-                    <TextView
+                    <EditText
+                        android:id="@+id/searchEditText"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Search for services..."
-                        android:textColor="#64748B"
+                        android:background="@android:color/transparent"
+                        android:hint="Search for services..."
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="#334155"
+                        android:textColorHint="#64748B"
                         android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tvSearchEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingHorizontal="4dp"
+                android:text="No matching posts found."
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
             <!-- PROMO BANNER -->
             <com.google.android.material.card.MaterialCardView
@@ -370,6 +388,7 @@
                 android:visibility="visible">
 
                 <HorizontalScrollView
+                    android:id="@+id/gigsScrollContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
@@ -384,6 +403,7 @@
 
                         <!-- GIG CARD 1 -->
                         <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/gig_card_1"
                         android:layout_width="260dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
@@ -452,6 +472,7 @@
 
                     <!-- GIG CARD 2 -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/gig_card_2"
                         android:layout_width="260dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
@@ -661,6 +682,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/communityCardsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

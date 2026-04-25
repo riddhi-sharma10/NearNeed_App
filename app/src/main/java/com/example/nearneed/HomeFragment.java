@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -175,6 +176,9 @@ public class HomeFragment extends Fragment {
             });
         }
 
+        EditText searchEdit = view.findViewById(R.id.searchEditText);
+        DashboardSearchHelper.bindMapSearchShortcut(searchEdit, requireContext());
+
         // Setup role toggle
         setupRoleToggle(view);
     }
@@ -194,6 +198,8 @@ public class HomeFragment extends Fragment {
         if (emptyState != null) {
             emptyState.setVisibility(hasPosts ? View.GONE : View.VISIBLE);
         }
+
+        DashboardSearchHelper.bindSeekerSearch(view, hasPosts, requireContext());
 
         // Wire "Post Now" button in empty state
         View btnPostNowEmpty = view.findViewById(R.id.btn_post_now_empty);

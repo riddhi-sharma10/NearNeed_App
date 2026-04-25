@@ -2,21 +2,17 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.animation.AnimationUtils;
-import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -116,12 +112,12 @@ public class IdVerificationActivity extends AppCompatActivity {
             btnSubmit.setText("Verifying Authenticity...");
             btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
 
-            new android.os.Handler().postDelayed(() -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 isFullyVerified = true;
                 btnSubmit.setText("ID Verified Successfully");
                 btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
 
-                new android.os.Handler().postDelayed(() -> {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (isFullyVerified) {
                         Intent intent = new Intent(this, IdVerifiedActivity.class);
                         startActivity(intent);
@@ -182,7 +178,7 @@ public class IdVerificationActivity extends AppCompatActivity {
             fDesc.setText("Extracting security features...");
             fIcon.setVisibility(View.VISIBLE);
             fIcon.setImageResource(R.drawable.ic_search_grey);
-            fIcon.setColorFilter(0xFF1E3A8A);
+            fIcon.setColorFilter(0xFF1E3A8A, android.graphics.PorterDuff.Mode.SRC_IN);
             fIcon.setPadding(0, 0, 0, 0);
             fIcon.setBackground(null);
             
@@ -190,7 +186,7 @@ public class IdVerificationActivity extends AppCompatActivity {
                 fTick.setVisibility(View.GONE);
             }
 
-            new android.os.Handler().postDelayed(() -> {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 card.setBackgroundResource(R.drawable.bg_id_uploaded);
                 fIcon.setVisibility(View.GONE);
                 fTitle.setTextColor(0xFF1E3A8A);

@@ -32,9 +32,34 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
     }
 
     private List<CommunityPost> posts = new ArrayList<>();
+    private List<CommunityPost> allPosts = new ArrayList<>();
 
     public void setPosts(List<CommunityPost> posts) {
-        this.posts = posts;
+        this.allPosts = new ArrayList<>(posts);
+        this.posts = new ArrayList<>(posts);
+        notifyDataSetChanged();
+    }
+
+    public void filter(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            posts = new ArrayList<>(allPosts);
+            notifyDataSetChanged();
+            return;
+        }
+
+        String lower = query.trim().toLowerCase();
+        List<CommunityPost> filtered = new ArrayList<>();
+        for (CommunityPost post : allPosts) {
+            if ((post.title != null && post.title.toLowerCase().contains(lower))
+                    || (post.postedBy != null && post.postedBy.toLowerCase().contains(lower))
+                    || (post.description != null && post.description.toLowerCase().contains(lower))
+                    || (post.location != null && post.location.toLowerCase().contains(lower))
+                    || (post.slotsNeeded != null && post.slotsNeeded.toLowerCase().contains(lower))) {
+                filtered.add(post);
+            }
+        }
+
+        posts = filtered;
         notifyDataSetChanged();
     }
 

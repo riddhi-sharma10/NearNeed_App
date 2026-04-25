@@ -246,6 +246,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             setupProviderMode(view);
         }
 
+        applyInitialSearchState(view);
+
         // Obtain the MapView
         mapView = view.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.map : R.id.provider_map);
         if (mapView != null) {
@@ -694,6 +696,40 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
         updateMapMarkers();
         updateBottomSheetCount();
+    }
+
+    private void applyInitialSearchState(View view) {
+        if (view == null || getActivity() == null) {
+            return;
+        }
+
+        android.content.Intent intent = requireActivity().getIntent();
+        String query = intent.getStringExtra("SEARCH_QUERY");
+        boolean focusSearch = intent.getBooleanExtra("FOCUS_SEARCH", false);
+
+        EditText searchEdit = RoleManager.ROLE_SEEKER.equals(currentRole)
+                ? view.findViewById(R.id.search_edit_text)
+                : view.findViewById(R.id.provider_search_edit_text);
+
+        if (searchEdit == null) {
+            return;
+        }
+
+        if (query != null && !query.trim().isEmpty()) {
+            searchEdit.setText(query);
+            searchEdit.setSelection(searchEdit.getText().length());
+            focusSearch = true;
+        }
+
+        if (focusSearch) {
+            view.post(() -> {
+                searchEdit.requestFocus();
+                InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.showSoftInput(searchEdit, InputMethodManager.SHOW_IMPLICIT);
+                }
+            });
+        }
     }
 
     private void recenterMap() {

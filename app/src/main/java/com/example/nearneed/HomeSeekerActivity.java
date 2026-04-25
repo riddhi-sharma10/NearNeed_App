@@ -48,6 +48,8 @@ public class HomeSeekerActivity extends AppCompatActivity {
         // Setup community volunteer buttons
         setupCommunityButtons();
 
+        DashboardSearchHelper.bindSeekerSearch(findViewById(android.R.id.content), true, this);
+
         // Connect FAB to PostOptionsActivity (or CreatePostActivity)
         MaterialButton fab = findViewById(R.id.fab_add_seeker);
         if (fab != null) {

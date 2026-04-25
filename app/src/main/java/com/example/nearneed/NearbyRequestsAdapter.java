@@ -31,6 +31,7 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
     }
 
     private List<RequestItem> requests = new ArrayList<>();
+    private List<RequestItem> allRequests = new ArrayList<>();
     private OnRequestActionListener listener;
 
     public interface OnRequestActionListener {
@@ -43,7 +44,30 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
     }
 
     public void setRequests(List<RequestItem> requests) {
-        this.requests = requests;
+        this.allRequests = new ArrayList<>(requests);
+        this.requests = new ArrayList<>(requests);
+        notifyDataSetChanged();
+    }
+
+    public void filter(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            requests = new ArrayList<>(allRequests);
+            notifyDataSetChanged();
+            return;
+        }
+
+        String lower = query.trim().toLowerCase();
+        List<RequestItem> filtered = new ArrayList<>();
+        for (RequestItem item : allRequests) {
+            if ((item.title != null && item.title.toLowerCase().contains(lower))
+                    || (item.description != null && item.description.toLowerCase().contains(lower))
+                    || (item.distance != null && item.distance.toLowerCase().contains(lower))
+                    || (item.price != null && item.price.toLowerCase().contains(lower))) {
+                filtered.add(item);
+            }
+        }
+
+        requests = filtered;
         notifyDataSetChanged();
     }
 

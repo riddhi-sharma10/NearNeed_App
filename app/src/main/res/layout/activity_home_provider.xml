@@ -189,6 +189,7 @@
 
             <!-- SEARCH BAR -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/searchCard"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
@@ -210,16 +211,34 @@
                         android:src="@drawable/ic_search_grey"
                         app:tint="#64748B" />
 
-                    <TextView
+                    <EditText
+                        android:id="@+id/searchEditText"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Search for requests..."
-                        android:textColor="#64748B"
+                        android:background="@android:color/transparent"
+                        android:hint="Search for requests..."
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="#334155"
+                        android:textColorHint="#64748B"
                         android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/tvSearchEmptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="12dp"
+                android:text="No matching requests found."
+                android:textColor="@color/text_muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
             <!-- EARNINGS CARD -->
             <com.google.android.material.card.MaterialCardView

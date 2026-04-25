@@ -117,6 +117,7 @@
 
                     <!-- Search Bar Overlay -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/searchCard"
                         android:layout_width="match_parent"
                         android:layout_height="52dp"
                         android:layout_margin="16dp"
@@ -138,15 +139,20 @@
                                 android:src="@drawable/ic_search_grey"
                                 app:tint="#94A3B8" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
+                            <EditText
+                                android:id="@+id/searchEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
                                 android:layout_marginStart="10dp"
                                 android:layout_toEndOf="@id/icSearchLoc"
+                                android:background="@android:color/transparent"
                                 android:fontFamily="sans-serif-medium"
-                                android:text="Search address or landmark..."
-                                android:textColor="#94A3B8"
+                                android:hint="Search address or landmark..."
+                                android:imeOptions="actionSearch"
+                                android:inputType="text"
+                                android:singleLine="true"
+                                android:textColor="#0F172A"
+                                android:textColorHint="#94A3B8"
                                 android:textSize="13sp" />
                         </RelativeLayout>
                     </com.google.android.material.card.MaterialCardView>

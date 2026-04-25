@@ -31,7 +31,6 @@
     </RelativeLayout>
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/nsvProfile"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
@@ -94,11 +93,14 @@
                         android:textSize="12sp" />
 
                     <LinearLayout
+                        android:id="@+id/llRatingRow"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -130,7 +132,7 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/btn_profile_reviews"
+                            android:id="@+id/llReviewsChip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
@@ -394,6 +396,7 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

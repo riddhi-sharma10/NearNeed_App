@@ -186,6 +186,11 @@ public class ProfileInfoActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
                 return;
             }
+            String dob = etDob.getText().toString().trim();
+            if (dob.isEmpty()) {
+                Toast.makeText(this, "Please enter your Date of Birth. You must be 18+.", Toast.LENGTH_LONG).show();
+                return;
+            }
             if (isUploading) {
                 Toast.makeText(this, "Please wait, uploading photo…", Toast.LENGTH_SHORT).show();
                 return;
@@ -229,8 +234,26 @@ public class ProfileInfoActivity extends AppCompatActivity {
 
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
-        new DatePickerDialog(this, (view, year, month, day) ->
-                etDob.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", day, month + 1, year)),
-                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        DatePickerDialog dialog = new DatePickerDialog(this, (view, year, month, day) -> {
+            Calendar selected = Calendar.getInstance();
+            selected.set(year, month, day);
+            
+            Calendar eighteenYearsAgo = Calendar.getInstance();
+            eighteenYearsAgo.add(Calendar.YEAR, -18);
+
+            if (selected.after(eighteenYearsAgo)) {
+                Toast.makeText(this, "You must be at least 18 years old to use NearNeed.", Toast.LENGTH_LONG).show();
+                etDob.setText("");
+            } else {
+                etDob.setText(String.format(Locale.getDefault(), "%02d/%02d/%04d", day, month + 1, year));
+            }
+        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+
+        // Disable dates less than 18 years ago in the picker UI
+        Calendar maxDate = Calendar.getInstance();
+        maxDate.add(Calendar.YEAR, -18);
+        dialog.getDatePicker().setMaxDate(maxDate.getTimeInMillis());
+
+        dialog.show();
     }
 }

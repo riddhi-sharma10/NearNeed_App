@@ -1,12 +1,24 @@
 package com.example.nearneed;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+
 public class ProfileActivity extends AppCompatActivity {
+
+    private ListenerRegistration profileListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,102 +27,163 @@ public class ProfileActivity extends AppCompatActivity {
         String role = RoleManager.getRole(this);
         if (RoleManager.ROLE_PROVIDER.equals(role)) {
             setContentView(R.layout.layout_profile_provider);
-            SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_PROFILE);
         } else {
             setContentView(R.layout.layout_profile_seeker);
-            SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_PROFILE);
         }
 
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_PROFILE);
         ProfileModeSwitcher.bind(this, findViewById(android.R.id.content), role);
         bindMenuClicks();
+
+        // Instant display from local cache while Firestore loads
+        applyLocalCache();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        profileListener = FirebaseFirestore.getInstance()
+                .collection("Users").document(user.getUid())
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null || !snapshot.exists()) return;
+                    applySnapshot(snapshot);
+                });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (profileListener != null) {
+            profileListener.remove();
+            profileListener = null;
+        }
+    }
+
+    private void applyLocalCache() {
+        String name = UserPrefs.getName(this);
+        String location = UserPrefs.getLocation(this);
+        String photoUriStr = UserPrefs.getPhotoUri(this);
+
+        setName(name);
+        setLocation(location);
+
+        if (photoUriStr != null) {
+            // Could be a local content URI or a remote https URL — Glide handles both
+            ImageView ivPhoto = findViewById(R.id.iv_profile_picture);
+            TextView tvInitials = findViewById(R.id.tv_profile_initials);
+            if (ivPhoto != null) {
+                Glide.with(this).load(Uri.parse(photoUriStr)).circleCrop()
+                        .into(ivPhoto);
+                ivPhoto.setVisibility(View.VISIBLE);
+                if (tvInitials != null) tvInitials.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void applySnapshot(DocumentSnapshot snapshot) {
+        String name = snapshot.getString("fullName");
+        String location = snapshot.getString("location");
+        String photoUrl = snapshot.getString("photoUrl");
+
+        // Persist to local cache for instant display next time
+        if (name != null && !name.isEmpty()) UserPrefs.saveName(this, name);
+        if (location != null && !location.isEmpty()) UserPrefs.saveLocation(this, location);
+        if (photoUrl != null) UserPrefs.savePhotoUri(this, photoUrl);
+
+        setName(name != null ? name : "");
+        setLocation(location != null ? location : "");
+
+        ImageView ivPhoto = findViewById(R.id.iv_profile_picture);
+        TextView tvInitials = findViewById(R.id.tv_profile_initials);
+
+        if (photoUrl != null && !photoUrl.isEmpty() && ivPhoto != null) {
+            Glide.with(this).load(photoUrl).circleCrop().into(ivPhoto);
+            ivPhoto.setVisibility(View.VISIBLE);
+            if (tvInitials != null) tvInitials.setVisibility(View.GONE);
+        } else if (ivPhoto != null) {
+            ivPhoto.setVisibility(View.GONE);
+            if (tvInitials != null) tvInitials.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setName(String name) {
+        if (name == null || name.isEmpty()) return;
+
+        TextView tvName = findViewById(R.id.tv_profile_name);
+        if (tvName != null) tvName.setText(name);
+
+        TextView tvInitials = findViewById(R.id.tv_profile_initials);
+        if (tvInitials != null) {
+            String[] parts = name.trim().split("\\s+");
+            String initials = parts.length >= 2
+                    ? String.valueOf(parts[0].charAt(0)) + parts[parts.length - 1].charAt(0)
+                    : String.valueOf(parts[0].charAt(0));
+            tvInitials.setText(initials.toUpperCase());
+        }
+    }
+
+    private void setLocation(String location) {
+        if (location == null || location.isEmpty()) return;
+
+        TextView tvLocSeeker = findViewById(R.id.tv_profile_location_seeker);
+        if (tvLocSeeker != null) tvLocSeeker.setText(location);
+
+        TextView tvLocProvider = findViewById(R.id.tv_profile_location);
+        if (tvLocProvider != null) tvLocProvider.setText(location);
     }
 
     private void bindMenuClicks() {
-        // Posts & Jobs
         View myPosts = findViewById(R.id.menu_my_posts);
-        if (myPosts != null) {
-            myPosts.setOnClickListener(v -> openMyPosts());
-        }
+        if (myPosts != null) myPosts.setOnClickListener(v -> openMyPosts());
 
         View myJobs = findViewById(R.id.menu_my_jobs);
-        if (myJobs != null) {
-            myJobs.setOnClickListener(v -> openMyPosts());
-        }
+        if (myJobs != null) myJobs.setOnClickListener(v -> openMyPosts());
 
-        // Help & Support
         View seekerHelp = findViewById(R.id.menu_help);
-        if (seekerHelp != null) {
-            seekerHelp.setOnClickListener(v -> openHelpSupport());
-        }
+        if (seekerHelp != null) seekerHelp.setOnClickListener(v -> openHelpSupport());
 
         View providerHelp = findViewById(R.id.menu_help_provider);
-        if (providerHelp != null) {
-            providerHelp.setOnClickListener(v -> openHelpSupport());
-        }
+        if (providerHelp != null) providerHelp.setOnClickListener(v -> openHelpSupport());
 
-        // Settings
         View seekerSettings = findViewById(R.id.menu_settings);
-        if (seekerSettings != null) {
-            seekerSettings.setOnClickListener(v -> openSettings());
-        }
+        if (seekerSettings != null) seekerSettings.setOnClickListener(v -> openSettings());
 
         View providerSettings = findViewById(R.id.menu_settings_provider);
-        if (providerSettings != null) {
-            providerSettings.setOnClickListener(v -> openSettings());
-        }
+        if (providerSettings != null) providerSettings.setOnClickListener(v -> openSettings());
 
-        // Earnings
         View menuEarnings = findViewById(R.id.menu_earnings);
-        if (menuEarnings != null) {
-            menuEarnings.setOnClickListener(v -> openEarnings());
-        }
+        if (menuEarnings != null) menuEarnings.setOnClickListener(v -> openEarnings());
 
         View btnViewEarnings = findViewById(R.id.btn_view_earnings);
-        if (btnViewEarnings != null) {
-            btnViewEarnings.setOnClickListener(v -> openEarnings());
-        }
+        if (btnViewEarnings != null) btnViewEarnings.setOnClickListener(v -> openEarnings());
 
-        // Logout
         View seekerLogout = findViewById(R.id.menu_logout);
-        if (seekerLogout != null) {
-            seekerLogout.setOnClickListener(v -> showLogoutDialog());
-        }
+        if (seekerLogout != null) seekerLogout.setOnClickListener(v -> showLogoutDialog());
 
         View providerLogout = findViewById(R.id.menu_logout_provider);
-        if (providerLogout != null) {
-            providerLogout.setOnClickListener(v -> showLogoutDialog());
-        }
+        if (providerLogout != null) providerLogout.setOnClickListener(v -> showLogoutDialog());
 
-        // Edit Profile
         View btnEditProfileSeeker = findViewById(R.id.btn_edit_profile);
-        if (btnEditProfileSeeker != null) {
-            btnEditProfileSeeker.setOnClickListener(v -> openEditProfile());
-        }
+        if (btnEditProfileSeeker != null) btnEditProfileSeeker.setOnClickListener(v -> openEditProfile());
 
-        // On provider mode it might be named differently
         View btnEditProfileProvider = findViewById(R.id.btn_edit_profile_provider);
-        if (btnEditProfileProvider != null) {
-            btnEditProfileProvider.setOnClickListener(v -> openEditProviderProfile());
-        }
+        if (btnEditProfileProvider != null) btnEditProfileProvider.setOnClickListener(v -> openEditProviderProfile());
 
         View cardReviewsStat = findViewById(R.id.card_reviews_stat);
-        if (cardReviewsStat != null) {
-            cardReviewsStat.setOnClickListener(v -> {
-                Intent intent = new Intent(ProfileActivity.this, ReviewsActivity.class);
-                startActivity(intent);
-            });
-        }
+        if (cardReviewsStat != null) cardReviewsStat.setOnClickListener(v ->
+                startActivity(new Intent(this, ReviewsActivity.class)));
     }
 
     private void openEditProfile() {
-        Intent intent = new Intent(this, EditProfileActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, EditProfileActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openEditProviderProfile() {
-        Intent intent = new Intent(this, EditProfileProviderActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, EditProfileProviderActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
@@ -118,47 +191,42 @@ public class ProfileActivity extends AppCompatActivity {
         android.app.Dialog dialog = new android.app.Dialog(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_logout_confirmation, null);
         dialog.setContentView(view);
-        
-        // Ensure transparent background for custom padding shadow effect
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawable(
+                    new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-
         view.findViewById(R.id.btn_logout_confirm).setOnClickListener(v -> {
             dialog.dismiss();
+            FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, WelcomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
         });
-
         view.findViewById(R.id.btn_logout_cancel).setOnClickListener(v -> dialog.dismiss());
-
         dialog.show();
     }
 
     private void openMyPosts() {
-        Intent intent = new Intent(this, MyPostsActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, MyPostsActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openSettings() {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, SettingsActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openHelpSupport() {
-        Intent intent = new Intent(this, HelpSupportActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, HelpSupportActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openEarnings() {
-        Intent intent = new Intent(this, MyEarningsActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(this, MyEarningsActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

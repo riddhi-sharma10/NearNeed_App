@@ -2,18 +2,7 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-}
-
-val hasGoogleServicesJson = listOf(
-    "google-services.json",
-    "src/debug/google-services.json",
-    "src/release/google-services.json"
-).any { file(it).exists() }
-
-if (hasGoogleServicesJson) {
-    apply(plugin = "com.google.gms.google-services")
-} else {
-    logger.lifecycle("google-services.json not found; skipping Google Services plugin")
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -67,6 +56,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

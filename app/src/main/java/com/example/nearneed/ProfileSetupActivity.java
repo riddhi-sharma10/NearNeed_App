@@ -98,6 +98,10 @@ public class ProfileSetupActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> onBackPressed());
 
         btnContinue.setOnClickListener(v -> {
+            if (selectedAddress != null && !selectedAddress.isEmpty()) {
+                UserPrefs.saveLocation(this, selectedAddress);
+                saveLocationToFirestore(selectedAddress);
+            }
             Intent intent = new Intent(this, IdVerificationActivity.class);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -170,6 +174,15 @@ public class ProfileSetupActivity extends AppCompatActivity {
             Toast.makeText(this, "Selected: " + name, Toast.LENGTH_SHORT).show();
         });
         rvSearchPredictions.setAdapter(searchPredictionAdapter);
+
+        String saved = UserPrefs.getLocation(this);
+        if (saved != null && !saved.isEmpty()) {
+            tvDetectedLocation.setText(saved);
+            tvDetectedLocation.setTextColor(0xFF0F172A);
+            if (etLocationSearch != null) {
+                etLocationSearch.setText(saved);
+            }
+        }
     }
 
     private void performGeocoding(String query) {
@@ -373,6 +386,21 @@ public class ProfileSetupActivity extends AppCompatActivity {
         if (imm != null) {
             imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
         }
+    }
+
+    private void saveLocationToFirestore(String address) {
+        com.google.firebase.auth.FirebaseUser user =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("location", address);
+        if (!Double.isNaN(selectedLat)) data.put("lat", selectedLat);
+        if (!Double.isNaN(selectedLng)) data.put("lng", selectedLng);
+
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("Users").document(user.getUid())
+                .set(data, com.google.firebase.firestore.SetOptions.merge());
     }
 
     @Override

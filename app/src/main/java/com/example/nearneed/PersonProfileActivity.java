@@ -1,6 +1,8 @@
 package com.example.nearneed;
 
 import android.os.Bundle;
+import android.content.Intent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,6 +51,14 @@ public class PersonProfileActivity extends AppCompatActivity {
             } else {
                 ivProfile.setImageResource(R.drawable.avatar_alex);
             }
+        }
+        
+        View btnReviews = findViewById(R.id.btn_profile_reviews);
+        if (btnReviews != null) {
+            btnReviews.setOnClickListener(v -> {
+                Intent intent = new Intent(PersonProfileActivity.this, ReviewsActivity.class);
+                startActivity(intent);
+            });
         }
     }
 

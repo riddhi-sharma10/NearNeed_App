@@ -92,6 +92,14 @@ public class ProfileActivity extends AppCompatActivity {
         if (btnEditProfileProvider != null) {
             btnEditProfileProvider.setOnClickListener(v -> openEditProviderProfile());
         }
+
+        View cardReviewsStat = findViewById(R.id.card_reviews_stat);
+        if (cardReviewsStat != null) {
+            cardReviewsStat.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, ReviewsActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void openEditProfile() {

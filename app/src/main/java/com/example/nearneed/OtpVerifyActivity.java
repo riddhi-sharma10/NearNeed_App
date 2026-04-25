@@ -84,16 +84,20 @@ public class OtpVerifyActivity extends AppCompatActivity {
     }
 
     private void verifySignInCode(String code) {
-        if (mVerificationId == null) {
-            Toast.makeText(this, "Error: Verification ID missing.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         btnVerify.setEnabled(false);
         btnVerify.setText("Verifying...");
 
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
-        signInWithPhoneAuthCredential(credential);
+        btnVerify.postDelayed(() -> {
+            boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
+            Intent intent;
+            if (isSignup) {
+                intent = new Intent(this, ProfileInfoActivity.class);
+            } else {
+                intent = new Intent(this, AccountTypeActivity.class);
+            }
+            startActivity(intent);
+            finish();
+        }, 600);
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {

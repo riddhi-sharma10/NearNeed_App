@@ -92,6 +92,7 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
 
         public void bind(Response response, int position, OnResponseActionListener listener, boolean showBudgetInfo) {
             tvName.setText(response.getApplicantName());
+            VerifiedBadgeHelper.apply(itemView.getContext(), tvName, response.isVerified());
             tvRating.setText(String.format("★ %.1f", response.getApplicantRating()));
             tvMessage.setText(response.getMessage());
             tvLocation.setText(response.getLocation());

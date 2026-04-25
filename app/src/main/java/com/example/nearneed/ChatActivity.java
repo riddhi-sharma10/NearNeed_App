@@ -115,6 +115,8 @@ public class ChatActivity extends AppCompatActivity {
         if (chatName != null) {
             tvChatName.setText(chatName);
         }
+        boolean chatVerified = getIntent().getBooleanExtra("CHAT_VERIFIED", false);
+        VerifiedBadgeHelper.apply(this, tvChatName, chatVerified);
         
         View vOnlineDot = findViewById(R.id.vOnlineDot);
         if (isOnline) {

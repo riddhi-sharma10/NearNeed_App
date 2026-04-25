@@ -115,6 +115,11 @@ public class VolunteersActivity extends AppCompatActivity {
             System.currentTimeMillis() - 10800000
         ));
 
+        // Seed verified state for demo (replace with Firestore field when real data is used)
+        allVolunteers.get(0).setVerified(false); // Alex Kumar – not verified
+        allVolunteers.get(1).setVerified(true);  // Priya Sharma – verified
+        allVolunteers.get(2).setVerified(true);  // Rajesh Patel – verified
+
         filteredVolunteers = new ArrayList<>(allVolunteers);
         updateTitle();
     }

@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,7 +57,7 @@ public class ResponsesActivity extends AppCompatActivity {
     }
 
     private void setupToolbar() {
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     private void setupHeroImage() {
@@ -166,6 +165,11 @@ public class ResponsesActivity extends AppCompatActivity {
                 "9876513234"
             ));
         }
+
+        // Seed verified state for demo (replace with Firestore field when real data is used)
+        allResponses.get(0).setVerified(true);   // Sarah Johnson – verified
+        allResponses.get(1).setVerified(false);  // Mike Chen – not verified
+        allResponses.get(2).setVerified(true);   // Emma Wilson – verified
 
         filteredResponses = new ArrayList<>(allResponses);
     }
@@ -315,6 +319,7 @@ public class ResponsesActivity extends AppCompatActivity {
             .show();
     }
 
+    @SuppressWarnings("unused")
     private void declineApplicant(String responseId, int position, String message) {
         Response response = filteredResponses.get(position);
         response.setStatus("declined");

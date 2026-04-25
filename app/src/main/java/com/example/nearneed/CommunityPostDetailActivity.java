@@ -11,8 +11,6 @@ import com.google.android.material.button.MaterialButton;
 
 public class CommunityPostDetailActivity extends AppCompatActivity {
 
-    private TextView tvTitle, tvDescription, tvPostedBy, tvPostedTime, tvLocation, tvSlotsAvailable;
-    private MaterialButton btnVolunteer;
     private boolean isProvider;
 
     @Override
@@ -27,15 +25,14 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        tvTitle = findViewById(R.id.tv_community_title);
-        tvDescription = findViewById(R.id.tv_community_description);
-        tvPostedBy = findViewById(R.id.tv_posted_by);
-        tvPostedTime = findViewById(R.id.tv_posted_time);
-        tvLocation = findViewById(R.id.tv_community_location);
-        tvSlotsAvailable = findViewById(R.id.tv_slots_available);
-        btnVolunteer = findViewById(R.id.btn_volunteer);
+        TextView tvTitle = findViewById(R.id.tv_community_title);
+        TextView tvDescription = findViewById(R.id.tv_community_description);
+        TextView tvPostedBy = findViewById(R.id.tv_posted_by);
+        TextView tvPostedTime = findViewById(R.id.tv_posted_time);
+        TextView tvLocation = findViewById(R.id.tv_community_location);
+        TextView tvSlotsAvailable = findViewById(R.id.tv_slots_available);
+        MaterialButton btnVolunteer = findViewById(R.id.btn_volunteer);
 
-        // Get data from intent
         Intent intent = getIntent();
         String title = intent.getStringExtra("title");
         String description = intent.getStringExtra("description");
@@ -43,12 +40,13 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         String postedTime = intent.getStringExtra("postedTime");
         String location = intent.getStringExtra("location");
         String slots = intent.getStringExtra("slots");
+        boolean posterVerified = intent.getBooleanExtra("IS_POSTER_VERIFIED", false);
         isProvider = RoleManager.isProvider(this);
 
-        // Set data to views
         tvTitle.setText(title != null ? title : "Community Need");
         tvDescription.setText(description != null ? description : "No description available");
         tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
+        VerifiedBadgeHelper.apply(this, tvPostedBy, posterVerified);
         tvPostedTime.setText(postedTime != null ? postedTime : "Recently");
         tvLocation.setText(location != null ? location : "Location unknown");
         tvSlotsAvailable.setText(slots != null ? slots : "Volunteers needed");

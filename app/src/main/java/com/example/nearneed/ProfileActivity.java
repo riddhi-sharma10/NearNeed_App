@@ -87,11 +87,13 @@ public class ProfileActivity extends AppCompatActivity {
         String name = snapshot.getString("fullName");
         String location = snapshot.getString("location");
         String photoUrl = snapshot.getString("photoUrl");
+        Boolean verified = snapshot.getBoolean("isVerified");
 
         // Persist to local cache for instant display next time
         if (name != null && !name.isEmpty()) UserPrefs.saveName(this, name);
         if (location != null && !location.isEmpty()) UserPrefs.saveLocation(this, location);
         if (photoUrl != null) UserPrefs.savePhotoUri(this, photoUrl);
+        if (verified != null) UserPrefs.saveVerified(this, verified);
 
         setName(name != null ? name : "");
         setLocation(location != null ? location : "");
@@ -113,7 +115,10 @@ public class ProfileActivity extends AppCompatActivity {
         if (name == null || name.isEmpty()) return;
 
         TextView tvName = findViewById(R.id.tv_profile_name);
-        if (tvName != null) tvName.setText(name);
+        if (tvName != null) {
+            tvName.setText(name);
+            VerifiedBadgeHelper.apply(this, tvName, UserPrefs.isVerified(this));
+        }
 
         TextView tvInitials = findViewById(R.id.tv_profile_initials);
         if (tvInitials != null) {

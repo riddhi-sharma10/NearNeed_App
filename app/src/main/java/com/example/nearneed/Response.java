@@ -11,6 +11,7 @@ public class Response {
     private int proposedBudget; // for gigs (optional)
     private String paymentMethod; // for gigs (optional)
     private String applicantPhone; // optional contact number
+    private boolean isVerified;
 
     public Response(String responseId, String applicantName, float applicantRating,
                    String message, String location, long timestamp, String status) {
@@ -69,4 +70,7 @@ public class Response {
 
     public String getApplicantPhone() { return applicantPhone; }
     public void setApplicantPhone(String applicantPhone) { this.applicantPhone = applicantPhone; }
+
+    public boolean isVerified() { return isVerified; }
+    public void setVerified(boolean verified) { this.isVerified = verified; }
 }

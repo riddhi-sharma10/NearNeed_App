@@ -15,8 +15,7 @@ import java.util.List;
 
 public final class DashboardNotificationPopup {
 
-    private DashboardNotificationPopup() {
-    }
+    private DashboardNotificationPopup() {}
 
     public static void show(Activity activity, View anchor, Runnable onChanged) {
         View content = LayoutInflater.from(activity).inflate(R.layout.dialog_dashboard_notifications, null);
@@ -34,16 +33,14 @@ public final class DashboardNotificationPopup {
         TextView tvClearAll = content.findViewById(R.id.tvClearAllNotifications);
         TextView tvEmpty = content.findViewById(R.id.tvEmptyNotifications);
 
-        List<AppNotification> items = new ArrayList<>(NotificationCenter.getNotifications(activity));
+        List<AppNotification> items = new ArrayList<>();
 
         NotificationPopupAdapter adapter = new NotificationPopupAdapter(items, notification -> {
             if (!notification.isRead()) {
                 notification.setRead(true);
-                NotificationCenter.saveNotifications(activity, items);
+                NotificationCenter.markAsRead(notification.getId());
                 rv.getAdapter().notifyDataSetChanged();
-                if (onChanged != null) {
-                    onChanged.run();
-                }
+                if (onChanged != null) onChanged.run();
             }
         });
 
@@ -51,14 +48,19 @@ public final class DashboardNotificationPopup {
         rv.setAdapter(adapter);
         updateEmptyState(items, rv, tvEmpty, tvClearAll);
 
+        // Load from Firestore — list shows empty state until data arrives
+        NotificationCenter.fetchOnce(loaded -> {
+            items.addAll(loaded);
+            adapter.notifyDataSetChanged();
+            updateEmptyState(items, rv, tvEmpty, tvClearAll);
+        });
+
         tvClearAll.setOnClickListener(v -> {
-            NotificationCenter.clearAll(activity);
+            NotificationCenter.clearAll();
             items.clear();
             adapter.notifyDataSetChanged();
             updateEmptyState(items, rv, tvEmpty, tvClearAll);
-            if (onChanged != null) {
-                onChanged.run();
-            }
+            if (onChanged != null) onChanged.run();
         });
 
         int popupWidth = (int) (320 * activity.getResources().getDisplayMetrics().density);

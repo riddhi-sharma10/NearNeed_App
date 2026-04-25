@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.ListenerRegistration;
+
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private TextView tvDeliveryLocation;
     private TextView tvDashboardNotificationBadge;
+    private ListenerRegistration notifListener;
     private NearbyRequestsAdapter nearbyRequestsAdapter;
     private CommunityVolunteeringAdapter communityVolunteeringAdapter;
     private static final String PREFS = "LocationPrefs";
@@ -117,9 +120,18 @@ public class HomeProviderActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        refreshNotificationBadge();
+    protected void onStart() {
+        super.onStart();
+        notifListener = NotificationCenter.listenUnreadCount(this::updateBadge);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (notifListener != null) {
+            notifListener.remove();
+            notifListener = null;
+        }
     }
 
     private void setupNearbyRequests() {
@@ -216,26 +228,19 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         if (ivDashboardNotifications != null) {
             ivDashboardNotifications.setOnClickListener(v ->
-                DashboardNotificationPopup.show(this, v, this::refreshNotificationBadge)
+                DashboardNotificationPopup.show(this, v, null)
             );
         }
-
-        refreshNotificationBadge();
     }
 
-    private void refreshNotificationBadge() {
-        if (tvDashboardNotificationBadge == null) {
-            return;
-        }
-
-        int unread = NotificationCenter.unreadCount(this);
-        if (unread <= 0) {
+    private void updateBadge(int count) {
+        if (tvDashboardNotificationBadge == null) return;
+        if (count <= 0) {
             tvDashboardNotificationBadge.setVisibility(View.GONE);
             return;
         }
-
         tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
-        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(unread, 9)));
+        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(count, 9)));
     }
 
     /**

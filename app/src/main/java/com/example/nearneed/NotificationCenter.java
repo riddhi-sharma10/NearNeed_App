@@ -1,103 +1,120 @@
 package com.example.nearneed;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public final class NotificationCenter {
 
-    private static final String PREFS = "dashboard_notifications";
-    private static final String KEY_ITEMS = "items";
+    private NotificationCenter() {}
 
-    private NotificationCenter() {
+    public interface OnNotificationsLoaded {
+        void onLoaded(List<AppNotification> notifications);
     }
 
-    public static List<AppNotification> getNotifications(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String raw = prefs.getString(KEY_ITEMS, "");
-        if (raw == null || raw.isEmpty()) {
-            List<AppNotification> seeded = seedNotifications();
-            saveNotifications(context, seeded);
-            return seeded;
-        }
+    public interface OnCountChanged {
+        void onChange(int count);
+    }
 
-        List<AppNotification> out = new ArrayList<>();
-        try {
-            JSONArray arr = new JSONArray(raw);
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.getJSONObject(i);
-                out.add(new AppNotification(
-                    o.optString("id"),
-                    o.optString("title"),
-                    o.optString("message"),
-                    o.optLong("timestamp"),
-                    o.optBoolean("read", false)
-                ));
+    /** Write a new notification to Firestore for the signed-in user. */
+    public static void addNotification(String title, String message) {
+        CollectionReference ref = notifRef();
+        if (ref == null) return;
+        String id = UUID.randomUUID().toString();
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", id);
+        data.put("title", title);
+        data.put("message", message);
+        data.put("timestamp", System.currentTimeMillis());
+        data.put("read", false);
+        ref.document(id).set(data);
+    }
+
+    /** Fetch all notifications once, newest-first. Used when opening the popup. */
+    public static void fetchOnce(OnNotificationsLoaded callback) {
+        CollectionReference ref = notifRef();
+        if (ref == null) {
+            callback.onLoaded(new ArrayList<>());
+            return;
+        }
+        ref.orderBy("timestamp", Query.Direction.DESCENDING)
+                .limit(50)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    List<AppNotification> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        list.add(fromDoc(doc));
+                    }
+                    callback.onLoaded(list);
+                })
+                .addOnFailureListener(e -> callback.onLoaded(new ArrayList<>()));
+    }
+
+    /**
+     * Attach a real-time listener for the unread count.
+     * Call remove() on the returned registration in onStop().
+     */
+    public static ListenerRegistration listenUnreadCount(OnCountChanged callback) {
+        CollectionReference ref = notifRef();
+        if (ref == null) {
+            callback.onChange(0);
+            return () -> {};
+        }
+        return ref.whereEqualTo("read", false)
+                .addSnapshotListener((snap, err) -> {
+                    if (snap != null) callback.onChange(snap.size());
+                });
+    }
+
+    /** Mark a single notification as read. */
+    public static void markAsRead(String notificationId) {
+        CollectionReference ref = notifRef();
+        if (ref == null) return;
+        ref.document(notificationId).update("read", true);
+    }
+
+    /** Delete all notifications for the current user. */
+    public static void clearAll() {
+        CollectionReference ref = notifRef();
+        if (ref == null) return;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        ref.get().addOnSuccessListener(snap -> {
+            WriteBatch batch = db.batch();
+            for (DocumentSnapshot doc : snap.getDocuments()) {
+                batch.delete(doc.getReference());
             }
-        } catch (Exception ignored) {
-            out = seedNotifications();
-            saveNotifications(context, out);
-        }
-        return out;
+            batch.commit();
+        });
     }
 
-    public static void saveNotifications(Context context, List<AppNotification> notifications) {
-        JSONArray arr = new JSONArray();
-        for (AppNotification n : notifications) {
-            JSONObject o = new JSONObject();
-            try {
-                o.put("id", n.getId());
-                o.put("title", n.getTitle());
-                o.put("message", n.getMessage());
-                o.put("timestamp", n.getTimestamp());
-                o.put("read", n.isRead());
-            } catch (Exception ignored) {
-            }
-            arr.put(o);
-        }
-
-        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_ITEMS, arr.toString()).apply();
+    private static CollectionReference notifRef() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return null;
+        return FirebaseFirestore.getInstance()
+                .collection("Users").document(user.getUid())
+                .collection("notifications");
     }
 
-    public static void markAsRead(Context context, String notificationId) {
-        List<AppNotification> items = getNotifications(context);
-        for (AppNotification n : items) {
-            if (n.getId().equals(notificationId)) {
-                n.setRead(true);
-                break;
-            }
-        }
-        saveNotifications(context, items);
-    }
-
-    public static void clearAll(Context context) {
-        saveNotifications(context, new ArrayList<>());
-    }
-
-    public static int unreadCount(Context context) {
-        int count = 0;
-        for (AppNotification n : getNotifications(context)) {
-            if (!n.isRead()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private static List<AppNotification> seedNotifications() {
-        long now = System.currentTimeMillis();
-        List<AppNotification> list = new ArrayList<>();
-        list.add(new AppNotification(UUID.randomUUID().toString(), "Booking Update", "Your upcoming booking starts in 30 minutes.", now - 2 * 60 * 1000L, false));
-        list.add(new AppNotification(UUID.randomUUID().toString(), "New Response", "You received 2 responses on Community Help post.", now - 25 * 60 * 1000L, false));
-        list.add(new AppNotification(UUID.randomUUID().toString(), "Payment Received", "A payment has been credited to your wallet.", now - 3 * 60 * 60 * 1000L, true));
-        list.add(new AppNotification(UUID.randomUUID().toString(), "Status Changed", "One booking moved to Completed.", now - 26 * 60 * 60 * 1000L, true));
-        return list;
+    private static AppNotification fromDoc(DocumentSnapshot doc) {
+        Long ts = doc.getLong("timestamp");
+        String id = doc.getString("id");
+        return new AppNotification(
+                id != null ? id : doc.getId(),
+                doc.getString("title"),
+                doc.getString("message"),
+                ts != null ? ts : 0L,
+                Boolean.TRUE.equals(doc.getBoolean("read"))
+        );
     }
 }

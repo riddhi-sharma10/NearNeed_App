@@ -17,7 +17,7 @@ import com.google.android.material.button.MaterialButton;
 public class ProviderOngoingFragment extends Fragment {
 
     private TextView tvProvStatus1, tvProvStatus2;
-    private MaterialButton update1, update2;
+    private MaterialButton viewDetails1, viewDetails2;
 
     @Nullable
     @Override
@@ -30,23 +30,23 @@ public class ProviderOngoingFragment extends Fragment {
 
         // ── CARD 1: Plumbing Repair ────────────────────────────────────────
         MaterialButton msg1 = root.findViewById(R.id.btnProvMsg1);
-        update1 = root.findViewById(R.id.btnProvUpdateStatus1);
+        viewDetails1 = root.findViewById(R.id.btnProvViewDetails1);
 
         if (msg1 != null)
             msg1.setOnClickListener(v -> openChat("Arjun Mehta"));
 
-        if (update1 != null)
-            update1.setOnClickListener(v -> openUpdateStatus("prov_1", "Plumbing Repair"));
+        if (viewDetails1 != null)
+            viewDetails1.setOnClickListener(v -> showDetails("Plumbing Repair"));
 
         // ── CARD 2: AC Repair & Servicing ─────────────────────────────────
         MaterialButton msg2 = root.findViewById(R.id.btnProvMsg2);
-        update2 = root.findViewById(R.id.btnProvUpdateStatus2);
+        viewDetails2 = root.findViewById(R.id.btnProvViewDetails2);
 
         if (msg2 != null)
             msg2.setOnClickListener(v -> openChat("Priya Nair"));
 
-        if (update2 != null)
-            update2.setOnClickListener(v -> openUpdateStatus("prov_2", "AC Repair & Servicing"));
+        if (viewDetails2 != null)
+            viewDetails2.setOnClickListener(v -> showDetails("AC Repair & Servicing"));
 
         return root;
     }
@@ -62,11 +62,11 @@ public class ProviderOngoingFragment extends Fragment {
         
         // Card 1
         String status1 = stateManager.getStatus("prov_1");
-        updateCardUI(status1, tvProvStatus1, update1);
+        updateCardUI(status1, tvProvStatus1, viewDetails1);
 
         // Card 2
         String status2 = stateManager.getStatus("prov_2");
-        updateCardUI(status2, tvProvStatus2, update2);
+        updateCardUI(status2, tvProvStatus2, viewDetails2);
     }
 
     private void updateCardUI(String status, TextView tvStatus, MaterialButton btnUpdate) {
@@ -97,10 +97,7 @@ public class ProviderOngoingFragment extends Fragment {
         startActivity(i);
     }
 
-    private void openUpdateStatus(String bookingId, String title) {
-        Intent i = new Intent(requireActivity(), UpdateStatusActivity.class);
-        i.putExtra("booking_id", bookingId);
-        i.putExtra("booking_title", title);
-        startActivity(i);
+    private void showDetails(String title) {
+        android.widget.Toast.makeText(getContext(), "Details for " + title, android.widget.Toast.LENGTH_SHORT).show();
     }
 }

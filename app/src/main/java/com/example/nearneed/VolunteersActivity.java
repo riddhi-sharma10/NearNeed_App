@@ -1,229 +1,122 @@
 package com.example.nearneed;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class VolunteersActivity extends AppCompatActivity {
 
-    private ImageButton btnBack;
-    private TextView tvTitle;
-    private ChipGroup chipGroupFilter;
     private RecyclerView rvVolunteers;
     private LinearLayout emptyStateLayout;
-    private TextView emptyStateTitle, emptyStateSubtitle;
-    private VolunteersAdapter adapter;
-    private List<Volunteer> allVolunteers, filteredVolunteers;
-    private String currentFilter = "all";
-    private int maxSlots = 0;
-    private int confirmedCount = 0;
-    private boolean isSeeker = false;
-    private String postTitle = "";
+    private ResponsesAdapter adapter;
+    private ApplicationViewModel appViewModel;
+    private BookingViewModel bookingViewModel;
+    private String postId;
+    private List<Application> allApps = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_volunteers);
 
-        // Get intent extras
-        maxSlots = getIntent().getIntExtra("max_slots", 0);
-        isSeeker = getIntent().getBooleanExtra("is_seeker", false);
-        postTitle = getIntent().getStringExtra("post_title");
+        postId = getIntent().getStringExtra("post_id");
+        if (postId == null) {
+            finish();
+            return;
+        }
 
         initViews();
-        setupToolbar();
-        loadVolunteers();
-        setupFilters();
         setupRecyclerView();
+        setupViewModels();
+        setupFilters();
     }
 
     private void initViews() {
-        btnBack = findViewById(R.id.btnBack);
-        tvTitle = findViewById(R.id.tvTitle);
-        chipGroupFilter = findViewById(R.id.chipGroupFilter);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         rvVolunteers = findViewById(R.id.rvVolunteers);
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
-        emptyStateTitle = findViewById(R.id.emptyStateTitle);
-        emptyStateSubtitle = findViewById(R.id.emptyStateSubtitle);
-    }
-
-    private void setupToolbar() {
-        btnBack.setOnClickListener(v -> onBackPressed());
+        ((TextView)findViewById(R.id.tvTitle)).setText("Volunteers");
     }
 
     private void setupFilters() {
-        chipGroupFilter.setOnCheckedStateChangeListener((group, checkedIds) -> {
+        ChipGroup chipGroup = findViewById(R.id.chipGroupFilter);
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (!checkedIds.isEmpty()) {
-                Chip selectedChip = findViewById(checkedIds.get(0));
-                String filterTag = selectedChip.getTag().toString();
-                applyFilter(filterTag);
+                Chip chip = findViewById(checkedIds.get(0));
+                applyFilter(chip.getTag().toString());
             }
         });
-
-        // Set default filter to "All"
-        Chip chipAll = findViewById(R.id.chipAll);
-        if (chipAll != null) {
-            chipAll.setChecked(true);
-        }
     }
 
-    private void loadVolunteers() {
-        // Initialize with sample volunteers (replace with database calls)
-        allVolunteers = new ArrayList<>();
+    private void setupViewModels() {
+        appViewModel = new ViewModelProvider(this).get(ApplicationViewModel.class);
+        bookingViewModel = new ViewModelProvider(this).get(BookingViewModel.class);
 
-        // Sample volunteer data
-        allVolunteers.add(new Volunteer(
-            "vol_001",
-            "Alex Kumar",
-            4.7f,
-            "Passionate about community service. Always ready to help!",
-            "Help with grocery shopping",
-            "interested",
-            System.currentTimeMillis() - 3600000
-        ));
+        appViewModel.getApplicationsByPost(postId).observe(this, apps -> {
+            allApps = apps;
+            applyFilter("all");
+        });
 
-        allVolunteers.add(new Volunteer(
-            "vol_002",
-            "Priya Sharma",
-            4.9f,
-            "Experienced volunteer, love helping neighbors",
-            "I can assist with this task",
-            "confirmed",
-            System.currentTimeMillis() - 7200000
-        ));
+        appViewModel.observeApplicationsByPost(this, postId);
+    }
 
-        allVolunteers.add(new Volunteer(
-            "vol_003",
-            "Rajesh Patel",
-            4.5f,
-            "Available on weekends to help community",
-            "Happy to help!",
-            "interested",
-            System.currentTimeMillis() - 10800000
-        ));
-
-        // Seed verified state for demo (replace with Firestore field when real data is used)
-        allVolunteers.get(0).setVerified(false); // Alex Kumar – not verified
-        allVolunteers.get(1).setVerified(true);  // Priya Sharma – verified
-        allVolunteers.get(2).setVerified(true);  // Rajesh Patel – verified
-
-        filteredVolunteers = new ArrayList<>(allVolunteers);
-        updateTitle();
+    private void applyFilter(String filter) {
+        List<Application> filtered = new ArrayList<>();
+        for (Application app : allApps) {
+            if ("all".equals(filter)) filtered.add(app);
+            else if ("confirmed".equals(filter) && "accepted".equals(app.status)) filtered.add(app);
+            else if ("pending".equals(filter) && "pending".equals(app.status)) filtered.add(app);
+        }
+        adapter.setApplications(filtered);
+        emptyStateLayout.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void setupRecyclerView() {
         rvVolunteers.setLayoutManager(new LinearLayoutManager(this));
-
-        // Count already confirmed volunteers
-        confirmedCount = 0;
-        for (Volunteer v : allVolunteers) {
-            if ("confirmed".equals(v.getStatus())) {
-                confirmedCount++;
-            }
-        }
-
-        adapter = new VolunteersAdapter(filteredVolunteers, new VolunteersAdapter.OnVolunteerActionListener() {
+        // Reusing ResponsesAdapter as it handles Application models perfectly
+        adapter = new ResponsesAdapter(new ArrayList<>(), new ResponsesAdapter.OnResponseActionListener() {
             @Override
-            public void onViewProfile(String volunteerId) {
-                Intent intent = new Intent(VolunteersActivity.this, VolunteerProfileActivity.class);
-                intent.putExtra("volunteerId", volunteerId);
+            public void onAccept(Application application, int position) {
+                appViewModel.updateApplicationStatus(application.applicationId, "accepted");
+                bookingViewModel.createBookingFromApplication(application);
+            }
+
+            @Override
+            public void onDecline(Application application, int position) {
+                appViewModel.updateApplicationStatus(application.applicationId, "declined");
+            }
+
+            @Override
+            public void onCall(Application application) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + application.applicantPhone));
                 startActivity(intent);
             }
 
             @Override
-            public void onMessage(String volunteerId) {
-                Intent chatIntent = new Intent(VolunteersActivity.this, ChatActivity.class);
-                chatIntent.putExtra("CHAT_NAME", "Volunteer " + volunteerId);
-                chatIntent.putExtra("CHAT_ONLINE", true);
-                startActivity(chatIntent);
+            public void onMessage(Application application) {
+                Intent intent = new Intent(VolunteersActivity.this, ChatActivity.class);
+                intent.putExtra("CHAT_NAME", application.applicantName);
+                startActivity(intent);
             }
-
-            @Override
-            public void onAccept(Volunteer volunteer) {
-                if (isSeeker && canAcceptMore()) {
-                    volunteer.setStatus("confirmed");
-                    confirmedCount++;
-                    adapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onReject(Volunteer volunteer) {
-                if (isSeeker) {
-                    volunteer.setStatus("rejected");
-                    adapter.notifyDataSetChanged();
-                }
-            }
-        }, isSeeker, maxSlots);
+        });
         rvVolunteers.setAdapter(adapter);
-        updateEmptyState();
-    }
-
-    private boolean canAcceptMore() {
-        if (maxSlots <= 0) return true; // No limit
-        return confirmedCount < maxSlots;
-    }
-
-    private void applyFilter(String filter) {
-        currentFilter = filter;
-        filteredVolunteers.clear();
-
-        if ("all".equals(filter)) {
-            filteredVolunteers.addAll(allVolunteers);
-        } else if ("confirmed".equals(filter)) {
-            for (Volunteer v : allVolunteers) {
-                if ("confirmed".equals(v.getStatus())) {
-                    filteredVolunteers.add(v);
-                }
-            }
-        } else if ("pending".equals(filter)) {
-            for (Volunteer v : allVolunteers) {
-                if ("interested".equals(v.getStatus())) {
-                    filteredVolunteers.add(v);
-                }
-            }
-        }
-
-        adapter.notifyDataSetChanged();
-        updateEmptyState();
-        updateTitle();
-    }
-
-    private void updateTitle() {
-        tvTitle.setText("Volunteers (" + filteredVolunteers.size() + ")");
-    }
-
-    private void updateEmptyState() {
-        if (filteredVolunteers.isEmpty()) {
-            emptyStateLayout.setVisibility(View.VISIBLE);
-            rvVolunteers.setVisibility(View.GONE);
-
-            if ("confirmed".equals(currentFilter)) {
-                emptyStateTitle.setText("No confirmed volunteers");
-                emptyStateSubtitle.setText("Confirm volunteers as they respond");
-            } else if ("pending".equals(currentFilter)) {
-                emptyStateTitle.setText("No pending volunteers");
-                emptyStateSubtitle.setText("Volunteers will appear here");
-            } else {
-                emptyStateTitle.setText("No volunteers yet");
-                emptyStateSubtitle.setText("Share your post to get volunteers!");
-            }
-        } else {
-            emptyStateLayout.setVisibility(View.GONE);
-            rvVolunteers.setVisibility(View.VISIBLE);
-        }
     }
 }

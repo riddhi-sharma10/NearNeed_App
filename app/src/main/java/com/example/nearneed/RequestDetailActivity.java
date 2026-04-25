@@ -12,6 +12,7 @@ public class RequestDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvDistance, tvDescription;
     private MaterialButton btnApply;
+    private String postId, postTitle, postType, creatorId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,25 +31,25 @@ public class RequestDetailActivity extends AppCompatActivity {
         tvDescription = findViewById(R.id.tv_request_description);
         btnApply = findViewById(R.id.btn_apply_request);
 
-        // Get data from intent
-        String title = getIntent().getStringExtra("title");
-        String distance = getIntent().getStringExtra("distance");
+        // Get data from intent (from NearbyRequestsAdapter)
+        postId = getIntent().getStringExtra("post_id");
+        postTitle = getIntent().getStringExtra("title");
+        postType = getIntent().getStringExtra("type");
+        creatorId = getIntent().getStringExtra("creator_id");
         String description = getIntent().getStringExtra("description");
+        String distance = getIntent().getStringExtra("distance");
 
         // Set data
-        tvTitle.setText(title != null ? title : "Request Details");
-        tvDistance.setText(distance != null ? distance : "Distance unknown");
+        tvTitle.setText(postTitle != null ? postTitle : "Request Details");
+        tvDistance.setText(distance != null ? distance : "Nearby");
         tvDescription.setText(description != null ? description : "No description available");
 
         // Apply button click
         btnApply.setOnClickListener(v -> showApplySheet());
     }
 
-    /**
-     * Shows the apply sheet with message, budget, and payment options.
-     */
     private void showApplySheet() {
-        RequestApplyBottomSheet sheet = new RequestApplyBottomSheet();
+        RequestApplyBottomSheet sheet = RequestApplyBottomSheet.newInstance(postId, postTitle, postType, creatorId);
         sheet.show(getSupportFragmentManager(), "apply_sheet");
     }
 }

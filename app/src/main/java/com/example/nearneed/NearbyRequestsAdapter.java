@@ -2,58 +2,43 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.imageview.ShapeableImageView;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAdapter.RequestViewHolder> {
 
+    private List<Post> posts = new ArrayList<>();
+    private List<Post> allPosts = new ArrayList<>();
 
-
-    private List<Post> requests = new ArrayList<>();
-    private List<Post> allRequests = new ArrayList<>();
-    private OnRequestActionListener listener;
-
-    public interface OnRequestActionListener {
-        void onAccept(int position);
-        void onDecline(int position);
-    }
-
-    public NearbyRequestsAdapter(OnRequestActionListener listener) {
-        this.listener = listener;
-    }
-
-    public void setRequests(List<Post> requests) {
-        this.allRequests = new ArrayList<>(requests);
-        this.requests = new ArrayList<>(requests);
+    public void setPosts(List<Post> posts) {
+        this.allPosts = new ArrayList<>(posts);
+        this.posts = new ArrayList<>(posts);
         notifyDataSetChanged();
     }
 
     public void filter(String query) {
         if (query == null || query.trim().isEmpty()) {
-            requests = new ArrayList<>(allRequests);
+            posts = new ArrayList<>(allPosts);
             notifyDataSetChanged();
             return;
         }
 
         String lower = query.trim().toLowerCase();
         List<Post> filtered = new ArrayList<>();
-        for (Post item : allRequests) {
+        for (Post item : allPosts) {
             if ((item.title != null && item.title.toLowerCase().contains(lower))
-                    || (item.description != null && item.description.toLowerCase().contains(lower))
-                    || (item.distance != null && item.distance.toLowerCase().contains(lower))
-                    || (item.budget != null && item.budget.toLowerCase().contains(lower))) {
+                    || (item.description != null && item.description.toLowerCase().contains(lower))) {
                 filtered.add(item);
             }
         }
 
-        requests = filtered;
+        posts = filtered;
         notifyDataSetChanged();
     }
 
@@ -67,22 +52,20 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
 
     @Override
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
-        Post item = requests.get(position);
-        holder.bind(item, position);
+        Post post = posts.get(position);
+        holder.bind(post);
     }
 
     @Override
     public int getItemCount() {
-        return requests.size();
+        return posts.size();
     }
 
     public class RequestViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvJobTitle;
-        private TextView tvDistance;
-        private TextView tvDescription;
+        private TextView tvJobTitle, tvDistance, tvDescription;
         private MaterialButton btnView;
 
-        public RequestViewHolder(@NonNull android.view.View itemView) {
+        public RequestViewHolder(@NonNull View itemView) {
             super(itemView);
             tvJobTitle = itemView.findViewById(R.id.tvJobTitle);
             tvDistance = itemView.findViewById(R.id.tvDistance);
@@ -90,18 +73,18 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
             btnView = itemView.findViewById(R.id.btnView);
         }
 
-        public void bind(Post item, int position) {
-            tvJobTitle.setText(item.title);
-            tvDistance.setText(item.distance != null ? item.distance : "Nearby");
-            tvDescription.setText(item.description);
+        public void bind(Post post) {
+            tvJobTitle.setText(post.title);
+            tvDistance.setText("Nearby");
+            tvDescription.setText(post.description);
 
             btnView.setOnClickListener(v -> {
-                Intent intent = new Intent(itemView.getContext(), GigPostDetailActivity.class);
-                intent.putExtra("post_id", item.postId);
-                intent.putExtra("title", item.title);
-                intent.putExtra("budget", item.budget);
-                intent.putExtra("distance", item.distance);
-                intent.putExtra("description", item.description);
+                Intent intent = new Intent(itemView.getContext(), RequestDetailActivity.class);
+                intent.putExtra("post_id", post.postId);
+                intent.putExtra("title", post.title);
+                intent.putExtra("type", post.type);
+                intent.putExtra("creator_id", post.creatorId);
+                intent.putExtra("description", post.description);
                 itemView.getContext().startActivity(intent);
             });
         }

@@ -226,31 +226,44 @@
                 app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
-                app:strokeColor="#E5E7EB">
+                app:strokeColor="#E5E7EB"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <LinearLayout
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:id="@+id/llUploadPrompt"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_id_camera"
+                            android:layout_marginBottom="8dp"
+                            app:tint="@color/sapphire_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tap to upload photos"
+                            android:textColor="@color/text_subheadline"
+                            android:textSize="13sp" />
+                    </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_id_camera"
-                        android:layout_marginBottom="8dp"
-                        app:tint="@color/sapphire_primary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tap to upload photos"
-                        android:textColor="@color/text_subheadline"
-                        android:textSize="13sp" />
-                </LinearLayout>
+                        android:id="@+id/ivUploadedPhoto"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone" />
+                </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Status History -->

@@ -19,6 +19,10 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import android.net.Uri;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +39,21 @@ public class UpdateStatusActivity extends AppCompatActivity {
     private StatusHistoryAdapter statusHistoryAdapter;
     private String bookingId;
     private String bookingTitle;
+    private android.widget.LinearLayout llUploadPrompt;
+    private ImageView ivUploadedPhoto;
+    private Uri selectedPhotoUri;
+
+    private final ActivityResultLauncher<String> photoPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    selectedPhotoUri = uri;
+                    ivUploadedPhoto.setImageURI(uri);
+                    ivUploadedPhoto.setVisibility(View.VISIBLE);
+                    llUploadPrompt.setVisibility(View.GONE);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +84,8 @@ public class UpdateStatusActivity extends AppCompatActivity {
         btnUploadPhoto = findViewById(R.id.btnUploadPhoto);
         btnClose = findViewById(R.id.btnClose);
         rvStatusHistory = findViewById(R.id.rvStatusHistory);
+        llUploadPrompt = findViewById(R.id.llUploadPrompt);
+        ivUploadedPhoto = findViewById(R.id.ivUploadedPhoto);
 
         // Setup status button listeners
         setupStatusButtons();
@@ -142,8 +163,7 @@ public class UpdateStatusActivity extends AppCompatActivity {
     }
 
     private void handlePhotoUpload() {
-        // TODO: Implement photo upload using file picker or camera
-        Toast.makeText(this, "Photo upload feature coming soon", Toast.LENGTH_SHORT).show();
+        photoPickerLauncher.launch("image/*");
     }
 
     private void setupStatusHistory() {
@@ -198,6 +218,9 @@ public class UpdateStatusActivity extends AppCompatActivity {
         Intent result = new Intent();
         result.putExtra("booking_id", bookingId);
         result.putExtra("new_status", selectedStatus);
+        if (selectedPhotoUri != null) {
+            result.putExtra("completion_photo_uri", selectedPhotoUri.toString());
+        }
         setResult(RESULT_OK, result);
 
         Toast.makeText(this, "Status updated to " + formatStatusType(selectedStatus), Toast.LENGTH_SHORT).show();
@@ -213,6 +236,9 @@ public class UpdateStatusActivity extends AppCompatActivity {
         intent.putExtra("provider_name", "Provider Name");
         intent.putExtra("service_amount", 500.0); // Default amount, can be customized
         intent.putExtra("completion_notes", completionNotes);
+        if (selectedPhotoUri != null) {
+            intent.putExtra("completion_photo_uri", selectedPhotoUri.toString());
+        }
         startActivity(intent);
         finish();
     }

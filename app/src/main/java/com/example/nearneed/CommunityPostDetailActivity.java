@@ -11,7 +11,7 @@ import com.google.android.material.button.MaterialButton;
 
 public class CommunityPostDetailActivity extends AppCompatActivity {
 
-    private TextView tvTitle, tvDescription, tvPostedBy, tvPostedTime, tvLocation, tvSlotsAvailable;
+    private TextView tvTitle, tvDescription, tvLocation, tvSlotsAvailable, tvAddress, tvDate, tvTime;
     private MaterialButton btnVolunteer;
     private boolean isProvider;
 
@@ -29,29 +29,34 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
 
         tvTitle = findViewById(R.id.tv_community_title);
         tvDescription = findViewById(R.id.tv_community_description);
-        tvPostedBy = findViewById(R.id.tv_posted_by);
-        tvPostedTime = findViewById(R.id.tv_posted_time);
         tvLocation = findViewById(R.id.tv_community_location);
         tvSlotsAvailable = findViewById(R.id.tv_slots_available);
+        tvAddress = findViewById(R.id.tv_community_address);
+        tvDate = findViewById(R.id.tv_event_date);
+        tvTime = findViewById(R.id.tv_event_time);
         btnVolunteer = findViewById(R.id.btn_volunteer);
 
         // Get data from intent
         Intent intent = getIntent();
         String title = intent.getStringExtra("title");
         String description = intent.getStringExtra("description");
-        String postedBy = intent.getStringExtra("postedBy");
-        String postedTime = intent.getStringExtra("postedTime");
         String location = intent.getStringExtra("location");
         String slots = intent.getStringExtra("slots");
+        String address = intent.getStringExtra("address");
+        String date = intent.getStringExtra("date");
+        String time = intent.getStringExtra("time");
+        
         isProvider = RoleManager.isProvider(this);
 
         // Set data to views
         tvTitle.setText(title != null ? title : "Community Need");
         tvDescription.setText(description != null ? description : "No description available");
-        tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
-        tvPostedTime.setText(postedTime != null ? postedTime : "Recently");
         tvLocation.setText(location != null ? location : "Location unknown");
         tvSlotsAvailable.setText(slots != null ? slots : "Volunteers needed");
+        
+        if (address != null) tvAddress.setText(address);
+        if (date != null) tvDate.setText(date);
+        if (time != null) tvTime.setText(time);
 
         btnVolunteer.setText(isProvider ? "Volunteer" : "View Applicants");
 

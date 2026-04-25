@@ -31,7 +31,7 @@ public class WelcomeActivity extends AppCompatActivity {
         });
 
         btnSignUp.setOnClickListener(v -> {
-            Intent intent = new Intent(WelcomeActivity.this, CreateAccountActivity.class);
+            Intent intent = new Intent(WelcomeActivity.this, OtpEnterActivity.class);
             intent.putExtra("IS_SIGNUP", true);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);

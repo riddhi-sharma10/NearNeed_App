@@ -35,11 +35,17 @@ public class CreatePostActivity extends AppCompatActivity {
     private android.widget.LinearLayout layoutPhotoContainer;
     private List<Uri> selectedImages = new ArrayList<>();
     private ActivityResultLauncher<Intent> photoPickerLauncher;
+    private String postType = "GIG"; // Default
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
+
+        if (getIntent() != null) {
+            postType = getIntent().getStringExtra("post_type");
+            if (postType == null) postType = "GIG";
+        }
 
         initViews();
         setupPhotoPicker();
@@ -146,6 +152,11 @@ public class CreatePostActivity extends AppCompatActivity {
         // Next Step Action
         btnNextStep.setOnClickListener(v -> {
             Intent intent = new Intent(this, CreatePostStep2Activity.class);
+            intent.putExtra("post_type", postType);
+            intent.putExtra("title", etServiceTitle.getText().toString().trim());
+            intent.putExtra("description", etDescription.getText().toString().trim());
+            intent.putExtra("category", selectedCategory);
+            // Optionally pass images (as strings or Uris)
             startActivity(intent);
         });
     }

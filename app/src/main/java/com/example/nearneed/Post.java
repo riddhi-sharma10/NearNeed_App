@@ -21,6 +21,14 @@ public class Post {
     public Long createdAt;
     public Long updatedAt;
 
+    // Post Creation fields
+    public String urgency;
+    public String preferredDate;
+    public String preferredTime;
+    public String additionalNotes;
+    public List<String> imageUrls;
+
+
     // COMMUNITY-specific fields
     public Integer slots;           // Total slots needed
     public Integer slotsFilled;     // How many have applied/volunteered

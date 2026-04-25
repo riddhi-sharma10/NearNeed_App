@@ -171,6 +171,9 @@ public class HomeSeekerActivity extends AppCompatActivity {
         if (ivDashboardNotifications != null) {
             ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, null));
         }
+        
+        // Bind search
+        DashboardSearchHelper.bindSeekerSearch(findViewById(android.R.id.content), gigsAdapter, communityAdapter, this);
     }
 
     private void setupRoleToggle() {

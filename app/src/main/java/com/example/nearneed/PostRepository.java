@@ -155,12 +155,10 @@ public class PostRepository {
         post.status = "active";
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(POSTS_COLLECTION)
-                .document()
-                .set(post)
+        com.google.firebase.firestore.DocumentReference docRef = db.collection(POSTS_COLLECTION).document();
+        docRef.set(post)
                 .addOnSuccessListener(aVoid -> {
-                    // Document ID is auto-generated; retrieve it
-                    callback.onSuccess(null);
+                    callback.onSuccess(docRef.getId());
                 })
                 .addOnFailureListener(callback::onFailure);
     }

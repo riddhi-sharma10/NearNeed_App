@@ -21,6 +21,8 @@ import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import androidx.lifecycle.ViewModelProvider;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class CreatePostStep2Activity extends AppCompatActivity {
 
@@ -32,11 +34,22 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     private List<TextView> urgencyTexts = new ArrayList<>();
     private List<ImageView> urgencyIcons = new ArrayList<>();
     private String selectedUrgency = "Urgent"; // Default
-
+    
+    private String postType, title, description, category;
+    private PostViewModel postViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post_step2);
+
+        if (getIntent() != null) {
+            postType = getIntent().getStringExtra("post_type");
+            title = getIntent().getStringExtra("title");
+            description = getIntent().getStringExtra("description");
+            category = getIntent().getStringExtra("category");
+        }
+
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
         initViews();
         setupListeners();
@@ -149,10 +162,48 @@ public class CreatePostStep2Activity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        btnPostRequest.setOnClickListener(v -> {
-            Intent intent = new Intent(this, PostedSuccessfullyActivity.class);
-            startActivity(intent);
-            finish();
+        btnPostRequest.setOnClickListener(v -> savePost());
+    }
+
+    private void savePost() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null 
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
+        
+        Post post = new Post();
+        post.userId = userId;
+        post.type = (postType != null && postType.equalsIgnoreCase("community")) ? "COMMUNITY" : "GIG";
+        post.title = title;
+        post.description = description;
+        post.category = category;
+        post.location = tvLocationSearch.getText().toString();
+        post.urgency = selectedUrgency;
+        post.preferredDate = tvDisplayDate.getText().toString();
+        post.preferredTime = tvDisplayTime.getText().toString();
+        post.additionalNotes = etAdditionalNotes.getText().toString().trim();
+        post.createdAt = System.currentTimeMillis();
+        post.status = "active";
+        
+        // Use a fixed coordinates for now as we don't have location selection for coords here
+        post.lat = 28.4595; 
+        post.lng = 77.0266;
+
+        btnPostRequest.setEnabled(false);
+        btnPostRequest.setText("Posting...");
+
+        postViewModel.createPost(post, new PostRepository.SaveCallback() {
+            @Override
+            public void onSuccess(String postId) {
+                Intent intent = new Intent(CreatePostStep2Activity.this, PostedSuccessfullyActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                btnPostRequest.setEnabled(true);
+                btnPostRequest.setText("Post Request");
+                Toast.makeText(CreatePostStep2Activity.this, "Failed to post: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

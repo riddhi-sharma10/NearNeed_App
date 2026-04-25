@@ -13,6 +13,8 @@
     <color name="brand_primary_dark">#172554</color>
     <color name="brand_primary_light">#DBEAFE</color>
     <color name="brand_primary_surface">#EFF6FF</color>
+    <color name="brand_primary_muted">#1A1E3A8A</color>
+    
     
     <color name="brand_secondary">#0F766E</color>
     <color name="brand_secondary_light">#F0FDFA</color>

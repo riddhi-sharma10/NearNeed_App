@@ -14,53 +14,34 @@ import java.util.List;
  */
 public class PostViewModel extends ViewModel {
 
-    private MutableLiveData<List<Post>> userPosts;
-    private MutableLiveData<List<Post>> nearbyPosts;
-    private MutableLiveData<String> errorMessage;
-    private MutableLiveData<Boolean> isLoading;
+    private final MutableLiveData<List<Post>> userPosts = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<Post>> nearbyPosts = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     
     private ListenerRegistration userPostsListener;
     private ListenerRegistration nearbyPostsListener;
+
+    public PostViewModel() {
+        // Initialization handled above
+    }
 
     /**
      * Get live data for user's own posts.
      */
     public LiveData<List<Post>> getUserPosts() {
-        if (userPosts == null) {
-            userPosts = new MutableLiveData<>();
-            userPosts.setValue(new ArrayList<>());
-        }
         return userPosts;
     }
 
-    /**
-     * Get live data for nearby posts.
-     */
     public LiveData<List<Post>> getNearbyPosts() {
-        if (nearbyPosts == null) {
-            nearbyPosts = new MutableLiveData<>();
-            nearbyPosts.setValue(new ArrayList<>());
-        }
         return nearbyPosts;
     }
 
-    /**
-     * Get error messages as live data.
-     */
     public LiveData<String> getErrorMessage() {
-        if (errorMessage == null) {
-            errorMessage = new MutableLiveData<>();
-        }
         return errorMessage;
     }
 
-    /**
-     * Get loading state.
-     */
     public LiveData<Boolean> getIsLoading() {
-        if (isLoading == null) {
-            isLoading = new MutableLiveData<>(false);
-        }
         return isLoading;
     }
 

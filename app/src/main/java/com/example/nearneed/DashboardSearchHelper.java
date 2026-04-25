@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Locale;
 
@@ -16,7 +17,10 @@ public final class DashboardSearchHelper {
     private DashboardSearchHelper() {
     }
 
-    public static void bindSeekerSearch(View root, boolean hasPosts, Context context) {
+    public static void bindSeekerSearch(View root, 
+                                        RecyclerView.Adapter<?> gigsAdapter,
+                                        RecyclerView.Adapter<?> communityAdapter,
+                                        Context context) {
         if (root == null) {
             return;
         }
@@ -26,17 +30,6 @@ public final class DashboardSearchHelper {
             return;
         }
 
-        if (!hasPosts) {
-            bindMapSearchShortcut(searchEdit, context);
-            return;
-        }
-
-        View gigsScrollContainer = root.findViewById(R.id.gigsScrollContainer);
-        View communityCardsContainer = root.findViewById(R.id.communityCardsContainer);
-        View gigCard1 = root.findViewById(R.id.gig_card_1);
-        View gigCard2 = root.findViewById(R.id.gig_card_2);
-        View communityCard1 = root.findViewById(R.id.community_card_1);
-        View communityCard2 = root.findViewById(R.id.community_card_2);
         TextView emptyState = root.findViewById(R.id.tvSearchEmptyState);
 
         searchEdit.addTextChangedListener(new TextWatcher() {
@@ -46,36 +39,23 @@ public final class DashboardSearchHelper {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s == null ? "" : s.toString().trim().toLowerCase(Locale.ROOT);
-                boolean showGig1 = query.isEmpty() || contains(query, "Plumbing Repair", "Fixing leaky faucets and clogged drains for the community.");
-                boolean showGig2 = query.isEmpty() || contains(query, "Electrical Fix", "Wiring inspection and circuit breaker repairs for Sector 15.");
-                boolean showCommunity1 = query.isEmpty() || contains(query, "Grocery Assistance", "Sarah J. needs help picking out fresh groceries for her weekly meals.");
-                boolean showCommunity2 = query.isEmpty() || contains(query, "Tech Setup Help", "David M. needs assistance setting up his new computer and installing software.");
-
-                if (gigCard1 != null) {
-                    gigCard1.setVisibility(showGig1 ? View.VISIBLE : View.GONE);
+                String query = s == null ? "" : s.toString().trim();
+                
+                // If adapters support filtering, call it here
+                // For now, we'll just handle the visibility of empty state
+                if (gigsAdapter instanceof CommunityVolunteeringAdapter) {
+                    ((CommunityVolunteeringAdapter) gigsAdapter).filter(query);
                 }
-                if (gigCard2 != null) {
-                    gigCard2.setVisibility(showGig2 ? View.VISIBLE : View.GONE);
-                }
-                if (communityCard1 != null) {
-                    communityCard1.setVisibility(showCommunity1 ? View.VISIBLE : View.GONE);
-                }
-                if (communityCard2 != null) {
-                    communityCard2.setVisibility(showCommunity2 ? View.VISIBLE : View.GONE);
+                if (communityAdapter instanceof CommunityVolunteeringAdapter) {
+                    ((CommunityVolunteeringAdapter) communityAdapter).filter(query);
                 }
 
-                if (gigsScrollContainer != null) {
-                    gigsScrollContainer.setVisibility(showGig1 || showGig2 ? View.VISIBLE : View.GONE);
-                }
-                if (communityCardsContainer != null) {
-                    communityCardsContainer.setVisibility(showCommunity1 || showCommunity2 ? View.VISIBLE : View.GONE);
-                }
-
-                if (emptyState != null) {
-                    emptyState.setVisibility(query.isEmpty() || showGig1 || showGig2 || showCommunity1 || showCommunity2
-                            ? View.GONE
-                            : View.VISIBLE);
+                if (emptyState != null && !query.isEmpty()) {
+                    boolean hasAny = (gigsAdapter != null && gigsAdapter.getItemCount() > 0)
+                            || (communityAdapter != null && communityAdapter.getItemCount() > 0);
+                    emptyState.setVisibility(hasAny ? View.GONE : View.VISIBLE);
+                } else if (emptyState != null) {
+                    emptyState.setVisibility(View.GONE);
                 }
             }
 

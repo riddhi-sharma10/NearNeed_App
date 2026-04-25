@@ -87,17 +87,14 @@ public class OtpVerifyActivity extends AppCompatActivity {
         btnVerify.setEnabled(false);
         btnVerify.setText("Verifying...");
 
-        btnVerify.postDelayed(() -> {
-            boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-            Intent intent;
-            if (isSignup) {
-                intent = new Intent(this, ProfileInfoActivity.class);
-            } else {
-                intent = new Intent(this, AccountTypeActivity.class);
-            }
-            startActivity(intent);
-            finish();
-        }, 600);
+        if (mVerificationId != null && !mVerificationId.isEmpty() && !mVerificationId.equals("dummy_verification_id")) {
+            PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
+            signInWithPhoneAuthCredential(credential);
+        } else {
+            Toast.makeText(this, "Verification ID missing. Try requesting a new OTP.", Toast.LENGTH_SHORT).show();
+            btnVerify.setEnabled(true);
+            btnVerify.setText("Verify");
+        }
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {

@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import android.Manifest;
@@ -116,8 +117,8 @@ public class LocationPickerHelper {
             progressBar.setVisibility(View.VISIBLE);
         }
 
-        // Get last location
-        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+        // Get current location directly instead of relying on last known location cache
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(location -> {
             if (progressBar != null) {
                 progressBar.setVisibility(View.GONE);
             }

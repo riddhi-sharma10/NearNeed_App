@@ -60,15 +60,14 @@ public class OtpEnterActivity extends AppCompatActivity {
         btnSendOtp.setEnabled(false);
         btnSendOtp.setText("Sending...");
 
-        btnSendOtp.postDelayed(() -> {
-            boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-            Intent intent = new Intent(OtpEnterActivity.this, OtpVerifyActivity.class);
-            intent.putExtra("IS_SIGNUP", isSignup);
-            intent.putExtra("PHONE_NUMBER", phoneNumber);
-            intent.putExtra("VERIFICATION_ID", "dummy_verification_id");
-            startActivity(intent);
-            finish();
-        }, 600);
+        PhoneAuthOptions options =
+                PhoneAuthOptions.newBuilder(mAuth)
+                        .setPhoneNumber("+91" + phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(this)
+                        .setCallbacks(mCallbacks)
+                        .build();
+        PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {

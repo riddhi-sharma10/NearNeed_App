@@ -3,12 +3,12 @@ package com.example.nearneed;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 import java.util.Locale;
@@ -59,13 +59,13 @@ public class ProviderPastAdapter extends RecyclerView.Adapter<ProviderPastAdapte
         private final LinearLayout layoutCompleted;
         private final TextView tvRating;
         private final TextView tvReview;
-        private final Button btnViewDetails;
-        private final Button btnViewEarnings;
+        private final MaterialButton btnViewDetails;
+        private final MaterialButton btnViewEarnings;
 
         // Cancelled section
         private final LinearLayout layoutCancelled;
         private final TextView tvCancellationNote;
-        private final Button btnViewCancellation;
+        private final MaterialButton btnViewCancellation;
 
         PastJobViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -33,6 +33,11 @@ public class OtpEnterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_enter);
 
+        if (!NearNeedApp.isFirebaseReady()) {
+            Toast.makeText(this, "Firebase not configured. Please contact support.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
         mAuth = FirebaseAuth.getInstance();
 
         btnBack = findViewById(R.id.btnBack);

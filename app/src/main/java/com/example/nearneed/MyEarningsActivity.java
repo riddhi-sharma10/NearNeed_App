@@ -28,13 +28,40 @@ public class MyEarningsActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
+        // Get Intent Extras
+        String specificServiceName = getIntent().getStringExtra("service_name");
+        double specificServiceAmount = getIntent().getDoubleExtra("service_amount", -1);
+
+        // Update UI dynamically
+        TextView tvTotalBalanceLabel = findViewById(R.id.tvTotalBalanceLabel);
+        TextView tvTotalBalanceAmount = findViewById(R.id.tvTotalBalanceAmount);
+        TextView tvRecentActivityLabel = findViewById(R.id.tvRecentActivityLabel);
+
+        List<TransactionItem> dataToShow;
+
+        if (specificServiceName != null && specificServiceAmount != -1) {
+            // SHOW ONLY THIS SPECIFIC GIG
+            if (tvTotalBalanceLabel != null) tvTotalBalanceLabel.setText("GIG EARNINGS");
+            if (tvTotalBalanceAmount != null) tvTotalBalanceAmount.setText("₹" + (int) specificServiceAmount);
+            if (tvRecentActivityLabel != null) tvRecentActivityLabel.setText("Transaction Details");
+
+            dataToShow = new ArrayList<>();
+            // Assuming we use a general checkmark icon or money icon for the specific gig
+            dataToShow.add(new TransactionItem(specificServiceName, "Service", "Just Now", "5.0", "₹" + (int)specificServiceAmount, "COMPLETED", R.drawable.ic_payment_wallet_blue));
+        } else {
+            // SHOW ALL EARNINGS (DEFAULT DASHBOARD)
+            if (tvTotalBalanceLabel != null) tvTotalBalanceLabel.setText("TOTAL BALANCE");
+            if (tvTotalBalanceAmount != null) tvTotalBalanceAmount.setText("₹4,500");
+            if (tvRecentActivityLabel != null) tvRecentActivityLabel.setText("Recent Activity");
+            
+            dataToShow = getDummyTransactions();
+        }
+
         // Setup RecyclerView
         RecyclerView rvTransactions = findViewById(R.id.rv_transactions);
         if (rvTransactions != null) {
             rvTransactions.setLayoutManager(new LinearLayoutManager(this));
-            
-            List<TransactionItem> dummyData = getDummyTransactions();
-            TransactionAdapter adapter = new TransactionAdapter(dummyData);
+            TransactionAdapter adapter = new TransactionAdapter(dataToShow);
             rvTransactions.setAdapter(adapter);
         }
     }
@@ -105,15 +132,15 @@ public class MyEarningsActivity extends AppCompatActivity {
             if ("COMPLETED".equalsIgnoreCase(item.status)) {
                 holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#059669")); // Green
                 holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#059669")); // Green
-                holder.tvAmount.setText("+" + item.amount);
+                holder.tvAmount.setText("+" + item.amount.replace("+", "")); // Ensure single plus
             } else if ("PENDING".equalsIgnoreCase(item.status)) {
                 holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#D97706")); // Orange
                 holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#D97706")); // Orange
-                holder.tvAmount.setText("+" + item.amount);
+                holder.tvAmount.setText("+" + item.amount.replace("+", ""));
             } else if ("FAILED".equalsIgnoreCase(item.status)) {
                 holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#DC2626")); // Red
                 holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#DC2626")); // Red
-                holder.tvAmount.setText(item.amount); // No plus sign for failed
+                holder.tvAmount.setText(item.amount.replace("+", "")); // No plus sign for failed
             }
             
             try {

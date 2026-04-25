@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="#F8FAFC"
     android:paddingTop="16dp"
     android:paddingBottom="80dp">
 
@@ -14,727 +14,721 @@
 
         <!-- CARD 1: AC Repair -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvSeekerUpcoming1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeColor="#EFF6FF"
+            app:strokeWidth="1.5dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:orientation="vertical"
+                android:padding="18dp">
 
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tvTitle1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:text="AC Repair &amp;\nMaintenance"
-                    android:textColor="#1E3A8A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/tvLabel1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Label -->
-                <TextView
-                    android:id="@+id/tvLabel1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="ESTIMATED\nCOST"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Price -->
-                <TextView
-                    android:id="@+id/tvPrice1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="$85.00"
-                    android:textColor="#1E3A8A"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvLabel1" />
-
-                <!-- Profile Pic -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivProfile1"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginTop="12dp"
-                    android:background="#DBEAFE"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTitle1"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
-
-                <!-- Name -->
-                <TextView
-                    android:id="@+id/tvName1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="David Miller"
-                    android:textColor="#4B5563"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile1"
-                    app:layout_constraintStart_toEndOf="@id/ivProfile1"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile1" />
-
-                <!-- Rating Pill -->
+                <!-- Top Row: Title + Badge -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_rating_pill_bookings"
+                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="6dp"
-                    android:paddingVertical="2dp"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile1"
-                    app:layout_constraintStart_toEndOf="@id/tvName1"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile1">
+                    android:layout_marginBottom="14dp">
 
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:src="@android:drawable/star_on"
-                        app:tint="#D97706" />
+                    <TextView
+                        android:id="@+id/tvTitle1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="AC Repair &amp; Maintenance"
+                        android:textColor="#1E3A8A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="4.9"
-                        android:textColor="#B45309"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:text="GIG"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_trending_badge"
+                        android:backgroundTint="#1E3A8A" />
                 </LinearLayout>
 
-                <!-- Calendar Row -->
-                <ImageView
-                    android:id="@+id/ivCalendar1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="24dp"
-                    android:src="@android:drawable/ic_menu_my_calendar"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile1"
-                    app:tint="#047857" />
-
+                <!-- Profile Block -->
                 <LinearLayout
-                    android:id="@+id/llDateInfo1"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivCalendar1"
-                    app:layout_constraintTop_toTopOf="@id/ivCalendar1">
+                    android:background="@drawable/bg_profile_block_bookings"
+                    android:padding="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
 
-                    <TextView
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivProfile1"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:background="#DBEAFE"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#1E3A8A"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                        android:layout_marginEnd="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ASSIGNED PRO"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/tvName1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="David Miller"
+                                android:textColor="#1E3A8A"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:background="@drawable/bg_rating_pill_white_bookings"
+                                android:gravity="center_vertical"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="2dp">
+
+                                <ImageView
+                                    android:layout_width="10dp"
+                                    android:layout_height="10dp"
+                                    android:src="@android:drawable/star_on"
+                                    app:tint="#D97706" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="3dp"
+                                    android:text="4.9"
+                                    android:textColor="#1E3A8A"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Price tag -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="October 24, 2023"
+                        android:orientation="vertical"
+                        android:gravity="end">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EST. COST"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvPrice1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹850"
+                            android:textColor="#1E3A8A"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F0F4FF"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Date Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="#1E3A8A" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="October 24, 2023 · 10:00 AM - 12:00 PM"
                         android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10:00 AM - 12:00 PM"
-                        android:textColor="#6B7280"
-                        android:textSize="12sp" />
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <!-- Location Row -->
-                <ImageView
-                    android:id="@+id/ivLocation1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="16dp"
-                    android:src="@android:drawable/ic_menu_mylocation"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llDateInfo1"
-                    app:tint="#047857" />
-
                 <LinearLayout
-                    android:id="@+id/llLocationInfo1"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivLocation1"
-                    app:layout_constraintTop_toTopOf="@id/ivLocation1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Home"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="242 Maple Avenue, Suite 4"
-                        android:textColor="#6B7280"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Buttons Area -->
-                <LinearLayout
-                    android:id="@+id/llTrackButton1"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_button_track_bookings"
-                    android:gravity="center"
-                    app:layout_constraintEnd_toStartOf="@id/llChatButton1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llLocationInfo1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Track"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/llChatButton1"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_button_chat_bookings"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="@id/llTrackButton1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/llTrackButton1">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@android:drawable/ic_dialog_email"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
                         app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="242 Maple Avenue, Suite 4"
+                        android:textColor="#6B7280"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Cancel Booking -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Action Buttons Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="CANCEL BOOKING"
-                    android:textColor="#9CA3AF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llTrackButton1" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <!-- Chat Button (full icon style from navbar) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/llChatButton1"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#1E3A8A"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_nav_messages"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/white" />
+
+                    <!-- Cancel -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCancelBooking1"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Cancel"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="#FCA5A5" />
+                </LinearLayout>
+
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- CARD 2: Deep Home Cleaning -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvSeekerUpcoming2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeColor="#EFF6FF"
+            app:strokeWidth="1.5dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:orientation="vertical"
+                android:padding="18dp">
 
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tvTitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:text="Deep Home Cleaning"
-                    android:textColor="#1E3A8A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/tvLabel2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Label -->
-                <TextView
-                    android:id="@+id/tvLabel2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="FIXED PRICE"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Price -->
-                <TextView
-                    android:id="@+id/tvPrice2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="$120.00"
-                    android:textColor="#1E3A8A"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvLabel2" />
-
-                <!-- Profile Pic -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivProfile2"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginTop="12dp"
-                    android:background="#DBEAFE"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTitle2"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
-
-                <!-- Name -->
-                <TextView
-                    android:id="@+id/tvName2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Sarah Jenkins"
-                    android:textColor="#4B5563"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile2"
-                    app:layout_constraintStart_toEndOf="@id/ivProfile2"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile2" />
-
-                <!-- Rating Pill -->
+                <!-- Top Row -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_rating_pill_bookings"
+                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="6dp"
-                    android:paddingVertical="2dp"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile2"
-                    app:layout_constraintStart_toEndOf="@id/tvName2"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile2">
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:id="@+id/tvTitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Deep Home Cleaning"
+                        android:textColor="#1E3A8A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GIG"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_trending_badge"
+                        android:backgroundTint="#1E3A8A" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_profile_block_bookings"
+                    android:padding="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivProfile2"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:background="#DBEAFE"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#1E3A8A"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                        android:layout_marginEnd="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ASSIGNED PRO"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/tvName2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sarah Jenkins"
+                                android:textColor="#1E3A8A"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:background="@drawable/bg_rating_pill_white_bookings"
+                                android:gravity="center_vertical"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="2dp">
+
+                                <ImageView
+                                    android:layout_width="10dp"
+                                    android:layout_height="10dp"
+                                    android:src="@android:drawable/star_on"
+                                    app:tint="#D97706" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="3dp"
+                                    android:text="4.8"
+                                    android:textColor="#1E3A8A"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="end">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FIXED PRICE"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvPrice2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹1,200"
+                            android:textColor="#1E3A8A"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#F0F4FF"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:src="@android:drawable/star_on"
-                        app:tint="#D97706" />
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="#1E3A8A" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:text="4.8"
-                        android:textColor="#B45309"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="October 28, 2023 · 08:00 AM - 02:00 PM"
+                        android:textColor="#374151"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Calendar Row -->
-                <ImageView
-                    android:id="@+id/ivCalendar2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="24dp"
-                    android:src="@android:drawable/ic_menu_my_calendar"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile2"
-                    app:tint="#047857" />
-
                 <LinearLayout
-                    android:id="@+id/llDateInfo2"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivCalendar2"
-                    app:layout_constraintTop_toTopOf="@id/ivCalendar2">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="#047857" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="October 28, 2023"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="08:00 AM - 02:00 PM"
-                        android:textColor="#6B7280"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Location Row -->
-                <ImageView
-                    android:id="@+id/ivLocation2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="16dp"
-                    android:src="@android:drawable/ic_menu_mylocation"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llDateInfo2"
-                    app:tint="#047857" />
-
-                <LinearLayout
-                    android:id="@+id/llLocationInfo2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivLocation2"
-                    app:layout_constraintTop_toTopOf="@id/ivLocation2">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Home"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
                         android:text="242 Maple Avenue, Suite 4"
                         android:textColor="#6B7280"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Buttons Area -->
-                <LinearLayout
-                    android:id="@+id/llTrackButton2"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_button_track_bookings"
-                    android:gravity="center"
-                    app:layout_constraintEnd_toStartOf="@id/llChatButton2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llLocationInfo2">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Track"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/llChatButton2"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_button_chat_bookings"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="@id/llTrackButton2"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/llTrackButton2">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@android:drawable/ic_dialog_email"
-                        app:tint="#047857" />
-                </LinearLayout>
-
-                <!-- Cancel Booking -->
-                <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="CANCEL BOOKING"
-                    android:textColor="#9CA3AF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llTrackButton2" />
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/llChatButton2"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#1E3A8A"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_nav_messages"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCancelBooking2"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Cancel"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="#FCA5A5" />
+                </LinearLayout>
+
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-
 
         <!-- CARD 3: Park Cleanup Drive (Community) -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvSeekerUpcoming3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
             app:strokeColor="#D1FAE5"
             app:strokeWidth="1.5dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp">
+                android:orientation="vertical"
+                android:padding="18dp">
 
-                <!-- Community Badge (top-left) -->
-                <TextView
-                    android:id="@+id/tvCommunityBadge3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_badge_community"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="🌿 COMMUNITY"
-                    android:textColor="#065F46"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- VOLUNTEER label (top-right) -->
-                <TextView
-                    android:id="@+id/tvLabelC3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="TYPE"
-                    android:textColor="#9CA3AF"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvTypeC3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:background="@drawable/bg_badge_community"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp"
-                    android:text="FREE"
-                    android:textColor="#065F46"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvLabelC3" />
-
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tvTitleC3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="Park Cleanup Drive"
-                    android:textColor="#1E3A8A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/tvTypeC3"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvCommunityBadge3" />
-
-                <!-- Organiser row -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivProfileC3"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginTop="12dp"
-                    android:background="#D1FAE5"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:tint="#065F46"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTitleC3"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
-
-                <TextView
-                    android:id="@+id/tvNameC3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Sarah Johnson"
-                    android:textColor="#4B5563"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfileC3"
-                    app:layout_constraintStart_toEndOf="@id/ivProfileC3"
-                    app:layout_constraintTop_toTopOf="@id/ivProfileC3" />
-
-                <!-- Organiser label -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:text="Organiser"
-                    android:textColor="#10B981"
-                    android:textSize="11sp"
-                    app:layout_constraintBottom_toBottomOf="@id/tvNameC3"
-                    app:layout_constraintStart_toEndOf="@id/tvNameC3"
-                    app:layout_constraintTop_toTopOf="@id/tvNameC3" />
-
-                <!-- Calendar Row -->
-                <ImageView
-                    android:id="@+id/ivCalendarC3"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="20dp"
-                    android:src="@android:drawable/ic_menu_my_calendar"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfileC3"
-                    app:tint="#047857" />
-
+                <!-- Community Badge -->
                 <LinearLayout
-                    android:id="@+id/llDateInfoC3"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivCalendarC3"
-                    app:layout_constraintTop_toTopOf="@id/ivCalendarC3">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
 
                     <TextView
+                        android:id="@+id/tvCommunityBadge3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="November 02, 2023"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
+                        android:background="@drawable/bg_badge_community"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:text="🌿 COMMUNITY"
+                        android:textColor="#065F46"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="07:00 AM – 10:00 AM"
-                        android:textColor="#6B7280"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Location Row -->
-                <ImageView
-                    android:id="@+id/ivLocationC3"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="16dp"
-                    android:src="@android:drawable/ic_menu_mylocation"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llDateInfoC3"
-                    app:tint="#047857" />
-
-                <LinearLayout
-                    android:id="@+id/llLocationInfoC3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivLocationC3"
-                    app:layout_constraintTop_toTopOf="@id/ivLocationC3">
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
 
                     <TextView
+                        android:id="@+id/tvTypeC3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Riverside Park"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gate No. 3, East Entrance"
-                        android:textColor="#6B7280"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <!-- Buttons -->
-                <LinearLayout
-                    android:id="@+id/llTrackButtonC3"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_btn_solid_green"
-                    android:gravity="center"
-                    app:layout_constraintEnd_toStartOf="@id/llChatButtonC3"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llLocationInfoC3">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="View Event"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
+                        android:background="@drawable/bg_badge_community"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="3dp"
+                        android:text="FREE"
+                        android:textColor="#065F46"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
+                <!-- Title Row -->
                 <LinearLayout
-                    android:id="@+id/llChatButtonC3"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_button_chat_bookings"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="@id/llTrackButtonC3"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/llTrackButtonC3">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:id="@+id/tvTitleC3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Park Cleanup Drive"
+                        android:textColor="#1E3A8A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_profile_block_bookings"
+                    android:padding="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivProfileC3"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:background="#D1FAE5"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#065F46"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                        android:layout_marginEnd="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ORGANISER"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvNameC3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sarah Johnson"
+                            android:textColor="#065F46"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#ECFDF5"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@android:drawable/ic_dialog_email"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
                         app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="November 02, 2023 · 07:00 AM – 10:00 AM"
+                        android:textColor="#374151"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
-                <!-- Cancel / Leave -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="LEAVE EVENT"
-                    android:textColor="#9CA3AF"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/llTrackButtonC3" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Riverside Park, Gate No. 3, East Entrance"
+                        android:textColor="#6B7280"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/llChatButtonC3"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#047857"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_nav_messages"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/llTrackButtonC3"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="View Event"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#065F46"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>

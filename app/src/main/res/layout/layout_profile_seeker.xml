@@ -94,6 +94,15 @@
                         android:textSize="28sp"
                         android:textStyle="bold" />
 
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/iv_profile_picture"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:layout_gravity="center"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle" />
+
                 </FrameLayout>
             </LinearLayout>
         </FrameLayout>

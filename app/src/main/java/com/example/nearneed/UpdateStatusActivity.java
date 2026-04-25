@@ -185,21 +185,24 @@ public class UpdateStatusActivity extends AppCompatActivity {
             return;
         }
 
+        // Persist in-memory state
+        BookingStateManager.getInstance().setStatus(bookingId, selectedStatus);
+
         // If completed, navigate to payment flow
         if ("completed".equals(selectedStatus)) {
             navigateToPaymentFlow(notes);
             return;
         }
 
-        // For other statuses, just update and finish
+        // For cancelled / other statuses: send result back to caller
+        Intent result = new Intent();
+        result.putExtra("booking_id", bookingId);
+        result.putExtra("new_status", selectedStatus);
+        setResult(RESULT_OK, result);
+
         Toast.makeText(this, "Status updated to " + formatStatusType(selectedStatus), Toast.LENGTH_SHORT).show();
-
-        // Update current status
         currentStatus = selectedStatus;
-
-        // Reset form
         etCompletionNotes.setText("");
-
         finish();
     }
 

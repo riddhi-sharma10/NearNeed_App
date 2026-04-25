@@ -1,84 +1,438 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:id="@+id/tv_job_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0 jobs scheduled"
-        android:textColor="@color/text_subheadline"
-        android:textSize="14sp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupFilter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        app:singleLine="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipAll"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:tag="all"
-            android:text="All" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:tag="GIG"
-            android:text="Gig" />
-
-        <com.google.android.material.chip.Chip
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:tag="COMMUNITY"
-            android:text="Community" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvUpcomingJobs"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp" />
+    android:background="#F8FAFC"
+    android:paddingTop="8dp"
+    android:paddingBottom="80dp">
 
     <LinearLayout
-        android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="40dp"
-        android:paddingBottom="40dp"
-        android:visibility="gone">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/emptyStateTitle"
-            android:layout_width="wrap_content"
+        <!-- Job count + filter row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No upcoming jobs"
-            android:textColor="@color/text_header"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp">
 
-        <TextView
-            android:id="@+id/emptyStateSubtitle"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/tv_job_count"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2 jobs scheduled"
+                android:textColor="#1E3A8A"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- CARD 1: GIG - Garden Maintenance -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvProvUpcoming1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="When you accept gigs or volunteers, they'll appear here"
-            android:textColor="@color/text_subheadline"
-            android:textSize="14sp" />
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeColor="#EFF6FF"
+            app:strokeWidth="1.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <!-- Header: Title + Badge -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Garden Maintenance"
+                        android:textColor="#1E3A8A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GIG"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_trending_badge"
+                        android:backgroundTint="#1E3A8A" />
+                </LinearLayout>
+
+                <!-- Seeker (Customer) info block -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_profile_block_bookings"
+                    android:padding="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:background="#DBEAFE"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#1E3A8A"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                        android:layout_marginEnd="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CUSTOMER"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Riya Sharma"
+                            android:textColor="#1E3A8A"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Agreed Price -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="end">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AGREED"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₹500"
+                            android:textColor="#1E3A8A"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Date & Location -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="#1E3A8A" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="October 24, 2023 · 10:00 AM"
+                        android:textColor="#374151"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="12 Green Park Colony, Sector 9"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMsgSeeker1"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#1E3A8A"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_nav_messages"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProvCancel1"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Cancel"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="#FCA5A5" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CARD 2: COMMUNITY -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvProvUpcoming2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:strokeColor="#D1FAE5"
+            app:strokeWidth="1.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <!-- Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Park Cleanup Drive"
+                        android:textColor="#1E3A8A"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🌿 COMMUNITY"
+                        android:textColor="#065F46"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_badge_community" />
+                </LinearLayout>
+
+                <!-- Organiser block -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_profile_block_bookings"
+                    android:padding="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:background="#D1FAE5"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#065F46"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                        android:layout_marginEnd="10dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ORGANISER"
+                            android:textColor="#9CA3AF"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sarah Johnson"
+                            android:textColor="#065F46"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FREE"
+                        android:textColor="#065F46"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:background="@drawable/bg_badge_community" />
+                </LinearLayout>
+
+                <!-- Date & Location -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="November 02, 2023 · 07:00 AM"
+                        android:textColor="#374151"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@android:drawable/ic_menu_mylocation"
+                        app:tint="#047857" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="Riverside Park, Gate No. 3"
+                        android:textColor="#6B7280"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMsgOrganiser"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:backgroundTint="#047857"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_nav_messages"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/white" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnProvCancel2"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Cancel"
+                        android:textColor="#DC2626"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="#FCA5A5" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

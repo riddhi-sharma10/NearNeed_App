@@ -1,520 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:paddingTop="16dp"
-    android:paddingBottom="80dp">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_job_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 jobs scheduled"
+        android:textColor="@color/text_subheadline"
+        android:textSize="14sp" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupFilter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginTop="10dp"
+        app:singleLine="true"
+        app:singleSelection="true">
 
-        <!-- CARD 1: Full House Cleaning -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipAll"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            android:tag="all"
+            android:text="All" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="20dp">
-
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tvTitle1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:text="Full House Cleaning"
-                    android:textColor="#1E3A8A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/tvEarningsLabel1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- EST. EARNINGS label -->
-                <TextView
-                    android:id="@+id/tvEarningsLabel1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="EST. EARNINGS"
-                    android:textColor="#9CA3AF"
-                    android:textSize="9sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Price -->
-                <TextView
-                    android:id="@+id/tvPrice1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="$150.00"
-                    android:textColor="#1E3A8A"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvEarningsLabel1" />
-
-                <!-- ACCEPTED Pill -->
-                <TextView
-                    android:id="@+id/tvAccepted1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_pill_accepted"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="ACCEPTED"
-                    android:textColor="#065F46"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTitle1" />
-
-                <!-- Divider -->
-                <View
-                    android:id="@+id/divider1"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:background="#F1F5F9"
-                    app:layout_constraintTop_toBottomOf="@id/tvAccepted1" />
-
-                <!-- Customer Avatar -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivProfile1"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="14dp"
-                    android:src="@drawable/avatar_sarah"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/divider1"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
-
-                <!-- Name + Rating column -->
-                <LinearLayout
-                    android:id="@+id/llCustomer1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile1"
-                    app:layout_constraintEnd_toStartOf="@id/ivChatBtn1"
-                    app:layout_constraintStart_toEndOf="@id/ivProfile1"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sarah Jenkins"
-                        android:textColor="#0F172A"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <!-- Rating Row -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
-                            android:src="@drawable/ic_star_yellow" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="4.9 (12 bookings)"
-                            android:textColor="#6B7280"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Chat Icon Button -->
-                <LinearLayout
-                    android:id="@+id/ivChatBtn1"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_btn_teal_soft"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile1">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:src="@drawable/ic_messages_active"
-                        app:tint="#0F766E" />
-                </LinearLayout>
-
-                <!-- Calendar Row -->
-                <ImageView
-                    android:id="@+id/ivCalendar1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="20dp"
-                    android:src="@drawable/ic_calendar_input"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile1" />
-
-                <TextView
-                    android:id="@+id/tvDateTime1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Monday, Oct 24  •  09:00 AM"
-                    android:textColor="#374151"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivCalendar1"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile1" />
-
-                <!-- Location Row -->
-                <ImageView
-                    android:id="@+id/ivLocation1"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="12dp"
-                    android:src="@drawable/ic_loc_pin_small"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivCalendar1" />
-
-                <TextView
-                    android:id="@+id/tvLocation1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="12dp"
-                    android:text="124 Oakwood Ave, Silver Spring"
-                    android:textColor="#374151"
-                    android:textSize="13sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivLocation1"
-                    app:layout_constraintTop_toBottomOf="@id/tvDateTime1" />
-
-                <!-- Navigate Button -->
-                <LinearLayout
-                    android:id="@+id/btnNavigate1"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_button_dark_blue_12dp"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@id/tvLocation1">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#FFFFFF" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Navigate"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Cancel Job Button -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_btn_cancel_job"
-                    android:gravity="center"
-                    app:layout_constraintTop_toBottomOf="@id/btnNavigate1">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CANCEL JOB"
-                        android:textColor="#EF4444"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-                </LinearLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- CARD 2: Deep Kitchen Sanitization -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
+        <com.google.android.material.chip.Chip
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            android:tag="GIG"
+            android:text="Gig" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="20dp">
+        <com.google.android.material.chip.Chip
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tag="COMMUNITY"
+            android:text="Community" />
+    </com.google.android.material.chip.ChipGroup>
 
-                <!-- Title -->
-                <TextView
-                    android:id="@+id/tvTitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:text="Deep Kitchen Sanitization"
-                    android:textColor="#1E3A8A"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@id/tvEarningsLabel2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvUpcomingJobs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp" />
 
-                <!-- EST. EARNINGS label -->
-                <TextView
-                    android:id="@+id/tvEarningsLabel2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:text="EST. EARNINGS"
-                    android:textColor="#9CA3AF"
-                    android:textSize="9sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:id="@+id/emptyStateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="40dp"
+        android:paddingBottom="40dp"
+        android:visibility="gone">
 
-                <!-- Price -->
-                <TextView
-                    android:id="@+id/tvPrice2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="$85.00"
-                    android:textColor="#1E3A8A"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvEarningsLabel2" />
+        <TextView
+            android:id="@+id/emptyStateTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No upcoming jobs"
+            android:textColor="@color/text_header"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-                <!-- ACCEPTED Pill -->
-                <TextView
-                    android:id="@+id/tvAccepted2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_pill_accepted"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="ACCEPTED"
-                    android:textColor="#065F46"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvTitle2" />
-
-                <!-- Divider -->
-                <View
-                    android:id="@+id/divider2"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:background="#F1F5F9"
-                    app:layout_constraintTop_toBottomOf="@id/tvAccepted2" />
-
-                <!-- Customer Avatar -->
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/ivProfile2"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="14dp"
-                    android:src="@drawable/avatar_alex"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/divider2"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent" />
-
-                <!-- Name + Rating column -->
-                <LinearLayout
-                    android:id="@+id/llCustomer2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile2"
-                    app:layout_constraintEnd_toStartOf="@id/ivChatBtn2"
-                    app:layout_constraintStart_toEndOf="@id/ivProfile2"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile2">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Marcus Chen"
-                        android:textColor="#0F172A"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <!-- Rating Row -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
-                            android:src="@drawable/ic_star_yellow" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="5.0 (3 bookings)"
-                            android:textColor="#6B7280"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Chat Icon Button -->
-                <LinearLayout
-                    android:id="@+id/ivChatBtn2"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_btn_teal_soft"
-                    android:gravity="center"
-                    app:layout_constraintBottom_toBottomOf="@id/ivProfile2"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/ivProfile2">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:src="@drawable/ic_messages_active"
-                        app:tint="#0F766E" />
-                </LinearLayout>
-
-                <!-- Calendar Row -->
-                <ImageView
-                    android:id="@+id/ivCalendar2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="20dp"
-                    android:src="@drawable/ic_calendar_input"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile2" />
-
-                <TextView
-                    android:id="@+id/tvDateTime2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Monday, Oct 24  •  02:30 PM"
-                    android:textColor="#374151"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivCalendar2"
-                    app:layout_constraintTop_toBottomOf="@id/ivProfile2" />
-
-                <!-- Location Row -->
-                <ImageView
-                    android:id="@+id/ivLocation2"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginTop="12dp"
-                    android:src="@drawable/ic_loc_pin_small"
-                    app:tint="#1E3A8A"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/ivCalendar2" />
-
-                <TextView
-                    android:id="@+id/tvLocation2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="12dp"
-                    android:text="892 Pine Crest St, Apt 4C"
-                    android:textColor="#374151"
-                    android:textSize="13sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ivLocation2"
-                    app:layout_constraintTop_toBottomOf="@id/tvDateTime2" />
-
-                <!-- Navigate Button -->
-                <LinearLayout
-                    android:id="@+id/btnNavigate2"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/bg_button_dark_blue_12dp"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    app:layout_constraintTop_toBottomOf="@id/tvLocation2">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        app:tint="#FFFFFF" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Navigate"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <!-- Cancel Job Button -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@drawable/bg_btn_cancel_job"
-                    android:gravity="center"
-                    app:layout_constraintTop_toBottomOf="@id/btnNavigate2">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="CANCEL JOB"
-                        android:textColor="#EF4444"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-                </LinearLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
-
+        <TextView
+            android:id="@+id/emptyStateSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="When you accept gigs or volunteers, they'll appear here"
+            android:textColor="@color/text_subheadline"
+            android:textSize="14sp" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>

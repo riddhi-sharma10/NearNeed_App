@@ -41,6 +41,21 @@ public class PersonProfileActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvReviews)).setText(reviews);
         ((TextView) findViewById(R.id.tvBio)).setText(bio);
 
+        View reviewsChip = findViewById(R.id.llReviewsChip);
+        View ratingRow = findViewById(R.id.llRatingRow);
+        View.OnClickListener openReviews = v -> {
+            Intent intent = new Intent(PersonProfileActivity.this, ReviewsActivity.class);
+            intent.putExtra("PERSON_NAME", name);
+            intent.putExtra("PERSON_REVIEWS", reviews);
+            startActivity(intent);
+        };
+        if (reviewsChip != null) {
+            reviewsChip.setOnClickListener(openReviews);
+        }
+        if (ratingRow != null) {
+            ratingRow.setOnClickListener(openReviews);
+        }
+
         ImageView ivProfile = findViewById(R.id.ivProfile);
         if (ivProfile != null) {
             String lowerGender = gender.toLowerCase();
@@ -51,14 +66,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             } else {
                 ivProfile.setImageResource(R.drawable.avatar_alex);
             }
-        }
-        
-        View btnReviews = findViewById(R.id.btn_profile_reviews);
-        if (btnReviews != null) {
-            btnReviews.setOnClickListener(v -> {
-                Intent intent = new Intent(PersonProfileActivity.this, ReviewsActivity.class);
-                startActivity(intent);
-            });
         }
     }
 

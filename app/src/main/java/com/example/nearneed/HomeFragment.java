@@ -246,8 +246,120 @@ public class HomeFragment extends Fragment {
             }
         }
 
+        // Setup gig and community post buttons
+        setupCommunityButtons(view);
+
         // Setup role toggle
         setupRoleToggle(view);
+    }
+
+    /**
+     * Sets up community volunteer buttons and My Posts view all.
+     */
+    private void setupCommunityButtons(View view) {
+        // Wire "View All" My Posts → Bookings (gigs only)
+        View btnViewAllGigs = view.findViewById(R.id.btnViewAllGigs);
+        if (btnViewAllGigs != null) {
+            btnViewAllGigs.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), BookingsActivity.class);
+                intent.putExtra("filter_type", "gigs");
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
+        // Wire "View All" community → Bookings (community only)
+        View viewAllCommunity = view.findViewById(R.id.btn_view_all_community);
+        if (viewAllCommunity != null) {
+            viewAllCommunity.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), BookingsActivity.class);
+                intent.putExtra("filter_type", "community");
+                startActivity(intent);
+                requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
+        // Wire gig post buttons → GigPostDetailActivity
+        View btnViewPostGig1 = view.findViewById(R.id.btn_view_post_gig_1);
+        View btnViewPostGig2 = view.findViewById(R.id.btn_view_post_gig_2);
+        if (btnViewPostGig1 != null) {
+            btnViewPostGig1.setOnClickListener(v -> showGigPostDetail("Plumbing Repair",
+                    "Fixing leaky faucets and clogged drains for the community.",
+                    "Plumbing • Urgent",
+                    "₹400 - 600",
+                    "0.5 km away",
+                    "2-3 hours"));
+        }
+        if (btnViewPostGig2 != null) {
+            btnViewPostGig2.setOnClickListener(v -> showGigPostDetail("Electrical Fix",
+                    "Wiring inspection and circuit breaker repairs for Sector 15.",
+                    "Electrical • Normal",
+                    "₹800 - 1200",
+                    "1.2 km away",
+                    "3-4 hours"));
+        }
+
+        // Wire community card buttons → CommunityVolunteerDetailActivity
+        View btnHelp1 = view.findViewById(R.id.btn_help_community_1);
+        View btnHelp2 = view.findViewById(R.id.btn_help_community_2);
+        if (btnHelp1 != null) {
+            btnHelp1.setOnClickListener(v -> showCommunityVolunteerDetail("Grocery Assistance",
+                    "Sarah J. needs help picking out fresh groceries for her weekly meals.",
+                    "Sarah J.",
+                    "0.4 miles away",
+                    5));
+        }
+        if (btnHelp2 != null) {
+            btnHelp2.setOnClickListener(v -> showCommunityVolunteerDetail("Tech Setup Help",
+                    "David M. needs assistance setting up his new computer and installing software.",
+                    "David M.",
+                    "1.2 miles away",
+                    3));
+        }
+    }
+
+    /**
+     * Navigates to GigPostDetailActivity with gig details.
+     */
+    private void showGigPostDetail(String title, String description, String category,
+                                   String budget, String distance, String duration) {
+        Intent intent = new Intent(requireContext(), GigPostDetailActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("description", description);
+        intent.putExtra("category", category);
+        intent.putExtra("budget", budget);
+        intent.putExtra("distance", distance);
+        intent.putExtra("duration", duration);
+        startActivity(intent);
+    }
+
+    /**
+     * Navigates to CommunityPostDetailActivity with community post details.
+     */
+    private void showCommunityPostDetail(String title, String description, String postedBy,
+                                         String postedTime, String location, String slots) {
+        Intent intent = new Intent(requireContext(), CommunityPostDetailActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("description", description);
+        intent.putExtra("postedBy", postedBy);
+        intent.putExtra("postedTime", postedTime);
+        intent.putExtra("location", location);
+        intent.putExtra("slots", slots);
+        startActivity(intent);
+    }
+
+    /**
+     * Navigates to CommunityVolunteerDetailActivity.
+     */
+    private void showCommunityVolunteerDetail(String title, String description, String postedBy,
+                                              String location, int slots) {
+        Intent intent = new Intent(requireContext(), CommunityVolunteerDetailActivity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("description", description);
+        intent.putExtra("postedBy", postedBy);
+        intent.putExtra("location", location);
+        intent.putExtra("slots", slots);
+        startActivity(intent);
     }
 
     /**

@@ -11,7 +11,7 @@ import com.google.android.material.button.MaterialButton;
 
 public class CommunityVolunteerDetailActivity extends AppCompatActivity {
 
-    private TextView tvTitle, tvDescription, tvPostedBy, tvLocation;
+    private TextView tvTitle, tvDescription, tvLocation;
     private MaterialButton btnVolunteer;
 
     @Override
@@ -28,21 +28,20 @@ public class CommunityVolunteerDetailActivity extends AppCompatActivity {
 
         tvTitle = findViewById(R.id.tv_community_volunteer_title);
         tvDescription = findViewById(R.id.tv_community_volunteer_description);
-        tvPostedBy = findViewById(R.id.tv_volunteer_posted_by);
+
         tvLocation = findViewById(R.id.tv_volunteer_location);
         btnVolunteer = findViewById(R.id.btn_volunteer_community);
 
         // Get data from intent
         String title = getIntent().getStringExtra("title");
         String description = getIntent().getStringExtra("description");
-        String postedBy = getIntent().getStringExtra("postedBy");
+
         String location = getIntent().getStringExtra("location");
         int slots = getIntent().getIntExtra("slots", 0);
 
         // Set data
         tvTitle.setText(title != null ? title : "Community Need");
         tvDescription.setText(description != null ? description : "No description available");
-        tvPostedBy.setText(postedBy != null ? postedBy : "Posted by someone");
         tvLocation.setText(location != null ? location : "Location unknown");
 
         // View Volunteers button click

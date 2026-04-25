@@ -526,36 +526,17 @@
                                 android:lineHeight="18sp"
                                 android:minLines="2" />
 
-                            <RelativeLayout
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_view_post_gig_2"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="20dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_centerVertical="true"
-                                    android:background="@color/white"
-                                    android:paddingHorizontal="10dp"
-                                    android:paddingVertical="6dp"
-                                    android:text="Today"
-                                    android:textColor="#475569"
-                                    android:textSize="11sp"
-                                    android:fontFamily="sans-serif-medium" />
-
-                                <com.google.android.material.button.MaterialButton
-                                    android:id="@+id/btn_view_post_gig_2"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="40dp"
-                                    android:layout_alignParentEnd="true"
-                                    android:text="View Post"
-                                    android:textColor="@color/white"
-                                    android:textSize="12sp"
-                                    android:textAllCaps="false"
-                                    android:paddingHorizontal="16dp"
-                                    app:backgroundTint="@color/sapphire_primary"
-                                    app:cornerRadius="20dp" />
-                            </RelativeLayout>
+                                android:layout_height="40dp"
+                                android:layout_marginTop="20dp"
+                                android:text="View Post"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:textAllCaps="false"
+                                app:backgroundTint="@color/sapphire_primary"
+                                app:cornerRadius="20dp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -694,11 +675,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="#F0FDFA"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:strokeWidth="2dp"
-                    app:strokeColor="@color/brand_success">
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#CCFBF1">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -756,12 +737,13 @@
                                     android:layout_height="wrap_content"
                                     android:background="@drawable/bg_trending_badge"
                                     android:backgroundTint="@color/brand_success"
-                                    android:paddingHorizontal="6dp"
-                                    android:paddingVertical="2dp"
+                                    android:paddingHorizontal="8dp"
+                                    android:paddingVertical="3dp"
                                     android:text="COMMUNITY"
                                     android:textColor="@color/white"
                                     android:textSize="9sp"
-                                    android:fontFamily="sans-serif-black" />
+                                    android:fontFamily="sans-serif-black"
+                                    android:layout_marginStart="8dp" />
                             </LinearLayout>
 
                             <TextView
@@ -786,16 +768,16 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_help_community_1"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:paddingHorizontal="16dp"
+                            android:layout_height="36dp"
+                            android:paddingHorizontal="12dp"
                             android:text="View"
                             android:textColor="@color/white"
                             android:textSize="12sp"
                             android:textAllCaps="false"
+                            android:minHeight="0dp"
+                            android:minWidth="0dp"
                             app:backgroundTint="@color/brand_success"
-                            app:cornerRadius="20dp"
-                            app:icon="@drawable/ic_arrow_forward"
-                            app:iconGravity="textEnd" />
+                            app:cornerRadius="18dp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -805,11 +787,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="#F0FDFA"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="2dp"
-                    app:strokeWidth="2dp"
-                    app:strokeColor="@color/brand_success">
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#CCFBF1">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -867,12 +849,13 @@
                                     android:layout_height="wrap_content"
                                     android:background="@drawable/bg_trending_badge"
                                     android:backgroundTint="@color/brand_success"
-                                    android:paddingHorizontal="6dp"
-                                    android:paddingVertical="2dp"
+                                    android:paddingHorizontal="8dp"
+                                    android:paddingVertical="3dp"
                                     android:text="COMMUNITY"
                                     android:textColor="@color/white"
                                     android:textSize="9sp"
-                                    android:fontFamily="sans-serif-black" />
+                                    android:fontFamily="sans-serif-black"
+                                    android:layout_marginStart="8dp" />
                             </LinearLayout>
 
                             <TextView
@@ -897,16 +880,16 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_help_community_2"
                             android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:paddingHorizontal="16dp"
+                            android:layout_height="36dp"
+                            android:paddingHorizontal="12dp"
                             android:text="View"
                             android:textColor="@color/white"
                             android:textSize="12sp"
                             android:textAllCaps="false"
+                            android:minHeight="0dp"
+                            android:minWidth="0dp"
                             app:backgroundTint="@color/brand_success"
-                            app:cornerRadius="20dp"
-                            app:icon="@drawable/ic_arrow_forward"
-                            app:iconGravity="textEnd" />
+                            app:cornerRadius="18dp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

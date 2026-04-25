@@ -159,9 +159,6 @@ public class ProfileActivity extends AppCompatActivity {
         View providerSettings = findViewById(R.id.menu_settings_provider);
         if (providerSettings != null) providerSettings.setOnClickListener(v -> openSettings());
 
-        View menuEarnings = findViewById(R.id.menu_earnings);
-        if (menuEarnings != null) menuEarnings.setOnClickListener(v -> openEarnings());
-
         View btnViewEarnings = findViewById(R.id.btn_view_earnings);
         if (btnViewEarnings != null) btnViewEarnings.setOnClickListener(v -> openEarnings());
 

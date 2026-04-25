@@ -1,14 +1,24 @@
 package com.example.nearneed;
 
-import android.os.Bundle;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+
 public class PersonProfileActivity extends AppCompatActivity {
+
+    private ListenerRegistration profileListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,56 +33,136 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        String name = readExtra("PERSON_NAME", "NearNeed User");
-        String email = readExtra("PERSON_EMAIL", "user@nearneed.app");
-        String phone = readExtra("PERSON_PHONE", "+91 98765 43210");
-        String gender = readExtra("PERSON_GENDER", "Not specified");
-        String experience = readExtra("PERSON_EXPERIENCE", "3 years");
-        String rating = readExtra("PERSON_RATING", "4.7");
-        String reviews = readExtra("PERSON_REVIEWS", "100 reviews");
-        String bio = readExtra("PERSON_BIO", "Active NearNeed member with positive community engagement.");
-
+        // Wire up reviews/rating tap — name comes from the live TextView
         TextView tvName = findViewById(R.id.tvName);
-        tvName.setText(name);
-        VerifiedBadgeHelper.apply(this, tvName, getIntent().getBooleanExtra("IS_VERIFIED", false));
-        ((TextView) findViewById(R.id.tvEmail)).setText(email);
-        ((TextView) findViewById(R.id.tvPhone)).setText(phone);
-        ((TextView) findViewById(R.id.tvGender)).setText(gender);
-        ((TextView) findViewById(R.id.tvExperience)).setText(experience);
-        ((TextView) findViewById(R.id.tvRating)).setText(rating + " ★");
-        ((TextView) findViewById(R.id.tvReviews)).setText(reviews);
-        ((TextView) findViewById(R.id.tvBio)).setText(bio);
-
         View reviewsChip = findViewById(R.id.llReviewsChip);
         View ratingRow = findViewById(R.id.llRatingRow);
         View.OnClickListener openReviews = v -> {
             Intent intent = new Intent(PersonProfileActivity.this, ReviewsActivity.class);
-            intent.putExtra("PERSON_NAME", name);
-            intent.putExtra("PERSON_REVIEWS", reviews);
+            intent.putExtra("PERSON_NAME",
+                tvName != null && tvName.getText() != null ? tvName.getText().toString() : "");
             startActivity(intent);
         };
-        if (reviewsChip != null) {
-            reviewsChip.setOnClickListener(openReviews);
+        if (reviewsChip != null) reviewsChip.setOnClickListener(openReviews);
+        if (ratingRow != null) ratingRow.setOnClickListener(openReviews);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startFirestoreListener();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (profileListener != null) {
+            profileListener.remove();
+            profileListener = null;
         }
-        if (ratingRow != null) {
-            ratingRow.setOnClickListener(openReviews);
+    }
+
+    private void startFirestoreListener() {
+        // Prefer an explicit userId passed by the caller; fall back to current user.
+        String userId = getIntent().getStringExtra("PERSON_USER_ID");
+        if (userId == null || userId.isEmpty()) {
+            FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+            if (current != null) userId = current.getUid();
+        }
+        if (userId == null) return;
+
+        final boolean isCurrentUser = isCurrentUser(userId);
+
+        profileListener = FirebaseFirestore.getInstance()
+            .collection("Users").document(userId)
+            .addSnapshotListener((snapshot, error) -> {
+                if (error != null || snapshot == null || !snapshot.exists()) return;
+                applySnapshot(snapshot, isCurrentUser);
+            });
+    }
+
+    private boolean isCurrentUser(String userId) {
+        FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+        return current != null && current.getUid().equals(userId);
+    }
+
+    private void applySnapshot(DocumentSnapshot snapshot, boolean isCurrentUser) {
+        String name        = snapshot.getString("fullName");
+        String photoUrl    = snapshot.getString("photoUrl");
+        String bio         = snapshot.getString("bio");
+        String phone       = snapshot.getString("phone");
+        String gender      = snapshot.getString("gender");
+        String experience  = snapshot.getString("experience");
+        Boolean verified   = snapshot.getBoolean("isVerified");
+        Double rating      = snapshot.getDouble("rating");
+        Long reviewCount   = snapshot.getLong("reviewCount");
+
+        // Email: authoritative source is Firebase Auth for the current user
+        String email;
+        if (isCurrentUser) {
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            email = (user != null && user.getEmail() != null)
+                ? user.getEmail()
+                : snapshot.getString("email");
+        } else {
+            email = snapshot.getString("email");
         }
 
+        // ── Name + verified badge ──
+        TextView tvName = findViewById(R.id.tvName);
+        if (tvName != null && name != null && !name.isEmpty()) {
+            tvName.setText(name);
+            VerifiedBadgeHelper.apply(this, tvName, Boolean.TRUE.equals(verified));
+        }
+
+        // ── Verified chip visibility ──
+        LinearLayout llVerified = findViewById(R.id.llVerifiedBadge);
+        if (llVerified != null) {
+            llVerified.setVisibility(Boolean.TRUE.equals(verified) ? View.VISIBLE : View.GONE);
+        }
+
+        // ── Text fields ──
+        setText(R.id.tvEmail,      email);
+        setText(R.id.tvPhone,      phone);
+        setText(R.id.tvGender,     gender);
+        setText(R.id.tvExperience, experience);
+        setText(R.id.tvBio,        bio);
+
+        if (rating != null) {
+            setText(R.id.tvRating, String.format("%.1f", rating));
+        }
+        if (reviewCount != null) {
+            setText(R.id.tvReviews, reviewCount + " reviews");
+        }
+
+        // ── Profile photo ──
         ImageView ivProfile = findViewById(R.id.ivProfile);
         if (ivProfile != null) {
-            String lowerGender = gender.toLowerCase();
-            if (lowerGender.contains("female")) {
-                ivProfile.setImageResource(R.drawable.avatar_sarah);
-            } else if (lowerGender.contains("male")) {
-                ivProfile.setImageResource(R.drawable.avatar_david);
+            if (photoUrl != null && !photoUrl.isEmpty()) {
+                Glide.with(this)
+                    .load(photoUrl)
+                    .placeholder(avatarForGender(gender))
+                    .circleCrop()
+                    .into(ivProfile);
             } else {
-                ivProfile.setImageResource(R.drawable.avatar_alex);
+                ivProfile.setImageResource(avatarForGender(gender));
             }
         }
     }
 
-    private String readExtra(String key, String fallback) {
-        String value = getIntent().getStringExtra(key);
-        return value == null || value.trim().isEmpty() ? fallback : value;
+    // ── Helpers ──
+
+    private void setText(int viewId, String text) {
+        if (text == null || text.isEmpty()) return;
+        TextView tv = findViewById(viewId);
+        if (tv != null) tv.setText(text);
+    }
+
+    private int avatarForGender(String gender) {
+        if (gender == null) return R.drawable.avatar_alex;
+        String lower = gender.toLowerCase();
+        if (lower.contains("female")) return R.drawable.avatar_sarah;
+        if (lower.contains("male"))   return R.drawable.avatar_david;
+        return R.drawable.avatar_alex;
     }
 }

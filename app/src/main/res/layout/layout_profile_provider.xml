@@ -389,40 +389,6 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/menu_earnings"
-                        android:layout_width="match_parent"
-                        android:layout_height="64dp"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="20dp"
-                        android:background="?attr/selectableItemBackground">
-                        <FrameLayout
-                            android:layout_width="42dp"
-                            android:layout_height="42dp"
-                            android:background="@drawable/bg_icon_container_light">
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_payment_wallet_blue"
-                                app:tint="#102A68" />
-                        </FrameLayout>
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="16dp"
-                            android:text="Earnings"
-                            android:textColor="#0F172A"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_chevron_right_thin"
-                            app:tint="@color/text_muted" />
-                    </LinearLayout>
-
-                    <LinearLayout
                         android:id="@+id/menu_settings_provider"
                         android:layout_width="match_parent"
                         android:layout_height="64dp"

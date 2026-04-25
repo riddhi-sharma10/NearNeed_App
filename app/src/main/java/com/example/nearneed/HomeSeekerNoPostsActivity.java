@@ -1,42 +1,60 @@
 package com.example.nearneed;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.google.android.material.button.MaterialButton;
 
 public class HomeSeekerNoPostsActivity extends AppCompatActivity {
 
+    private TextView tvGreeting;
     private TextView tvDeliveryLocation;
-    private static final String PREFS = "LocationPrefs";
-    private static final String KEY_LOCATION = "delivery_location";
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_seeker_no_posts);
 
-        // Connect the FAB to potentially a Create Post Activity (standard behavior)
-        MaterialButton fab = findViewById(R.id.fab_add_seeker);
-        if (fab != null) {
-            fab.setOnClickListener(v -> {
-                Intent intent = new Intent(this, CreatePostActivity.class);
-                startActivity(intent);
-            });
+        tvGreeting = findViewById(R.id.tvGreeting);
+        tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
+
+        // Show cached values immediately so there's no blank flash
+        String cachedName = UserPrefs.getName(this);
+        String cachedLocation = UserPrefs.getLocation(this);
+        if (!cachedName.isEmpty()) {
+            tvGreeting.setText("Hello, " + cachedName);
+        }
+        if (cachedLocation != null && !cachedLocation.isEmpty()) {
+            tvDeliveryLocation.setText(cachedLocation);
         }
 
-        // Location picker setup
-        tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
-        loadSavedLocation();
+        // ViewModel drives real-time updates from Firestore
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        userViewModel.getName().observe(this, name -> {
+            tvGreeting.setText("Hello, " + name);
+            UserPrefs.saveName(this, name);
+        });
+        userViewModel.getLocation().observe(this, location -> {
+            tvDeliveryLocation.setText(location);
+            UserPrefs.saveLocation(this, location);
+        });
 
+        // Location section click
         View locationSection = findViewById(R.id.locationSection);
         if (locationSection != null) {
             locationSection.setOnClickListener(v -> showLocationPicker());
+        }
+
+        MaterialButton fab = findViewById(R.id.fab_add_seeker);
+        if (fab != null) {
+            fab.setOnClickListener(v -> startActivity(new Intent(this, CreatePostActivity.class)));
         }
 
         EditText searchEdit = findViewById(R.id.searchEditText);
@@ -45,26 +63,7 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
     }
 
-    private void loadSavedLocation() {
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        String saved = prefs.getString(KEY_LOCATION, null);
-        if (saved != null && tvDeliveryLocation != null) {
-            tvDeliveryLocation.setText(saved);
-        }
-    }
-
-    private void saveLocation(String displayText) {
-        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_LOCATION, displayText);
-        editor.apply();
-
-        if (tvDeliveryLocation != null) {
-            tvDeliveryLocation.setText(displayText);
-        }
-    }
-
     private void showLocationPicker() {
-        LocationPickerHelper.show(this, displayText -> saveLocation(displayText));
+        LocationPickerHelper.show(this, location -> userViewModel.saveLocation(location));
     }
 }

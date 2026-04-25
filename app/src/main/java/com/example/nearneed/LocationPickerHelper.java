@@ -14,12 +14,18 @@ import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import android.Manifest;
-import android.content.Context;
-import android.view.View;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.io.IOException;
+import android.view.View;
+import android.widget.EditText;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+
 
 public class LocationPickerHelper {
 
@@ -91,8 +97,48 @@ public class LocationPickerHelper {
             });
         }
 
+
+        // Search Bar Logic
+        EditText etSearch = view.findViewById(R.id.etLocationSearch);
+        RecyclerView rvPredictions = view.findViewById(R.id.rvLocationPredictions);
+        
+        if (etSearch != null && rvPredictions != null) {
+            rvPredictions.setLayoutManager(new LinearLayoutManager(activity));
+            SearchPredictionAdapter adapter = new SearchPredictionAdapter((lat, lng, name) -> {
+                // When a search result is clicked
+                String displayText = "DELIVER TO: " + name;
+                selectLocation(displayText);
+                dialog.dismiss();
+            });
+            rvPredictions.setAdapter(adapter);
+
+            Handler searchHandler = new Handler(Looper.getMainLooper());
+            Runnable searchRunnable = null;
+
+            etSearch.addTextChangedListener(new TextWatcher() {
+                private Runnable currentRunnable;
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (currentRunnable != null) searchHandler.removeCallbacks(currentRunnable);
+                    currentRunnable = () -> {
+                        GeocodingHelper.performSearch(s.toString(), results -> {
+                            if (!results.isEmpty()) {
+                                rvPredictions.setVisibility(View.VISIBLE);
+                                adapter.setPredictions(results);
+                            } else {
+                                rvPredictions.setVisibility(View.GONE);
+                            }
+                        });
+                    };
+                    searchHandler.postDelayed(currentRunnable, 500);
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
+
         dialog.show();
     }
+
 
     private static void selectLocation(String displayText) {
         if (currentCallback != null) {

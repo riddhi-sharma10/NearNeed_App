@@ -1,22 +1,31 @@
 package com.example.nearneed;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MyPostsActivity extends AppCompatActivity {
+
+    private RecyclerView rv;
+    private MyPostsAdapter adapter;
+    private PostViewModel viewModel;
+    private View layoutEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,65 +39,55 @@ public class MyPostsActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        RecyclerView rv = findViewById(R.id.rvMyPosts);
+        rv = findViewById(R.id.rvMyPosts);
+        layoutEmpty = findViewById(R.id.layout_empty); // Added in Step 8
+        
         rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setHasFixedSize(true);
-        rv.setNestedScrollingEnabled(false);
-        rv.setItemViewCacheSize(20);
+        adapter = new MyPostsAdapter(new ArrayList<>());
+        rv.setAdapter(adapter);
 
-        List<MyPost> posts = buildMockPosts();
-
-        rv.setAdapter(new MyPostsAdapter(posts));
+        setupViewModel();
     }
 
-    private List<MyPost> buildMockPosts() {
-        List<MyPost> posts = new ArrayList<>();
+    private void setupViewModel() {
+        viewModel = new ViewModelProvider(this).get(PostViewModel.class);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        String[][] seed = new String[][]{
-                {"Emergency Food Delivery", "Food Support • 0/4 Volunteers", "URGENT", "URGENT"},
-                {"Plumbing Repair", "₹400 budget", "PAID GIG", "PAID"},
-                {"Garden Drive Block B", "Active • 12 Volunteers", "COMMUNITY", "COMMUNITY"},
-                {"Dog Walking (Eve)", "₹200/walk", "PAID GIG", "PAID"},
-                {"Senior App Assistance", "Community Support", "COMMUNITY", "COMMUNITY"},
-                {"Night Watch Group", "5 Volunteers needed", "URGENT", "URGENT"},
-                {"Medicine Pickup", "Urgent • 2 volunteers needed", "URGENT", "URGENT"},
-                {"Pet Boarding", "₹900 total", "PAID GIG", "PAID"},
-                {"Weekend Cleanup Drive", "Community • 18 joined", "COMMUNITY", "COMMUNITY"},
-                {"Emergency Ride Needed", "Urgent • 1 driver", "URGENT", "URGENT"}
-        };
+        viewModel.getUserPosts().observe(this, posts -> {
+            adapter.setPosts(posts);
+            updateEmptyState(posts.isEmpty());
+        });
 
-        for (int i = 0; i < 4; i++) {
-            for (String[] row : seed) {
-                String title = i == 0 ? row[0] : row[0] + " #" + (i + 1);
-                posts.add(new MyPost(title, row[1], row[2], row[3]));
-            }
-        }
-        return posts;
+        viewModel.observeUserPosts(this, userId);
     }
 
-    private static class MyPost {
-        String title, detail, badge, type;
-
-        MyPost(String title, String detail, String badge, String type) {
-            this.title = title;
-            this.detail = detail;
-            this.badge = badge;
-            this.type = type; // URGENT, PAID, COMMUNITY
+    private void updateEmptyState(boolean isEmpty) {
+        if (layoutEmpty == null) return;
+        if (isEmpty) {
+            layoutEmpty.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+            ((ImageView) layoutEmpty.findViewById(R.id.ivEmptyIllustration)).setImageResource(R.drawable.img_empty_posts);
+            ((TextView) layoutEmpty.findViewById(R.id.tvEmptyTitle)).setText("You haven't posted anything yet");
+            ((TextView) layoutEmpty.findViewById(R.id.tvEmptyMessage)).setText("Your requests for help or gig opportunities will appear here.");
+            layoutEmpty.findViewById(R.id.btnEmptyAction).setOnClickListener(v -> {
+                startActivity(new Intent(this, PostOptionsActivity.class));
+            });
+        } else {
+            layoutEmpty.setVisibility(View.GONE);
+            rv.setVisibility(View.VISIBLE);
         }
     }
 
     private class MyPostsAdapter extends RecyclerView.Adapter<MyPostsAdapter.ViewHolder> {
-        private final List<MyPost> posts;
+        private List<Post> posts;
 
-        MyPostsAdapter(List<MyPost> posts) {
+        MyPostsAdapter(List<Post> posts) {
             this.posts = posts;
-            setHasStableIds(true);
         }
 
-        @Override
-        public long getItemId(int position) {
-            MyPost post = posts.get(position);
-            return (post.title + post.detail + post.type).hashCode();
+        void setPosts(List<Post> posts) {
+            this.posts = posts;
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -100,13 +99,22 @@ public class MyPostsActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            MyPost post = posts.get(position);
+            Post post = posts.get(position);
             holder.tvTitle.setText(post.title);
-            holder.tvDetail.setText(post.detail);
-            holder.tvBadge.setText(post.badge);
+            
+            String detail;
+            if ("GIG".equals(post.type)) {
+                detail = post.budget != null ? post.budget : "Paid Gig";
+            } else {
+                detail = (post.slotsFilled != null ? post.slotsFilled : 0) + "/" + 
+                         (post.slots != null ? post.slots : 0) + " Volunteers";
+            }
+            holder.tvDetail.setText(detail);
+            
+            holder.tvBadge.setText(post.type);
 
             // Apply badge colors based on type
-            if ("URGENT".equals(post.type)) {
+            if ("URGENT".equals(post.category)) {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_urgent_badge);
                 holder.tvBadge.setTextColor(getColor(R.color.urgent_red));
             } else if ("COMMUNITY".equals(post.type)) {
@@ -117,8 +125,12 @@ public class MyPostsActivity extends AppCompatActivity {
                 holder.tvBadge.setTextColor(getColor(R.color.brand_primary));
             }
 
-            holder.btnAction.setOnClickListener(v -> 
-                Toast.makeText(MyPostsActivity.this, "Viewing details for: " + post.title, Toast.LENGTH_SHORT).show());
+            holder.btnAction.setOnClickListener(v -> {
+                Intent intent = new Intent(MyPostsActivity.this, ResponsesActivity.class);
+                intent.putExtra("post_id", post.postId);
+                intent.putExtra("post_title", post.title);
+                startActivity(intent);
+            });
         }
 
         @Override

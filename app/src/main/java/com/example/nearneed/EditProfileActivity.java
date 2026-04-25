@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -21,26 +22,47 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditProfileActivity extends AppCompatActivity {
 
     private TextInputEditText etBio;
     private TextView tvBioCount;
+    private ShapeableImageView ivProfilePhoto;
+    private TextView tvProfileInitials;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private Uri pendingPhotoUri = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        // Back arrow
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbarEditProfile);
         if (toolbar != null) {
             toolbar.setNavigationOnClickListener(v -> finish());
         }
+
+        ivProfilePhoto = findViewById(R.id.ivProfilePhoto);
+        tvProfileInitials = findViewById(R.id.tvProfileInitials);
+        etBio = findViewById(R.id.etBio);
+        tvBioCount = findViewById(R.id.tvBioCount);
+
+        preloadLocalData();
+        loadFromFirestore();
 
         // ── Photo picker ──
         imagePickerLauncher = registerForActivityResult(
@@ -49,24 +71,19 @@ public class EditProfileActivity extends AppCompatActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri selectedImage = result.getData().getData();
                     if (selectedImage != null) {
-                        // Show the photo and hide the initials
-                        com.google.android.material.imageview.ShapeableImageView ivPhoto =
-                                findViewById(R.id.ivProfilePhoto);
-                        android.widget.TextView tvInitials =
-                                findViewById(R.id.tvProfileInitials);
-                        if (ivPhoto != null) {
-                            ivPhoto.setImageURI(selectedImage);
-                            ivPhoto.setVisibility(android.view.View.VISIBLE);
+                        pendingPhotoUri = selectedImage;
+                        if (ivProfilePhoto != null) {
+                            ivProfilePhoto.setImageURI(selectedImage);
+                            ivProfilePhoto.setVisibility(View.VISIBLE);
                         }
-                        if (tvInitials != null) {
-                            tvInitials.setVisibility(android.view.View.GONE);
+                        if (tvProfileInitials != null) {
+                            tvProfileInitials.setVisibility(View.GONE);
                         }
-                        Toast.makeText(this, "Photo updated!", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         );
-        android.view.View photoContainer = findViewById(R.id.layoutProfilePhoto);
+        View photoContainer = findViewById(R.id.layoutProfilePhoto);
         if (photoContainer != null) {
             photoContainer.setOnClickListener(v -> openImagePicker());
         }
@@ -75,13 +92,11 @@ public class EditProfileActivity extends AppCompatActivity {
             tvChangePhoto.setOnClickListener(v -> openImagePicker());
         }
 
-        // ── Gender chips (read-only – pre-select Male for demo) ──
+        // ── Gender chips (read-only) ──
         Chip chipMale = findViewById(R.id.chipMale);
         if (chipMale != null) chipMale.setChecked(true);
 
         // ── Bio character counter ──
-        etBio = findViewById(R.id.etBio);
-        tvBioCount = findViewById(R.id.tvBioCount);
         if (etBio != null && tvBioCount != null) {
             updateBioCount(etBio.getText() != null ? etBio.getText().toString().length() : 0);
             etBio.addTextChangedListener(new TextWatcher() {
@@ -107,10 +122,107 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         // ── Save Changes ──
-        findViewById(R.id.btnSaveChanges).setOnClickListener(v -> {
-            Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-            finish();
-        });
+        findViewById(R.id.btnSaveChanges).setOnClickListener(v -> saveChanges());
+    }
+
+    private void preloadLocalData() {
+        String cachedPhoto = UserPrefs.getPhotoUri(this);
+        if (cachedPhoto != null && ivProfilePhoto != null) {
+            Glide.with(this).load(cachedPhoto).circleCrop().into(ivProfilePhoto);
+            ivProfilePhoto.setVisibility(View.VISIBLE);
+            if (tvProfileInitials != null) tvProfileInitials.setVisibility(View.GONE);
+        }
+
+        String cachedName = UserPrefs.getName(this);
+        TextInputEditText etFullName = findViewById(R.id.etFullName);
+        if (etFullName != null && cachedName != null && !cachedName.isEmpty()) {
+            etFullName.setText(cachedName);
+        }
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        TextInputEditText etEmail = findViewById(R.id.etEmail);
+        if (etEmail != null && user != null && user.getEmail() != null) {
+            etEmail.setText(user.getEmail());
+        }
+    }
+
+    private void loadFromFirestore() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        FirebaseFirestore.getInstance()
+            .collection("Users").document(user.getUid())
+            .get()
+            .addOnSuccessListener(snapshot -> {
+                if (!snapshot.exists()) return;
+
+                String bio = snapshot.getString("bio");
+                if (bio != null && etBio != null) {
+                    etBio.setText(bio);
+                    updateBioCount(bio.length());
+                }
+
+                String photoUrl = snapshot.getString("photoUrl");
+                if (photoUrl != null && !photoUrl.isEmpty() && ivProfilePhoto != null
+                        && pendingPhotoUri == null) {
+                    Glide.with(this).load(photoUrl).circleCrop().into(ivProfilePhoto);
+                    ivProfilePhoto.setVisibility(View.VISIBLE);
+                    if (tvProfileInitials != null) tvProfileInitials.setVisibility(View.GONE);
+                    UserPrefs.savePhotoUri(this, photoUrl);
+                }
+            });
+    }
+
+    private void saveChanges() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Not signed in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String bio = etBio != null && etBio.getText() != null
+            ? etBio.getText().toString().trim() : "";
+
+        if (pendingPhotoUri != null) {
+            uploadPhotoThenSave(user.getUid(), bio);
+        } else {
+            persistToFirestore(user.getUid(), bio, null);
+        }
+    }
+
+    private void uploadPhotoThenSave(String uid, String bio) {
+        StorageReference ref = FirebaseStorage.getInstance()
+            .getReference("profile_photos/" + uid + ".jpg");
+
+        ref.putFile(pendingPhotoUri)
+            .addOnSuccessListener(task ->
+                ref.getDownloadUrl().addOnSuccessListener(downloadUri -> {
+                    String url = downloadUri.toString();
+                    UserPrefs.savePhotoUri(this, url);
+                    persistToFirestore(uid, bio, url);
+                })
+                .addOnFailureListener(e ->
+                    Toast.makeText(this, "Failed to get photo URL", Toast.LENGTH_SHORT).show()))
+            .addOnFailureListener(e ->
+                Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    private void persistToFirestore(String uid, String bio, String photoUrl) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("bio", bio);
+        if (photoUrl != null) {
+            data.put("photoUrl", photoUrl);
+        }
+
+        FirebaseFirestore.getInstance()
+            .collection("Users").document(uid)
+            .set(data, SetOptions.merge())
+            .addOnSuccessListener(unused -> {
+                Toast.makeText(this, "Profile updated!", Toast.LENGTH_SHORT).show();
+                finish();
+            })
+            .addOnFailureListener(e ->
+                Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void updateBioCount(int len) {
@@ -147,7 +259,6 @@ public class EditProfileActivity extends AppCompatActivity {
             dialog.findViewById(R.id.fpOtpBox6)
         };
 
-        // Auto-advance OTP boxes
         for (int i = 0; i < otpBoxes.length; i++) {
             final int idx = i;
             if (otpBoxes[i] == null) continue;
@@ -165,7 +276,6 @@ public class EditProfileActivity extends AppCompatActivity {
             });
         }
 
-        // Step 1 – Send OTP (validate email)
         dialog.findViewById(R.id.btnSendOtp).setOnClickListener(v -> {
             String email = etEmail != null && etEmail.getText() != null
                     ? etEmail.getText().toString().trim() : "";
@@ -187,7 +297,6 @@ public class EditProfileActivity extends AppCompatActivity {
             if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
         });
 
-        // Step 2 – Verify OTP (all 6 required)
         dialog.findViewById(R.id.btnVerifyOtp).setOnClickListener(v -> {
             StringBuilder otp = new StringBuilder();
             for (EditText box : otpBoxes) {
@@ -211,7 +320,6 @@ public class EditProfileActivity extends AppCompatActivity {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
 
-        // Resend OTP
         TextView tvResend = dialog.findViewById(R.id.tvResendOtp);
         if (tvResend != null) {
             tvResend.setOnClickListener(v -> {

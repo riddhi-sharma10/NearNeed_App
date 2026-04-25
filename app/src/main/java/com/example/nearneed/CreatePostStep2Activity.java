@@ -24,7 +24,7 @@ import java.util.Locale;
 
 public class CreatePostStep2Activity extends AppCompatActivity {
 
-    private TextView tvNotesCharCount, tvDisplayDate, tvDisplayTime;
+    private TextView tvNotesCharCount, tvDisplayDate, tvDisplayTime, tvLocationSearch;
     private EditText etAdditionalNotes;
     private MaterialButton btnPostRequest;
     
@@ -48,6 +48,7 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         tvNotesCharCount = findViewById(R.id.tvNotesCharCount);
         tvDisplayDate = findViewById(R.id.tvDisplayDate);
         tvDisplayTime = findViewById(R.id.tvDisplayTime);
+        tvLocationSearch = findViewById(R.id.tvLocationSearch);
         btnPostRequest = findViewById(R.id.btnPostRequest);
 
         urgencyCards.add(findViewById(R.id.cardUrgencyNow));
@@ -74,6 +75,18 @@ public class CreatePostStep2Activity extends AppCompatActivity {
             final int index = i;
             urgencyCards.get(i).setOnClickListener(v -> selectUrgency(index));
         }
+
+        findViewById(R.id.llLocationSearch).setOnClickListener(v -> {
+            LocationPickerHelper.show(this, displayText -> {
+                String loc = displayText;
+                if (loc.startsWith("DELIVER TO: ")) {
+                    loc = loc.substring("DELIVER TO: ".length());
+                }
+                tvLocationSearch.setText(loc);
+                tvLocationSearch.setTextColor(Color.parseColor("#111827"));
+                updatePostButtonState();
+            });
+        });
 
         findViewById(R.id.containerSetDate).setOnClickListener(v -> {
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
@@ -164,8 +177,9 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     private void updatePostButtonState() {
         boolean isDateSet = !tvDisplayDate.getText().toString().contains("Set Date");
         boolean isTimeSet = !tvDisplayTime.getText().toString().contains("Set Time");
+        boolean isLocationSet = !tvLocationSearch.getText().toString().contains("Search address");
         
-        boolean isEnabled = isDateSet && isTimeSet;
+        boolean isEnabled = isDateSet && isTimeSet && isLocationSet;
         btnPostRequest.setEnabled(isEnabled);
         
         if (isEnabled) {

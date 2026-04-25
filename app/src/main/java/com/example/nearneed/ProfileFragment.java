@@ -157,13 +157,6 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        // Earnings
-        if (providerBinding.menuEarnings != null) {
-            providerBinding.menuEarnings.setOnClickListener(v -> {
-                Snackbar.make(requireView(), "Fetching Your Revenue Reports...", Snackbar.LENGTH_SHORT).show();
-            });
-        }
-
         // Logout
         if (providerBinding.menuLogoutProvider != null) {
             providerBinding.menuLogoutProvider.setOnClickListener(v -> {

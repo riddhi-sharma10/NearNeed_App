@@ -80,7 +80,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:text="Rachel"
+                        android:text=""
                         android:textColor="@color/brand_primary"
                         android:textSize="34sp" />
 
@@ -125,7 +125,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="4dp"
-                                android:text="4.8"
+                                android:text="—"
                                 android:textColor="@color/brand_secondary"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -158,7 +158,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="4dp"
-                                android:text="128 reviews"
+                                android:text="—"
                                 android:textColor="@color/text_subheadline"
                                 android:textSize="12sp"
                                 android:textStyle="bold" />
@@ -166,6 +166,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/llVerifiedBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -175,7 +176,8 @@
                         android:paddingStart="10dp"
                         android:paddingTop="5dp"
                         android:paddingEnd="10dp"
-                        android:paddingBottom="5dp">
+                        android:paddingBottom="5dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:layout_width="12dp"
@@ -227,7 +229,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:lineSpacingExtra="2dp"
-                        android:text="Reliable and friendly service provider with excellent communication and delivery record."
+                        android:text=""
                         android:textColor="@color/text_subheadline"
                         android:textSize="14sp" />
 
@@ -265,7 +267,7 @@
                                 style="@style/AppFormText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="rachel@nearneed.app"
+                                android:text=""
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -306,7 +308,7 @@
                                 style="@style/AppFormText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="+91 98765 43210"
+                                android:text=""
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -347,7 +349,7 @@
                                 style="@style/AppFormText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Female"
+                                android:text=""
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -388,7 +390,7 @@
                                 style="@style/AppFormText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="5 years"
+                                android:text=""
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />

@@ -5,78 +5,78 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@color/surface_background">
+    android:background="@color/white">
 
-    <!-- Top Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Top Bar - Match MessagesFragment styling -->
+    <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_card"
-        android:elevation="4dp"
-        android:paddingTop="48dp"
+        android:orientation="horizontal"
+        android:background="@color/white"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="54dp"
         android:paddingBottom="16dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Back Button - minimal, small chevron -->
+        <!-- Back Button -->
         <ImageView
             android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="0dp"
-            android:padding="10dp"
-            android:scaleType="centerInside"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_back_arrow"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
             android:contentDescription="Back"
-            android:alpha="0.75"
-            app:tint="@color/brand_primary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:scaleType="centerInside"
+            android:layout_marginEnd="8dp"
+            app:tint="@color/brand_primary" />
 
         <!-- Avatar -->
-        <ImageView
-            android:id="@+id/ivProfilePic"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginStart="12dp"
-            android:background="@drawable/bg_circle_light_blue"
-            android:src="@drawable/ic_nav_profile"
-            android:padding="8dp"
-            app:tint="@color/brand_primary"
-            app:layout_constraintStart_toEndOf="@id/btnBack"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:cardBackgroundColor="#CCD6E6"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:id="@+id/ivProfilePic"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_nav_profile"
+                android:scaleType="centerCrop"
+                app:tint="@color/brand_primary" />
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Name + Status -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_marginStart="12dp"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivProfilePic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvChatName"
-                style="@style/AppHeading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rachel"
-                android:textSize="18sp" />
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
                 <View
                     android:id="@+id/vOnlineDot"
@@ -87,15 +87,23 @@
 
                 <TextView
                     android:id="@+id/tvChatStatus"
-                    style="@style/AppDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Online"
-                    android:textSize="13sp" />
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:id="@+id/chatDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F3F4F6"
+        app:layout_constraintTop_toBottomOf="@id/topBar" />
 
     <!-- Chat Messages RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
@@ -111,7 +119,40 @@
         tools:listitem="@layout/item_chat_preview_pair"
         tools:itemCount="3"
         app:layout_constraintBottom_toTopOf="@id/bottomBar"
-        app:layout_constraintTop_toBottomOf="@id/topBar" />
+        app:layout_constraintTop_toBottomOf="@id/chatDivider" />
+
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/emptyStateContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingHorizontal="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintTop_toBottomOf="@id/chatDivider">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Start a conversation"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#111827"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Say hello and begin the conversation"
+            android:textSize="14sp"
+            android:textColor="#6B7280"
+            android:gravity="center"
+            android:lineSpacingExtra="2dp" />
+
+    </LinearLayout>
 
     <!-- Bottom Input Bar -->
     <LinearLayout

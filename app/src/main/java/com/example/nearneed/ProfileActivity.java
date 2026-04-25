@@ -15,6 +15,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -81,6 +85,8 @@ public class ProfileActivity extends AppCompatActivity {
                 if (tvInitials != null) tvInitials.setVisibility(View.GONE);
             }
         }
+
+        syncToUsersCollection(name, photoUriStr, location, UserPrefs.isVerified(this));
     }
 
     private void applySnapshot(DocumentSnapshot snapshot) {
@@ -109,6 +115,27 @@ public class ProfileActivity extends AppCompatActivity {
             ivPhoto.setVisibility(View.GONE);
             if (tvInitials != null) tvInitials.setVisibility(View.VISIBLE);
         }
+
+        syncToUsersCollection(name, photoUrl, location, Boolean.TRUE.equals(verified));
+    }
+
+    private void syncToUsersCollection(String name, String profileImage, String address, boolean isVerified) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name == null ? "NearNeed User" : name);
+        map.put("profileImage", profileImage == null ? "" : profileImage);
+        map.put("address", address == null ? "" : address);
+        map.put("isVerified", isVerified);
+        if (user.getEmail() != null) {
+            map.put("email", user.getEmail());
+        }
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.getUid())
+                .set(map, SetOptions.merge());
     }
 
     private void setName(String name) {
@@ -158,9 +185,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         View providerSettings = findViewById(R.id.menu_settings_provider);
         if (providerSettings != null) providerSettings.setOnClickListener(v -> openSettings());
-
-        View menuEarnings = findViewById(R.id.menu_earnings);
-        if (menuEarnings != null) menuEarnings.setOnClickListener(v -> openEarnings());
 
         View btnViewEarnings = findViewById(R.id.btn_view_earnings);
         if (btnViewEarnings != null) btnViewEarnings.setOnClickListener(v -> openEarnings());

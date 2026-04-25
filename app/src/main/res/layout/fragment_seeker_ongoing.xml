@@ -210,12 +210,9 @@
                         android:textSize="13sp"
                         android:textAllCaps="false"
                         android:textStyle="bold"
+                        android:maxLines="1"
                         app:backgroundTint="@color/brand_success"
-                        app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_check_circle_green"
-                        app:iconGravity="textStart"
-                        app:iconPadding="6dp"
-                        app:iconSize="16dp" />
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -414,12 +411,9 @@
                         android:textSize="13sp"
                         android:textAllCaps="false"
                         android:textStyle="bold"
+                        android:maxLines="1"
                         app:backgroundTint="@color/brand_success"
-                        app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_check_circle_green"
-                        app:iconGravity="textStart"
-                        app:iconPadding="6dp"
-                        app:iconSize="16dp" />
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
 
             </LinearLayout>

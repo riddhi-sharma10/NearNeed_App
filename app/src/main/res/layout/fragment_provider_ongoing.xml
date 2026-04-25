@@ -192,19 +192,19 @@
                         app:iconTint="@color/white" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnProvUpdateStatus1"
+                        android:id="@+id/btnProvViewDetails1"
                         android:layout_width="0dp"
                         android:layout_height="46dp"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        android:text="Update Status"
+                        android:text="View Details"
                         android:textColor="@color/white"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textAllCaps="false"
-                        app:backgroundTint="@color/brand_success"
+                        app:backgroundTint="#0284C7"
                         app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_check_circle_green"
+                        app:icon="@android:drawable/ic_menu_info_details"
                         app:iconGravity="textStart"
                         app:iconPadding="6dp"
                         app:iconSize="16dp" />
@@ -388,19 +388,19 @@
                         app:iconTint="@color/white" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnProvUpdateStatus2"
+                        android:id="@+id/btnProvViewDetails2"
                         android:layout_width="0dp"
                         android:layout_height="46dp"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        android:text="Update Status"
+                        android:text="View Details"
                         android:textColor="@color/white"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textAllCaps="false"
-                        app:backgroundTint="@color/brand_success"
+                        app:backgroundTint="#0284C7"
                         app:cornerRadius="12dp"
-                        app:icon="@drawable/ic_check_circle_green"
+                        app:icon="@android:drawable/ic_menu_info_details"
                         app:iconGravity="textStart"
                         app:iconPadding="6dp"
                         app:iconSize="16dp" />

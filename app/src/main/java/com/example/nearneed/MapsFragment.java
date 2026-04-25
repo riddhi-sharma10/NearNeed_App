@@ -95,11 +95,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private MapView mapView;
     private String currentRole;
     private boolean isGigsMode = true;
+    private PostViewModel postViewModel;
 
     // UI elements - Common
     
     private View infoCard;
     private Marker selectedMarker;
+    private ApplicationViewModel applicationViewModel;
 
     // UI elements - Provider specific
     private MaterialCardView jobDetailCard;
@@ -151,6 +153,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         public int colorResId;
         public LatLng location;
         public String type; // "GIG" or "COMMUNITY"
+        public String postId;
+        public String creatorId;
         public int slots;        // total slots for COMMUNITY jobs (0 = not applicable)
         public int slotsFilled;  // how many have applied
         public boolean hasApplied;     // true if provider has already applied
@@ -171,6 +175,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             this.slotsFilled = 0;
             this.hasApplied = false;
             this.applicationStatus = null;
+            this.postId = null;
+            this.creatorId = null;
         }
     }
 
@@ -241,6 +247,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
 
         initUI(view);
+
+        postViewModel = new androidx.lifecycle.ViewModelProvider(this).get(PostViewModel.class);
+        applicationViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ApplicationViewModel.class);
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
             setupProviderMode(view);
@@ -349,8 +358,30 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         allJobs = new ArrayList<>();
         filteredJobs = new ArrayList<>();
 
-        // Initialize jobs data
-        initializeSampleJobs();
+        // Real-time observation
+        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
+            allJobs.clear();
+            for (Post p : posts) {
+                Job j = new Job(
+                    p.title,
+                    p.description,
+                    String.format("%.1fkm", p.distance != null ? p.distance : 0.0),
+                    p.budget != null ? "₹" + p.budget : "Voluntary",
+                    "Normal",
+                    "GIG".equals(p.type) ? R.drawable.ic_plumber : R.drawable.ic_gardening,
+                    "GIG".equals(p.type) ? R.color.sapphire_primary : R.color.brand_success,
+                    new LatLng(p.latitude, p.longitude),
+                    p.type
+                );
+                j.postId = p.postId;
+                j.creatorId = p.userId;
+                allJobs.add(j);
+            }
+            applyFilters();
+        });
+
+        // Trigger observation (Gurgaon default if no loc)
+        postViewModel.observeNearbyPosts(getViewLifecycleOwner(), 28.4595, 77.0266, 10.0);
 
         // Setup bottom sheet
         bottomSheetPanel = view.findViewById(R.id.provider_bottom_sheet);
@@ -436,77 +467,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void initializeSampleJobs() {
-        allJobs.add(new Job(
-            "Plumbing Repair",
-            "Pipe repair in kitchen area",
-            "0.5km away",
-            "₹500 - 800",
-            "High Urgency",
-            R.drawable.ic_plumber,
-            R.color.sapphire_primary,
-            new LatLng(19.0850, 72.8750),
-            "GIG"
-        ));
-
-        allJobs.add(new Job(
-            "TV Mounting",
-            "Wall mount installation needed",
-            "1.2km away",
-            "₹1200 - 1500",
-            "Normal",
-            R.drawable.ic_toolbox_seeker,
-            R.color.sapphire_primary,
-            new LatLng(19.0650, 72.8650),
-            "GIG"
-        ));
-
-        allJobs.add(new Job(
-            "Electrical Work",
-            "Wiring repair needed",
-            "0.8km away",
-            "₹800 - 1200",
-            "High Urgency",
-            R.drawable.ic_plug_blue,
-            R.color.sapphire_primary,
-            new LatLng(19.0750, 72.8800),
-            "GIG"
-        ));
-
-        // Add community volunteer posts
-        Job communityJob1 = new Job(
-            "Grocery Assistance",
-            "Help an elderly neighbor with weekly grocery run",
-            "0.4km away",
-            "",
-            "Normal",
-            R.drawable.ic_gardening,
-            R.color.brand_success,
-            new LatLng(19.0790, 72.8720),
-            "COMMUNITY"
-        );
-        communityJob1.slots = 5;
-        communityJob1.slotsFilled = 1;
-        allJobs.add(communityJob1);
-
-        Job communityJob2 = new Job(
-            "Park Cleanup",
-            "Community park cleaning drive this Saturday",
-            "0.9km away",
-            "",
-            "Normal",
-            R.drawable.ic_gardening,
-            R.color.brand_success,
-            new LatLng(19.0720, 72.8810),
-            "COMMUNITY"
-        );
-        communityJob2.slots = 8;
-        communityJob2.slotsFilled = 0;
-        allJobs.add(communityJob2);
-
-        filteredJobs.addAll(allJobs);
-        updateBottomSheetCount();
-    }
 
     private void updateChipAppearance(Chip chip, boolean isSelected) {
         if (isSelected) {
@@ -896,7 +856,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     updateMapMarkers();
                     setupProviderMapListeners();
                 } else {
-                    updateMarkers();
+                    observePostsForSeeker();
                     setupSeekerMapListeners();
                 }
                 
@@ -950,20 +910,28 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    private void observePostsForSeeker() {
+        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
+            mMap.removeAnnotations();
+            markerDataMap.clear();
+            
+            int blue = ContextCompat.getColor(requireContext(), R.color.sapphire_primary);
+            int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
+
+            for (Post p : posts) {
+                if ("COMMUNITY".equals(p.type)) {
+                    addSampleMarker(new LatLng(p.latitude, p.longitude), p.title, p.description, green, R.drawable.ic_gardening);
+                } else if ("GIG".equals(p.type)) {
+                    // For now, seekers only see community posts or we can show gigs if we want
+                    addSampleMarker(new LatLng(p.latitude, p.longitude), p.title, p.description, blue, R.drawable.ic_toolbox_seeker);
+                }
+            }
+        });
+        postViewModel.observeNearbyPosts(getViewLifecycleOwner(), 28.4595, 77.0266, 10.0);
+    }
+
     private void updateMarkers() {
-        if (mMap == null) return;
-        mMap.removeAnnotations();
-
-        int blue = ContextCompat.getColor(requireContext(), R.color.sapphire_primary);
-        int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
-        int yellow = ContextCompat.getColor(requireContext(), R.color.sapphire_tertiary);
-
-        if (isGigsMode) {
-            addSampleMarker(new LatLng(19.0820, 72.8850), "Marcus Watts", "Electrician", blue, R.drawable.ic_plug_blue);
-            addSampleMarker(new LatLng(19.0700, 72.8700), "Sarah Chen", "Cleaning", blue, R.drawable.ic_cleaning);
-        } else {
-            addSampleMarker(new LatLng(19.0750, 72.8800), "Park Cleanup", "Community", green, R.drawable.ic_gardening);
-        }
+        // Obsolete - handled by observePostsForSeeker
     }
 
     private void addSampleMarker(LatLng pos, String title, String snippet, int color, int iconResId) {
@@ -1060,6 +1028,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     if (currentDetailJob.slots > 0) {
                         currentDetailJob.slotsFilled = Math.min(currentDetailJob.slotsFilled + 1, currentDetailJob.slots);
                     }
+
+                    // Real-time submit
+                    applicationViewModel.submitApplication(
+                        currentDetailJob.postId,
+                        currentDetailJob.title,
+                        currentDetailJob.type,
+                        currentDetailJob.creatorId,
+                        "I would like to volunteer for this community request.",
+                        "0", "VOLUNTEER", null
+                    );
                 }
                 dialog.dismiss();
                 showSuccessDialog();
@@ -1130,6 +1108,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 // Mark job as applied with pending status
                 job.hasApplied = true;
                 job.applicationStatus = "pending";
+
+                // Real-time submit
+                applicationViewModel.submitApplication(
+                    job.postId,
+                    job.title,
+                    job.type,
+                    job.creatorId,
+                    message,
+                    budgetValue != null ? budgetValue.getText().toString() : "0",
+                    selectedPayment[0], null
+                );
 
                 dialog.dismiss();
                 showGigApplicationSuccessDialog();

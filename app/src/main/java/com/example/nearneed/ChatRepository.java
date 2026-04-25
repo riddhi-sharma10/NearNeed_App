@@ -83,6 +83,40 @@ public class ChatRepository {
     }
 
     /**
+     * Send a media message (Image or Voice).
+     */
+    public static void sendMediaMessage(String chatId, String senderId, String receiverId, 
+                                        String mediaUrl, boolean isVoice, SaveCallback callback) {
+        if (chatId == null || mediaUrl == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        
+        Map<String, Object> messageMap = new HashMap<>();
+        messageMap.put("senderId", senderId);
+        messageMap.put("receiverId", receiverId);
+        messageMap.put("messageText", isVoice ? "Voice message" : "Image message");
+        messageMap.put("isVoice", isVoice);
+        if (isVoice) {
+            messageMap.put("audioPath", mediaUrl);
+        } else {
+            messageMap.put("imageUri", mediaUrl);
+        }
+        messageMap.put("timestamp", FieldValue.serverTimestamp());
+
+        db.collection(MESSAGES_COLLECTION)
+                .document(chatId)
+                .collection("messages")
+                .add(messageMap)
+                .addOnSuccessListener(doc -> {
+                    updateChatMetadata(chatId, senderId, receiverId, isVoice ? "Voice message" : "Image message");
+                    if (callback != null) callback.onSuccess();
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
+    }
+
+    /**
      * Update chat thread metadata for the inbox view.
      */
     private static void updateChatMetadata(String chatId, String senderId, String receiverId, String lastMessage) {

@@ -80,6 +80,23 @@ public class ChatViewModel extends AndroidViewModel {
     }
 
     /**
+     * Send a media message (Image or Voice).
+     */
+    public void sendMediaMessage(String chatId, String receiverId, String mediaUrl, boolean isVoice) {
+        ChatRepository.sendMediaMessage(chatId, currentUserId, receiverId, mediaUrl, isVoice, new ChatRepository.SaveCallback() {
+            @Override
+            public void onSuccess() {
+                // Handled by real-time listener
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                error.setValue("Failed to send media: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
      * Mark chat as read.
      */
     public void markAsRead(String chatId) {

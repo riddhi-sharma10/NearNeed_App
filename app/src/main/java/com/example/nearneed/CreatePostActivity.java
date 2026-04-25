@@ -156,7 +156,13 @@ public class CreatePostActivity extends AppCompatActivity {
             intent.putExtra("title", etServiceTitle.getText().toString().trim());
             intent.putExtra("description", etDescription.getText().toString().trim());
             intent.putExtra("category", selectedCategory);
-            // Optionally pass images (as strings or Uris)
+            
+            ArrayList<String> imageUris = new ArrayList<>();
+            for (Uri uri : selectedImages) {
+                imageUris.add(uri.toString());
+            }
+            intent.putStringArrayListExtra("selected_images", imageUris);
+            
             startActivity(intent);
         });
     }

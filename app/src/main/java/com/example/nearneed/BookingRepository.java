@@ -53,7 +53,12 @@ public class BookingRepository {
         db.collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
                 .set(booking)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify provider they have been booked
+                    NotificationCenter.sendNotificationToUser(providerId, "You've been Booked!", 
+                        "You have a new booking for: " + postTitle);
+                    callback.onSuccess(bookingId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -188,7 +193,19 @@ public class BookingRepository {
         db.collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify both parties
+                    db.collection(BOOKINGS_COLLECTION).document(bookingId).get()
+                        .addOnSuccessListener(snapshot -> {
+                            Booking booking = fromSnapshot(snapshot);
+                            if (booking != null) {
+                                String msg = "The booking for '" + booking.postTitle + "' is now " + newStatus + ".";
+                                NotificationCenter.sendNotificationToUser(booking.seekerId, "Booking Status Update", msg);
+                                NotificationCenter.sendNotificationToUser(booking.providerId, "Booking Status Update", msg);
+                            }
+                        });
+                    callback.onSuccess(bookingId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 

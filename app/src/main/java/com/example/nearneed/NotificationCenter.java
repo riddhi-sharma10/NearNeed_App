@@ -27,10 +27,19 @@ public final class NotificationCenter {
         void onChange(int count);
     }
 
-    /** Write a new notification to Firestore for the signed-in user. */
     public static void addNotification(String title, String message) {
-        CollectionReference ref = notifRef();
-        if (ref == null) return;
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        sendNotificationToUser(user.getUid(), title, message);
+    }
+
+    /** Write a new notification to Firestore for a specific user. */
+    public static void sendNotificationToUser(String userId, String title, String message) {
+        if (userId == null || userId.isEmpty()) return;
+        
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference ref = db.collection("Users").document(userId).collection("notifications");
+        
         String id = UUID.randomUUID().toString();
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);

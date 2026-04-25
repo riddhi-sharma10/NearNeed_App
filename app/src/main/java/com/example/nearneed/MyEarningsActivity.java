@@ -37,33 +37,48 @@ public class MyEarningsActivity extends AppCompatActivity {
         TextView tvTotalBalanceAmount = findViewById(R.id.tvTotalBalanceAmount);
         TextView tvRecentActivityLabel = findViewById(R.id.tvRecentActivityLabel);
 
-        List<TransactionItem> dataToShow;
-
-        if (specificServiceName != null && specificServiceAmount != -1) {
-            // SHOW ONLY THIS SPECIFIC GIG
-            if (tvTotalBalanceLabel != null) tvTotalBalanceLabel.setText("GIG EARNINGS");
-            if (tvTotalBalanceAmount != null) tvTotalBalanceAmount.setText("₹" + (int) specificServiceAmount);
-            if (tvRecentActivityLabel != null) tvRecentActivityLabel.setText("Transaction Details");
-
-            dataToShow = new ArrayList<>();
-            // Assuming we use a general checkmark icon or money icon for the specific gig
-            dataToShow.add(new TransactionItem(specificServiceName, "Service", "Just Now", "5.0", "₹" + (int)specificServiceAmount, "COMPLETED", R.drawable.ic_payment_wallet_blue));
-        } else {
-            // SHOW ALL EARNINGS (DEFAULT DASHBOARD)
-            if (tvTotalBalanceLabel != null) tvTotalBalanceLabel.setText("TOTAL BALANCE");
-            if (tvTotalBalanceAmount != null) tvTotalBalanceAmount.setText("₹4,500");
-            if (tvRecentActivityLabel != null) tvRecentActivityLabel.setText("Recent Activity");
-            
-            dataToShow = getDummyTransactions();
-        }
-
         // Setup RecyclerView
         RecyclerView rvTransactions = findViewById(R.id.rv_transactions);
+        List<TransactionItem> transactionList = new ArrayList<>();
+        TransactionAdapter adapter = new TransactionAdapter(transactionList);
         if (rvTransactions != null) {
             rvTransactions.setLayoutManager(new LinearLayoutManager(this));
-            TransactionAdapter adapter = new TransactionAdapter(dataToShow);
             rvTransactions.setAdapter(adapter);
         }
+
+        ApplicationViewModel viewModel = new androidx.lifecycle.ViewModelProvider(this).get(ApplicationViewModel.class);
+        viewModel.getUserApplications().observe(this, apps -> {
+            transactionList.clear();
+            double total = 0;
+            for (Application app : apps) {
+                String status = app.status != null ? app.status.toUpperCase() : "PENDING";
+                double amount = app.proposedBudget != null ? app.proposedBudget : 0.0;
+                
+                if ("COMPLETED".equals(status)) {
+                    total += amount;
+                }
+
+                transactionList.add(new TransactionItem(
+                    app.postTitle != null ? app.postTitle : "Untitled Job",
+                    app.postType != null ? app.postType : "Service",
+                    formatDate(app.appliedAt),
+                    "5.0",
+                    "₹" + (int)amount,
+                    status,
+                    "GIG".equals(app.postType) ? R.drawable.ic_payment_wallet_blue : R.drawable.ic_groceries
+                ));
+            }
+            adapter.notifyDataSetChanged();
+            if (tvTotalBalanceAmount != null) {
+                tvTotalBalanceAmount.setText("₹" + (int)total);
+            }
+        });
+    }
+
+    private String formatDate(Long timestamp) {
+        if (timestamp == null) return "Just Now";
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMM, hh:mm a", java.util.Locale.getDefault());
+        return sdf.format(new java.util.Date(timestamp));
     }
 
     private List<TransactionItem> getDummyTransactions() {

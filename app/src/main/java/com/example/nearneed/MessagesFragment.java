@@ -181,13 +181,10 @@ public class MessagesFragment extends Fragment {
     }
 
     private void hydrateUserInfo(ChatEntry entry) {
-        firestore.collection("users").document(entry.userId).get()
+        firestore.collection("Users").document(entry.userId).get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot != null && snapshot.exists()) {
                         applyUserSnapshot(entry, snapshot, true);
-                    } else {
-                        firestore.collection("Users").document(entry.userId).get()
-                                .addOnSuccessListener(legacy -> applyUserSnapshot(entry, legacy, false));
                     }
                 });
     }

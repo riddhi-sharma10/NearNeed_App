@@ -88,7 +88,12 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .set(app)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify post creator
+                    NotificationCenter.sendNotificationToUser(creatorId, "New Application", 
+                        "Someone applied to your post: " + postTitle);
+                    callback.onSuccess(applicationId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -236,7 +241,20 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify applicant
+                    getApplication(applicationId, new ApplicationCallback() {
+                        @Override
+                        public void onApplicationFetched(Application application) {
+                            if (application != null) {
+                                NotificationCenter.sendNotificationToUser(application.applicantId, 
+                                    "Application Accepted!", "Your application for '" + application.postTitle + "' was accepted.");
+                            }
+                        }
+                        @Override public void onError(Exception e) {}
+                    });
+                    callback.onSuccess(applicationId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -255,7 +273,20 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify applicant
+                    getApplication(applicationId, new ApplicationCallback() {
+                        @Override
+                        public void onApplicationFetched(Application application) {
+                            if (application != null) {
+                                NotificationCenter.sendNotificationToUser(application.applicantId, 
+                                    "Application Update", "Your application for '" + application.postTitle + "' was rejected.");
+                            }
+                        }
+                        @Override public void onError(Exception e) {}
+                    });
+                    callback.onSuccess(applicationId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -293,7 +324,22 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    // Notify both parties if needed
+                    getApplication(applicationId, new ApplicationCallback() {
+                        @Override
+                        public void onApplicationFetched(Application application) {
+                            if (application != null) {
+                                NotificationCenter.sendNotificationToUser(application.applicantId, 
+                                    "Job Completed", "The job '" + application.postTitle + "' has been marked as completed.");
+                                NotificationCenter.sendNotificationToUser(application.creatorId, 
+                                    "Job Completed", "The job '" + application.postTitle + "' has been marked as completed.");
+                            }
+                        }
+                        @Override public void onError(Exception e) {}
+                    });
+                    callback.onSuccess(applicationId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 

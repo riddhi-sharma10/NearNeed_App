@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import android.net.Uri;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -204,8 +205,21 @@ public class ChatActivity extends AppCompatActivity {
                     etMessageInput.setText("");
                 }
             } else if (selectedImageUri != null) {
-                // TODO: Handle image sending via Storage in Phase 4
-                Toast.makeText(this, "Image sending coming soon!", Toast.LENGTH_SHORT).show();
+                // Phase 4: Handle image sending via Storage
+                if (chatId != null) {
+                    StorageRepository.uploadImage(selectedImageUri, "chat_images", new StorageRepository.UploadCallback() {
+                        @Override
+                        public void onSuccess(String downloadUrl) {
+                            viewModel.sendMediaMessage(chatId, peerUserId, downloadUrl, false);
+                            selectedImageUri = null;
+                            if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
+                        }
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(ChatActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
         });
 
@@ -363,10 +377,23 @@ public class ChatActivity extends AppCompatActivity {
                             if (secs < 1) {
                                 Toast.makeText(ChatActivity.this, "🎙 Hold to record a voice message", Toast.LENGTH_SHORT).show();
                             } else {
-                                ChatMessage msg = new ChatMessage("", true, true);
-                                msg.durationSecs = secs;
-                                msg.audioPath = audioFilePath;
-                                addMessage(msg);
+                                if (chatId != null && audioFilePath != null) {
+                                    StorageRepository.uploadAudio(audioFilePath, new StorageRepository.UploadCallback() {
+                                        @Override
+                                        public void onSuccess(String downloadUrl) {
+                                            viewModel.sendMediaMessage(chatId, peerUserId, downloadUrl, true);
+                                        }
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Toast.makeText(ChatActivity.this, "Audio upload failed", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                } else {
+                                    ChatMessage msg = new ChatMessage("", true, true);
+                                    msg.durationSecs = secs;
+                                    msg.audioPath = audioFilePath;
+                                    addMessage(msg);
+                                }
                             }
                         }
                         return true;
@@ -853,6 +880,18 @@ public class ChatActivity extends AppCompatActivity {
                 // Bubble containers
                 llSentBubble = itemView.findViewById(R.id.llSentMessageBubble);
                 llReceivedBubble = itemView.findViewById(R.id.llReceivedMessageBubble);
+            }
+        }
+    }
+
+    private void updateEmptyState() {
+        if (emptyStateContainer != null && rvMessages != null) {
+            if (messageList.isEmpty()) {
+                emptyStateContainer.setVisibility(View.VISIBLE);
+                rvMessages.setVisibility(View.GONE);
+            } else {
+                emptyStateContainer.setVisibility(View.GONE);
+                rvMessages.setVisibility(View.VISIBLE);
             }
         }
     }

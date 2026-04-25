@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import androidx.lifecycle.ViewModelProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import android.net.Uri;
 
 public class CreatePostStep2Activity extends AppCompatActivity {
 
@@ -34,6 +35,7 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     private List<TextView> urgencyTexts = new ArrayList<>();
     private List<ImageView> urgencyIcons = new ArrayList<>();
     private String selectedUrgency = "Urgent"; // Default
+    private ArrayList<String> selectedImageUris = new ArrayList<>();
     
     private String postType, title, description, category;
     private PostViewModel postViewModel;
@@ -47,6 +49,8 @@ public class CreatePostStep2Activity extends AppCompatActivity {
             title = getIntent().getStringExtra("title");
             description = getIntent().getStringExtra("description");
             category = getIntent().getStringExtra("category");
+            selectedImageUris = getIntent().getStringArrayListExtra("selected_images");
+            if (selectedImageUris == null) selectedImageUris = new ArrayList<>();
         }
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
@@ -166,6 +170,40 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     }
 
     private void savePost() {
+        btnPostRequest.setEnabled(false);
+        btnPostRequest.setText("Uploading Media...");
+
+        List<String> downloadUrls = new ArrayList<>();
+        if (selectedImageUris.isEmpty()) {
+            finalizeSavePost(downloadUrls);
+        } else {
+            uploadImagesRecursively(0, downloadUrls);
+        }
+    }
+
+    private void uploadImagesRecursively(int index, List<String> downloadUrls) {
+        if (index >= selectedImageUris.size()) {
+            finalizeSavePost(downloadUrls);
+            return;
+        }
+
+        Uri uri = Uri.parse(selectedImageUris.get(index));
+        StorageRepository.uploadImage(uri, "posts", new StorageRepository.UploadCallback() {
+            @Override
+            public void onSuccess(String downloadUrl) {
+                downloadUrls.add(downloadUrl);
+                uploadImagesRecursively(index + 1, downloadUrls);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // If one fails, we can either stop or continue. Let's continue for now.
+                uploadImagesRecursively(index + 1, downloadUrls);
+            }
+        });
+    }
+
+    private void finalizeSavePost(List<String> imageUrls) {
         String userId = FirebaseAuth.getInstance().getCurrentUser() != null 
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
         
@@ -182,12 +220,11 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         post.additionalNotes = etAdditionalNotes.getText().toString().trim();
         post.createdAt = System.currentTimeMillis();
         post.status = "active";
+        post.imageUrls = imageUrls; // Assuming Post model has this field
         
-        // Use a fixed coordinates for now as we don't have location selection for coords here
         post.lat = 28.4595; 
         post.lng = 77.0266;
 
-        btnPostRequest.setEnabled(false);
         btnPostRequest.setText("Posting...");
 
         postViewModel.createPost(post, new PostRepository.SaveCallback() {

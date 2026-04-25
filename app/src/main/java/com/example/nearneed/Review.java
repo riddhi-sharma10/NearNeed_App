@@ -1,28 +1,30 @@
 package com.example.nearneed;
 
+/**
+ * Data model for User Reviews/Ratings.
+ * Firestore: reviews/{reviewId}
+ */
 public class Review {
-    private String reviewerName;
-    private float rating;
-    private String reviewText;
-    private long reviewDate;
+    public String reviewId;
+    public String bookingId;
+    public String postId;
+    public String reviewerId;
+    public String revieweeId; // The person being rated
+    public float rating;      // 1.0 to 5.0
+    public String comment;
+    public long createdAt;
 
-    public Review(String reviewerName, float rating, String reviewText, long reviewDate) {
-        this.reviewerName = reviewerName;
-        this.rating = rating;
-        this.reviewText = reviewText;
-        this.reviewDate = reviewDate;
+    public Review() {
+        // Required for Firestore
     }
 
-    // Getters and Setters
-    public String getReviewerName() { return reviewerName; }
-    public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
-
-    public float getRating() { return rating; }
-    public void setRating(float rating) { this.rating = rating; }
-
-    public String getReviewText() { return reviewText; }
-    public void setReviewText(String reviewText) { this.reviewText = reviewText; }
-
-    public long getReviewDate() { return reviewDate; }
-    public void setReviewDate(long reviewDate) { this.reviewDate = reviewDate; }
+    public Review(String bookingId, String postId, String reviewerId, String revieweeId, float rating, String comment) {
+        this.bookingId = bookingId;
+        this.postId = postId;
+        this.reviewerId = reviewerId;
+        this.revieweeId = revieweeId;
+        this.rating = rating;
+        this.comment = comment;
+        this.createdAt = System.currentTimeMillis();
+    }
 }

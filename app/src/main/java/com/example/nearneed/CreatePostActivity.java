@@ -100,6 +100,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     tvCharCount.setTextColor(Color.parseColor("#94A3B8"));
                 }
                 updateNextButtonState();
+                autoPredictCategory();
             }
 
             @Override
@@ -114,6 +115,7 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 updateNextButtonState();
+                autoPredictCategory();
             }
 
             @Override
@@ -280,6 +282,23 @@ public class CreatePostActivity extends AppCompatActivity {
         } else {
             btnNextStep.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#CBD5E1")));
             btnNextStep.setAlpha(0.6f);
+        }
+    }
+
+    private void autoPredictCategory() {
+        if (!selectedCategory.isEmpty() && !selectedCategory.equals("More")) {
+            return;
+        }
+        String title = etServiceTitle.getText().toString();
+        String desc = etDescription.getText().toString();
+        String predicted = CategoryPredictor.predict(title + " " + desc);
+        if (!predicted.isEmpty()) {
+            for (int i = 0; i < categoryTexts.size(); i++) {
+                if (categoryTexts.get(i).getText().toString().equalsIgnoreCase(predicted)) {
+                    selectCategory(i);
+                    break;
+                }
+            }
         }
     }
 }

@@ -116,6 +116,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
         setupObservers();
+        requestLocationUpdates();
 
         SeekerNavbarController.bind(this, findViewById(android.R.id.content),
             SeekerNavbarController.TAB_HOME);
@@ -168,12 +169,30 @@ public class HomeProviderActivity extends AppCompatActivity {
             communityVolunteeringAdapter.setPosts(community);
         });
 
-        postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 5.0); // Default to Gurgaon if no loc
+        // Observation triggered by requestLocationUpdates()
         
         userViewModel.getLocation().observe(this, loc -> {
-            // Update radius when location changes if needed
-            // For now just re-observe with fake coords or real ones if available
+            // Re-fetch if manual location picker was used
+            requestLocationUpdates();
         });
+    }
+
+    private void requestLocationUpdates() {
+        if (LocationHelper.hasLocationPermissions(this)) {
+            LocationHelper.getCurrentLocation(this, new LocationHelper.LocationCallback() {
+                @Override
+                public void onLocationReceived(double lat, double lng) {
+                    postViewModel.observeNearbyPosts(HomeProviderActivity.this, lat, lng, 5.0);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    postViewModel.observeNearbyPosts(HomeProviderActivity.this, 28.4595, 77.0266, 5.0);
+                }
+            });
+        } else {
+            postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 5.0);
+        }
     }
 
     private void setupDashboardNotifications() {

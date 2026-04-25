@@ -17,6 +17,13 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
+import android.net.Uri;
+import java.io.IOException;
 
 public class IdVerificationActivity extends AppCompatActivity {
 
@@ -144,68 +151,74 @@ public class IdVerificationActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
             if (requestCode == REQUEST_PICK_FRONT) {
-                setCardUploadedState(cardUploadFront, "Front of ID");
+                runOcrOnImage(imageUri, cardUploadFront, "Front of ID");
             } else if (requestCode == REQUEST_PICK_BACK) {
-                setCardUploadedState(cardUploadBack, "Back of ID");
+                runOcrOnImage(imageUri, cardUploadBack, "Back of ID");
             }
         }
     }
 
-    private void setCardUploadedState(android.view.View card, String side) {
-        android.widget.ImageView icon = null;
-        TextView title = null;
-        TextView desc = null;
-        android.widget.ImageView tick = null;
+    private void runOcrOnImage(Uri imageUri, View card, String side) {
+        TextView title = card.findViewById(card.getId() == R.id.cardUploadFront ? R.id.titleFront : R.id.titleBack);
+        TextView desc = card.findViewById(card.getId() == R.id.cardUploadFront ? R.id.descFront : R.id.descBack);
+        android.widget.ImageView icon = card.findViewById(card.getId() == R.id.cardUploadFront ? R.id.iconFront : R.id.iconBack);
+        android.widget.ImageView tick = card.findViewById(card.getId() == R.id.cardUploadFront ? R.id.tickFront : R.id.tickBack);
 
-        if (card.getId() == R.id.cardUploadFront) {
-            icon = card.findViewById(R.id.iconFront);
-            title = card.findViewById(R.id.titleFront);
-            desc = card.findViewById(R.id.descFront);
-            tick = card.findViewById(R.id.tickFront);
-        } else if (card.getId() == R.id.cardUploadBack) {
-            icon = card.findViewById(R.id.iconBack);
-            title = card.findViewById(R.id.titleBack);
-            desc = card.findViewById(R.id.descBack);
-            tick = card.findViewById(R.id.tickBack);
+        title.setText("Scanning ID...");
+        desc.setText("Extracting data using AI...");
+        icon.setVisibility(View.VISIBLE);
+        icon.setImageResource(R.drawable.ic_search_grey);
+        icon.setColorFilter(0xFF1E3A8A, android.graphics.PorterDuff.Mode.SRC_IN);
+        
+        try {
+            InputImage image = InputImage.fromFilePath(this, imageUri);
+            TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+            recognizer.process(image)
+                    .addOnSuccessListener(visionText -> {
+                        String resultText = visionText.getText();
+                        if (resultText != null && !resultText.isEmpty()) {
+                            // Basic logic to confirm it looks like an ID
+                            boolean looksLikeId = resultText.length() > 20; 
+                            if (looksLikeId) {
+                                finalizeOcrResult(card, icon, title, desc, tick, side, true);
+                            } else {
+                                Toast.makeText(this, "Image too blurry or not an ID", Toast.LENGTH_SHORT).show();
+                                finalizeOcrResult(card, icon, title, desc, tick, side, false);
+                            }
+                        } else {
+                            finalizeOcrResult(card, icon, title, desc, tick, side, false);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "OCR failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        finalizeOcrResult(card, icon, title, desc, tick, side, false);
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 
-        if (icon != null && title != null && desc != null) {
-            final android.widget.ImageView fIcon = icon;
-            final TextView fTitle = title;
-            final TextView fDesc = desc;
-            final android.widget.ImageView fTick = tick;
-
-            fTitle.setText("Scanning ID...");
-            fDesc.setText("Extracting security features...");
-            fIcon.setVisibility(View.VISIBLE);
-            fIcon.setImageResource(R.drawable.ic_search_grey);
-            fIcon.setColorFilter(0xFF1E3A8A, android.graphics.PorterDuff.Mode.SRC_IN);
-            fIcon.setPadding(0, 0, 0, 0);
-            fIcon.setBackground(null);
-            
-            if (fTick != null) {
-                fTick.setVisibility(View.GONE);
+    private void finalizeOcrResult(View card, android.widget.ImageView icon, TextView title, TextView desc, android.widget.ImageView tick, String side, boolean success) {
+        if (success) {
+            card.setBackgroundResource(R.drawable.bg_id_uploaded);
+            icon.setVisibility(View.GONE);
+            title.setText(side + " Scanned");
+            title.setTextColor(0xFF1E3A8A);
+            desc.setText("AI verification complete");
+            desc.setTextColor(0xFF1E3A8A);
+            if (tick != null) {
+                tick.setVisibility(View.VISIBLE);
+                tick.startAnimation(AnimationUtils.loadAnimation(this, R.anim.scale_in_tick));
             }
-
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                card.setBackgroundResource(R.drawable.bg_id_uploaded);
-                fIcon.setVisibility(View.GONE);
-                fTitle.setTextColor(0xFF1E3A8A);
-                fDesc.setText("Data extracted successfully");
-                fDesc.setTextColor(0xFF1E3A8A);
-
-                if (fTick != null) {
-                    fTick.setVisibility(View.VISIBLE);
-                    // Apply smooth scale-in animation to tick mark
-                    fTick.startAnimation(AnimationUtils.loadAnimation(IdVerificationActivity.this, R.anim.scale_in_tick));
-                }
-
-                if (side.contains("Front")) frontUploaded = true;
-                else backUploaded = true;
-
-                checkReadyToSubmit();
-            }, 2000);
+            if (side.contains("Front")) frontUploaded = true;
+            else backUploaded = true;
+            checkReadyToSubmit();
+        } else {
+            title.setText("Upload Failed");
+            desc.setText("Try a clearer photo");
         }
     }
 

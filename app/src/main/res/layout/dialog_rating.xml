@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_rounded">
+
+    <TextView
+        android:id="@+id/tvRatingTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rate your experience"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/tvRatingSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="How was your interaction with the user?"
+        android:textSize="14sp"
+        android:textColor="#64748B"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"/>
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:progressTint="#F59E0B"
+        android:layout_marginBottom="24dp"/>
+
+    <EditText
+        android:id="@+id/etReviewComment"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/bg_input_field"
+        android:hint="Leave a comment (optional)..."
+        android:gravity="top|start"
+        android:padding="12dp"
+        android:textSize="14sp"
+        android:textColor="#1E293B"
+        android:layout_marginBottom="24dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSubmitReview"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Submit Review"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#1E3A8A"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/btnMaybeLater"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Maybe Later"
+        android:gravity="center"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:padding="8dp"/>
+
+</LinearLayout>

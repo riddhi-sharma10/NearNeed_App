@@ -10,7 +10,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="52dp"
         android:background="@color/white"
         app:navigationIcon="@drawable/ic_back_arrow"
         app:title="" />
@@ -33,64 +33,102 @@
                 android:id="@+id/tv_community_volunteer_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Community Need Title"
+                android:text="Community Garden Spring Cleanup &amp; Planting"
                 android:textColor="@color/text_header"
-                android:textSize="24sp"
+                android:textSize="28sp"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif-black" />
+                android:fontFamily="sans-serif-black"
+                android:lineSpacingExtra="4dp" />
 
-            <!-- Badge -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COMMUNITY"
+                android:textColor="@color/brand_success"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_pill_completed_soft"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:layout_marginTop="8dp" />
+
+            <!-- Date & Time Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="12dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="COMMUNITY"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_trending_badge"
-                    android:backgroundTint="@color/brand_success"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp" />
-            </LinearLayout>
-
-            <!-- Posted Info -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Posted by"
-                        android:textColor="@color/text_muted"
-                        android:textSize="12sp" />
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_bookings_calendar"
+                        app:tint="@color/text_muted" />
 
                     <TextView
-                        android:id="@+id/tv_volunteer_posted_by"
-                        android:layout_width="0dp"
+                        android:id="@+id/tv_volunteer_event_date"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Sarah J."
+                        android:text="Sat, May 24"
                         android:textColor="@color/text_body"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
+                        android:textSize="14sp"
                         android:layout_marginStart="8dp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="24dp">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_clock"
+                        app:tint="@color/text_muted" />
+
+                    <TextView
+                        android:id="@+id/tv_volunteer_event_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="9:00 AM - 1:00 PM"
+                        android:textColor="@color/text_body"
+                        android:textSize="14sp"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Location Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Location"
+                    android:textColor="@color/text_header"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_volunteer_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="123 Community Drive, Springfield"
+                    android:textColor="@color/text_body"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -103,7 +141,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_loc_pin_small"
-                        android:tint="@color/brand_success"
+                        app:tint="@color/brand_success"
                         android:layout_marginEnd="6dp" />
 
                     <TextView
@@ -112,51 +150,34 @@
                         android:layout_height="wrap_content"
                         android:text="0.4 miles away"
                         android:textColor="@color/text_body"
-                        android:textSize="13sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Description Card -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Description -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="About this need"
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="32dp" />
+
+            <TextView
+                android:id="@+id/tv_community_volunteer_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:cardBackgroundColor="#F0F9F7"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/brand_success">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="DETAILS"
-                        android:textColor="@color/text_muted"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_community_volunteer_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Detailed description of the community need..."
-                        android:textColor="@color/text_body_dark"
-                        android:textSize="14sp"
-                        android:lineSpacingMultiplier="1.5"
-                        android:layout_marginTop="12dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:text="Detailed description of the community need..."
+                android:textColor="@color/text_body"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.5"
+                android:layout_marginTop="8dp" />
 
             <!-- Spacer -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="24dp" />
+                android:layout_height="32dp" />
 
         </LinearLayout>
 

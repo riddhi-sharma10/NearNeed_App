@@ -40,7 +40,7 @@ public class MyPostsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         rv = findViewById(R.id.rvMyPosts);
-        layoutEmpty = findViewById(R.id.layout_empty); // Added in Step 8
+        layoutEmpty = findViewById(R.id.layout_empty);
         
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MyPostsAdapter(new ArrayList<>());
@@ -51,6 +51,12 @@ public class MyPostsActivity extends AppCompatActivity {
 
     private void setupViewModel() {
         viewModel = new ViewModelProvider(this).get(PostViewModel.class);
+        
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            finish();
+            return;
+        }
+        
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         viewModel.getUserPosts().observe(this, posts -> {
@@ -66,12 +72,24 @@ public class MyPostsActivity extends AppCompatActivity {
         if (isEmpty) {
             layoutEmpty.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
-            ((ImageView) layoutEmpty.findViewById(R.id.ivEmptyIllustration)).setImageResource(R.drawable.img_empty_posts);
-            ((TextView) layoutEmpty.findViewById(R.id.tvEmptyTitle)).setText("You haven't posted anything yet");
-            ((TextView) layoutEmpty.findViewById(R.id.tvEmptyMessage)).setText("Your requests for help or gig opportunities will appear here.");
-            layoutEmpty.findViewById(R.id.btnEmptyAction).setOnClickListener(v -> {
-                startActivity(new Intent(this, PostOptionsActivity.class));
-            });
+            ImageView ivIllustration = layoutEmpty.findViewById(R.id.ivEmptyIllustration);
+            if (ivIllustration != null) {
+                ivIllustration.setImageResource(R.drawable.img_empty_posts);
+            }
+            TextView tvTitle = layoutEmpty.findViewById(R.id.tvEmptyTitle);
+            if (tvTitle != null) {
+                tvTitle.setText("You haven't posted anything yet");
+            }
+            TextView tvMessage = layoutEmpty.findViewById(R.id.tvEmptyMessage);
+            if (tvMessage != null) {
+                tvMessage.setText("Your requests for help or gig opportunities will appear here.");
+            }
+            View btnAction = layoutEmpty.findViewById(R.id.btnEmptyAction);
+            if (btnAction != null) {
+                btnAction.setOnClickListener(v -> {
+                    startActivity(new Intent(this, PostOptionsActivity.class));
+                });
+            }
         } else {
             layoutEmpty.setVisibility(View.GONE);
             rv.setVisibility(View.VISIBLE);
@@ -104,25 +122,28 @@ public class MyPostsActivity extends AppCompatActivity {
             
             String detail;
             if ("GIG".equals(post.type)) {
-                detail = post.budget != null ? post.budget : "Paid Gig";
+                detail = post.budget != null && !post.budget.isEmpty() ? "Budget: " + post.budget : "Paid Gig";
             } else {
                 detail = (post.slotsFilled != null ? post.slotsFilled : 0) + "/" + 
                          (post.slots != null ? post.slots : 0) + " Volunteers";
             }
             holder.tvDetail.setText(detail);
             
-            holder.tvBadge.setText(post.type);
+            holder.tvBadge.setText(post.type != null ? post.type : "POST");
 
-            // Apply badge colors based on type
-            if ("URGENT".equals(post.category)) {
+            // Apply badge colors based on category/type
+            if ("High Urgency".equalsIgnoreCase(post.category) || "URGENT".equalsIgnoreCase(post.type)) {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_urgent_badge);
                 holder.tvBadge.setTextColor(getColor(R.color.urgent_red));
-            } else if ("COMMUNITY".equals(post.type)) {
+                holder.tvBadge.setText("URGENT");
+            } else if ("COMMUNITY".equalsIgnoreCase(post.type)) {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_community_badge);
                 holder.tvBadge.setTextColor(getColor(R.color.community_green));
+                holder.tvBadge.setText("COMMUNITY");
             } else {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_paid_badge);
                 holder.tvBadge.setTextColor(getColor(R.color.brand_primary));
+                holder.tvBadge.setText("PAID GIG");
             }
 
             holder.btnAction.setOnClickListener(v -> {

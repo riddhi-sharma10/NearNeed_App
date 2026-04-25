@@ -5,22 +5,30 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.ListenerRegistration;
-
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class HomeSeekerActivity extends AppCompatActivity {
 
@@ -29,6 +37,15 @@ public class HomeSeekerActivity extends AppCompatActivity {
     private TextView tvDashboardNotificationBadge;
     private ListenerRegistration notifListener;
     private UserViewModel userViewModel;
+    private PostViewModel postViewModel;
+    
+    private RecyclerView rvMyGigs;
+    private RecyclerView rvCommunity;
+    private View emptyStateContainer;
+    private View postsContentContainer;
+    
+    private DashboardGigsAdapter gigsAdapter;
+    private CommunityVolunteeringAdapter communityAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,18 +65,15 @@ public class HomeSeekerActivity extends AppCompatActivity {
         tvGreeting = findViewById(R.id.tvGreeting);
         tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
 
-        // Show cached values immediately so there's no blank flash
+        // Show cached values
         String cachedName = UserPrefs.getName(this);
         String cachedLocation = UserPrefs.getLocation(this);
-        if (!cachedName.isEmpty()) {
-            tvGreeting.setText("Hello, " + cachedName);
-        }
-        if (cachedLocation != null && !cachedLocation.isEmpty()) {
-            tvDeliveryLocation.setText(cachedLocation);
-        }
+        if (!cachedName.isEmpty()) tvGreeting.setText("Hello, " + cachedName);
+        if (cachedLocation != null && !cachedLocation.isEmpty()) tvDeliveryLocation.setText(cachedLocation);
 
-        // ViewModel drives real-time updates from Firestore
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+
         userViewModel.getName().observe(this, name -> {
             tvGreeting.setText("Hello, " + name);
             UserPrefs.saveName(this, name);
@@ -69,36 +83,81 @@ public class HomeSeekerActivity extends AppCompatActivity {
             UserPrefs.saveLocation(this, location);
         });
 
-        // Location section click
-        View locationSection = findViewById(R.id.locationSection);
-        if (locationSection != null) {
-            locationSection.setOnClickListener(v -> showLocationPicker());
+        findViewById(R.id.locationSection).setOnClickListener(v -> showLocationPicker());
+        
+        setupRoleToggle();
+        setupRecyclerViews();
+        setupFAB();
+        setupDashboardNotifications();
+        setupObservers();
+    }
+
+    private void setupRecyclerViews() {
+        rvMyGigs = findViewById(R.id.rvMyGigPosts);
+        rvCommunity = findViewById(R.id.rvCommunityNeeds);
+        emptyStateContainer = findViewById(R.id.empty_state_container);
+        postsContentContainer = findViewById(R.id.posts_content_container);
+
+        rvMyGigs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        gigsAdapter = new DashboardGigsAdapter();
+        rvMyGigs.setAdapter(gigsAdapter);
+
+        rvCommunity.setLayoutManager(new LinearLayoutManager(this));
+        communityAdapter = new CommunityVolunteeringAdapter();
+        rvCommunity.setAdapter(communityAdapter);
+        
+        findViewById(R.id.btnViewAllGigs).setOnClickListener(v -> startActivity(new Intent(this, MyPostsActivity.class)));
+        findViewById(R.id.btn_view_all_community).setOnClickListener(v -> {
+            Intent intent = new Intent(this, BookingsActivity.class);
+            intent.putExtra("filter_type", "community");
+            startActivity(intent);
+        });
+        
+        if (findViewById(R.id.btn_post_now_empty) != null) {
+            findViewById(R.id.btn_post_now_empty).setOnClickListener(v -> 
+                startActivity(new Intent(this, PostOptionsActivity.class)));
+        }
+    }
+
+    private void setupObservers() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null 
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+
+        if (!userId.isEmpty()) {
+            postViewModel.getUserPosts().observe(this, posts -> {
+                List<Post> myGigs = new ArrayList<>();
+                for (Post p : posts) {
+                    if ("GIG".equals(p.type)) myGigs.add(p);
+                }
+                gigsAdapter.setPosts(myGigs);
+                
+                if (myGigs.isEmpty()) {
+                    emptyStateContainer.setVisibility(View.VISIBLE);
+                    postsContentContainer.setVisibility(View.GONE);
+                } else {
+                    emptyStateContainer.setVisibility(View.GONE);
+                    postsContentContainer.setVisibility(View.VISIBLE);
+                }
+            });
+            postViewModel.observeUserPosts(this, userId);
         }
 
-        setupRoleToggle();
-        setupCommunityButtons();
-        DashboardSearchHelper.bindSeekerSearch(findViewById(android.R.id.content), true, this);
+        postViewModel.getNearbyPosts().observe(this, posts -> {
+            List<Post> communityPosts = new ArrayList<>();
+            for (Post p : posts) {
+                if ("COMMUNITY".equals(p.type)) communityPosts.add(p);
+            }
+            communityAdapter.setPosts(communityPosts);
+        });
+        
+        // Default coords
+        postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 10.0);
+    }
 
+    private void setupFAB() {
         MaterialButton fab = findViewById(R.id.fab_add_seeker);
         if (fab != null) {
             fab.setOnClickListener(v -> startActivity(new Intent(this, PostOptionsActivity.class)));
-        }
-
-        setupDashboardNotifications();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        notifListener = NotificationCenter.listenUnreadCount(this::updateBadge);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (notifListener != null) {
-            notifListener.remove();
-            notifListener = null;
         }
     }
 
@@ -109,161 +168,68 @@ public class HomeSeekerActivity extends AppCompatActivity {
     private void setupDashboardNotifications() {
         ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
         tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
-
         if (ivDashboardNotifications != null) {
-            ivDashboardNotifications.setOnClickListener(v ->
-                DashboardNotificationPopup.show(this, v, null));
+            ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, null));
         }
-    }
-
-    private void updateBadge(int count) {
-        if (tvDashboardNotificationBadge == null) return;
-        if (count <= 0) {
-            tvDashboardNotificationBadge.setVisibility(View.GONE);
-            return;
-        }
-        tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
-        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(count, 9)));
-    }
-
-    private void setupCommunityButtons() {
-        View btnViewAllGigs = findViewById(R.id.btnViewAllGigs);
-        if (btnViewAllGigs != null) {
-            btnViewAllGigs.setOnClickListener(v -> {
-                Intent intent = new Intent(this, BookingsActivity.class);
-                intent.putExtra("filter_type", "gigs");
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
-        }
-
-        View viewAllCommunity = findViewById(R.id.btn_view_all_community);
-        if (viewAllCommunity != null) {
-            viewAllCommunity.setOnClickListener(v -> {
-                Intent intent = new Intent(this, BookingsActivity.class);
-                intent.putExtra("filter_type", "community");
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            });
-        }
-
-        View btnViewPostGig1 = findViewById(R.id.btn_view_post_gig_1);
-        View btnViewPostGig2 = findViewById(R.id.btn_view_post_gig_2);
-        if (btnViewPostGig1 != null) {
-            btnViewPostGig1.setOnClickListener(v -> showGigPostDetail("Plumbing Repair",
-                "Fixing leaky faucets and clogged drains for the community.",
-                "Plumbing • Urgent", "₹400 - 600", "0.5 km away", "2-3 hours"));
-        }
-        if (btnViewPostGig2 != null) {
-            btnViewPostGig2.setOnClickListener(v -> showGigPostDetail("Electrical Fix",
-                "Wiring inspection and circuit breaker repairs nearby.",
-                "Electrical • Normal", "₹800 - 1200", "1.2 km away", "3-4 hours"));
-        }
-
-        View btnHelp1 = findViewById(R.id.btn_help_community_1);
-        View btnHelp2 = findViewById(R.id.btn_help_community_2);
-        if (btnHelp1 != null) {
-            btnHelp1.setOnClickListener(v -> showCommunityPostDetail("Grocery Assistance",
-                "A neighbor needs help picking out fresh groceries for her weekly meals.",
-                "Community Member", "2 hours ago", "0.4 km away", "5 volunteers needed"));
-        }
-        if (btnHelp2 != null) {
-            btnHelp2.setOnClickListener(v -> showCommunityPostDetail("Tech Setup Help",
-                "A neighbor needs assistance setting up a new computer and installing software.",
-                "Community Member", "5 hours ago", "1.2 km away", "3 volunteers needed"));
-        }
-    }
-
-    private void showGigPostDetail(String title, String description, String category,
-                                   String budget, String distance, String duration) {
-        Intent intent = new Intent(this, GigPostDetailActivity.class);
-        intent.putExtra("title", title);
-        intent.putExtra("description", description);
-        intent.putExtra("category", category);
-        intent.putExtra("budget", budget);
-        intent.putExtra("distance", distance);
-        intent.putExtra("duration", duration);
-        startActivity(intent);
-    }
-
-    private void showCommunityPostDetail(String title, String description, String postedBy,
-                                         String postedTime, String location, String slots) {
-        Intent intent = new Intent(this, CommunityPostDetailActivity.class);
-        intent.putExtra("title", title);
-        intent.putExtra("description", description);
-        intent.putExtra("postedBy", postedBy);
-        intent.putExtra("postedTime", postedTime);
-        intent.putExtra("location", location);
-        intent.putExtra("slots", slots);
-        startActivity(intent);
-    }
-
-    private void showVolunteerSheet(String postTitle) {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View sheetView = getLayoutInflater().inflate(R.layout.layout_community_respond_sheet, null);
-        dialog.setContentView(sheetView);
-
-        MaterialButton applyBtn = sheetView.findViewById(R.id.btn_apply_volunteer);
-        if (applyBtn != null) {
-            applyBtn.setOnClickListener(v -> {
-                dialog.dismiss();
-                showSuccessDialog();
-            });
-        }
-        dialog.show();
-    }
-
-    private void showSuccessDialog() {
-        Dialog dialog = new MaterialAlertDialogBuilder(this)
-            .setTitle("You're in!")
-            .setMessage("Your response has been sent. Redirecting to home...")
-            .setIcon(android.R.drawable.ic_dialog_info)
-            .show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (dialog.isShowing()) dialog.dismiss();
-            finish();
-        }, 3000);
     }
 
     private void setupRoleToggle() {
-        TextView tabSeeker = findViewById(R.id.tab_seeker);
-        TextView tabProvider = findViewById(R.id.tab_provider);
-
-        if (tabSeeker != null) {
-            tabSeeker.setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
-        }
-        if (tabProvider != null) {
-            tabProvider.setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
-        }
-        updateToggleAppearance();
+        findViewById(R.id.tab_seeker).setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
+        findViewById(R.id.tab_provider).setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
     }
 
     private void switchRole(String newRole) {
         if (newRole.equals(RoleManager.getRole(this))) return;
-
         RoleManager.setRole(this, newRole);
-        String msg = RoleManager.ROLE_SEEKER.equals(newRole)
-            ? "Switched to Seeker mode" : "Switched to Provider mode";
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        finish();
     }
 
-    private void updateToggleAppearance() {
-        TextView tabSeeker = findViewById(R.id.tab_seeker);
-        TextView tabProvider = findViewById(R.id.tab_provider);
+    private static class DashboardGigsAdapter extends RecyclerView.Adapter<DashboardGigsAdapter.ViewHolder> {
+        private List<Post> posts = new ArrayList<>();
 
-        if (tabSeeker != null) {
-            tabSeeker.setBackgroundResource(R.drawable.bg_seeker_tab_active);
-            tabSeeker.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
+        void setPosts(List<Post> posts) {
+            this.posts = posts;
+            notifyDataSetChanged();
         }
-        if (tabProvider != null) {
-            tabProvider.setBackground(null);
-            tabProvider.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_my_post, parent, false);
+            // Adjust width for horizontal scroll
+            ViewGroup.LayoutParams lp = view.getLayoutParams();
+            lp.width = (int) (260 * parent.getContext().getResources().getDisplayMetrics().density);
+            view.setLayoutParams(lp);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Post post = posts.get(position);
+            holder.tvTitle.setText(post.title);
+            holder.tvDetail.setText(post.budget != null ? "Budget: " + post.budget : "Gig");
+            holder.tvBadge.setText(post.status != null ? post.status.toUpperCase() : "ACTIVE");
+            
+            holder.itemView.setOnClickListener(v -> {
+                Intent intent = new Intent(v.getContext(), ResponsesActivity.class);
+                intent.putExtra("post_id", post.postId);
+                intent.putExtra("post_title", post.title);
+                v.getContext().startActivity(intent);
+            });
+        }
+
+        @Override
+        public int getItemCount() { return posts.size(); }
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tvTitle, tvDetail, tvBadge;
+            ViewHolder(View v) {
+                super(v);
+                tvTitle = v.findViewById(R.id.tv_post_title);
+                tvDetail = v.findViewById(R.id.tv_post_detail);
+                tvBadge = v.findViewById(R.id.tv_post_badge);
+            }
         }
     }
 }

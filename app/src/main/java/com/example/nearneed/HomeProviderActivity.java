@@ -28,6 +28,7 @@ public class HomeProviderActivity extends AppCompatActivity {
     private NearbyRequestsAdapter nearbyRequestsAdapter;
     private CommunityVolunteeringAdapter communityVolunteeringAdapter;
     private UserViewModel userViewModel;
+    private PostViewModel postViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +114,9 @@ public class HomeProviderActivity extends AppCompatActivity {
         DashboardSearchHelper.bindProviderSearch(searchEdit, nearbyRequestsAdapter,
             communityVolunteeringAdapter, searchEmptyState);
 
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+        setupObservers();
+
         SeekerNavbarController.bind(this, findViewById(android.R.id.content),
             SeekerNavbarController.TAB_HOME);
     }
@@ -142,41 +146,37 @@ public class HomeProviderActivity extends AppCompatActivity {
             @Override public void onAccept(int position) {}
             @Override public void onDecline(int position) {}
         });
-
-        List<NearbyRequestsAdapter.RequestItem> requests = new ArrayList<>();
-        requests.add(new NearbyRequestsAdapter.RequestItem(
-            "Leaky Faucet Repair", "0.8 km", "₹45 est",
-            "Fixing leaky faucets in kitchen area. Water is dripping from underneath the sink.",
-            R.drawable.ic_plumber));
-        requests.add(new NearbyRequestsAdapter.RequestItem(
-            "Light Installation", "2.4 km", "₹80 est",
-            "Installing LED lights in the bedroom. Need someone with basic electrical knowledge.",
-            R.drawable.ic_electrician));
-
-        nearbyRequestsAdapter.setRequests(requests);
         rvNearbyRequests.setAdapter(nearbyRequestsAdapter);
-
         setupCommunityVolunteering();
     }
 
     private void setupCommunityVolunteering() {
         RecyclerView rvCommunityVolunteering = findViewById(R.id.rvCommunityVolunteering);
         communityVolunteeringAdapter = new CommunityVolunteeringAdapter();
-
-        List<CommunityVolunteeringAdapter.CommunityPost> communityPosts = new ArrayList<>();
-        communityPosts.add(new CommunityVolunteeringAdapter.CommunityPost(
-            "Park Cleanup Drive", "Community Member",
-            "Help us clean and beautify the neighborhood park. Bring gloves and energy!",
-            "0.6 km away", "8 volunteers needed"));
-        communityPosts.add(new CommunityVolunteeringAdapter.CommunityPost(
-            "Free Coaching Session", "Community Member",
-            "Teaching basic English to underprivileged kids. Make a difference!",
-            "1.5 km away", "3 volunteers needed"));
-
-        communityVolunteeringAdapter.setPosts(communityPosts);
         if (rvCommunityVolunteering != null) {
             rvCommunityVolunteering.setAdapter(communityVolunteeringAdapter);
         }
+    }
+
+    private void setupObservers() {
+        // Default radius 5km
+        postViewModel.getNearbyPosts().observe(this, posts -> {
+            List<Post> gigs = new ArrayList<>();
+            List<Post> community = new ArrayList<>();
+            for (Post p : posts) {
+                if ("GIG".equals(p.type)) gigs.add(p);
+                else if ("COMMUNITY".equals(p.type)) community.add(p);
+            }
+            nearbyRequestsAdapter.setRequests(gigs);
+            communityVolunteeringAdapter.setPosts(community);
+        });
+
+        postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 5.0); // Default to Gurgaon if no loc
+        
+        userViewModel.getLocation().observe(this, loc -> {
+            // Update radius when location changes if needed
+            // For now just re-observe with fake coords or real ones if available
+        });
     }
 
     private void setupDashboardNotifications() {

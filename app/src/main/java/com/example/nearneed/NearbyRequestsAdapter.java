@@ -14,24 +14,10 @@ import java.util.List;
 
 public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAdapter.RequestViewHolder> {
 
-    public static class RequestItem {
-        public String title;
-        public String distance;
-        public String price;
-        public String description;
-        public int iconDrawable;
 
-        public RequestItem(String title, String distance, String price, String description, int iconDrawable) {
-            this.title = title;
-            this.distance = distance;
-            this.price = price;
-            this.description = description;
-            this.iconDrawable = iconDrawable;
-        }
-    }
 
-    private List<RequestItem> requests = new ArrayList<>();
-    private List<RequestItem> allRequests = new ArrayList<>();
+    private List<Post> requests = new ArrayList<>();
+    private List<Post> allRequests = new ArrayList<>();
     private OnRequestActionListener listener;
 
     public interface OnRequestActionListener {
@@ -43,7 +29,7 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
         this.listener = listener;
     }
 
-    public void setRequests(List<RequestItem> requests) {
+    public void setRequests(List<Post> requests) {
         this.allRequests = new ArrayList<>(requests);
         this.requests = new ArrayList<>(requests);
         notifyDataSetChanged();
@@ -57,12 +43,12 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
         }
 
         String lower = query.trim().toLowerCase();
-        List<RequestItem> filtered = new ArrayList<>();
-        for (RequestItem item : allRequests) {
+        List<Post> filtered = new ArrayList<>();
+        for (Post item : allRequests) {
             if ((item.title != null && item.title.toLowerCase().contains(lower))
                     || (item.description != null && item.description.toLowerCase().contains(lower))
                     || (item.distance != null && item.distance.toLowerCase().contains(lower))
-                    || (item.price != null && item.price.toLowerCase().contains(lower))) {
+                    || (item.budget != null && item.budget.toLowerCase().contains(lower))) {
                 filtered.add(item);
             }
         }
@@ -81,7 +67,7 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
 
     @Override
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
-        RequestItem item = requests.get(position);
+        Post item = requests.get(position);
         holder.bind(item, position);
     }
 
@@ -104,14 +90,16 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
             btnView = itemView.findViewById(R.id.btnView);
         }
 
-        public void bind(RequestItem item, int position) {
+        public void bind(Post item, int position) {
             tvJobTitle.setText(item.title);
-            tvDistance.setText(item.distance);
+            tvDistance.setText(item.distance != null ? item.distance : "Nearby");
             tvDescription.setText(item.description);
 
             btnView.setOnClickListener(v -> {
-                Intent intent = new Intent(itemView.getContext(), RequestDetailActivity.class);
+                Intent intent = new Intent(itemView.getContext(), GigPostDetailActivity.class);
+                intent.putExtra("post_id", item.postId);
                 intent.putExtra("title", item.title);
+                intent.putExtra("budget", item.budget);
                 intent.putExtra("distance", item.distance);
                 intent.putExtra("description", item.description);
                 itemView.getContext().startActivity(intent);

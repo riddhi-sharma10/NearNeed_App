@@ -15,26 +15,12 @@ import java.util.List;
 
 public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<CommunityVolunteeringAdapter.CommunityViewHolder> {
 
-    public static class CommunityPost {
-        public String title;
-        public String postedBy;
-        public String description;
-        public String location;
-        public String slotsNeeded;
 
-        public CommunityPost(String title, String postedBy, String description, String location, String slotsNeeded) {
-            this.title = title;
-            this.postedBy = postedBy;
-            this.description = description;
-            this.location = location;
-            this.slotsNeeded = slotsNeeded;
-        }
-    }
 
-    private List<CommunityPost> posts = new ArrayList<>();
-    private List<CommunityPost> allPosts = new ArrayList<>();
+    private List<Post> posts = new ArrayList<>();
+    private List<Post> allPosts = new ArrayList<>();
 
-    public void setPosts(List<CommunityPost> posts) {
+    public void setPosts(List<Post> posts) {
         this.allPosts = new ArrayList<>(posts);
         this.posts = new ArrayList<>(posts);
         notifyDataSetChanged();
@@ -48,13 +34,12 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
         }
 
         String lower = query.trim().toLowerCase();
-        List<CommunityPost> filtered = new ArrayList<>();
-        for (CommunityPost post : allPosts) {
+        List<Post> filtered = new ArrayList<>();
+        for (Post post : allPosts) {
             if ((post.title != null && post.title.toLowerCase().contains(lower))
                     || (post.postedBy != null && post.postedBy.toLowerCase().contains(lower))
                     || (post.description != null && post.description.toLowerCase().contains(lower))
-                    || (post.location != null && post.location.toLowerCase().contains(lower))
-                    || (post.slotsNeeded != null && post.slotsNeeded.toLowerCase().contains(lower))) {
+                    || (post.location != null && post.location.toLowerCase().contains(lower))) {
                 filtered.add(post);
             }
         }
@@ -73,7 +58,7 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
 
     @Override
     public void onBindViewHolder(@NonNull CommunityViewHolder holder, int position) {
-        CommunityPost post = posts.get(position);
+        Post post = posts.get(position);
         holder.bind(post);
     }
 
@@ -96,9 +81,9 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
             btnView = itemView.findViewById(R.id.btnViewCommunity);
         }
 
-        public void bind(CommunityPost post) {
+        public void bind(Post post) {
             tvTitle.setText(post.title);
-            tvPostedBy.setText(post.postedBy);
+            tvPostedBy.setText(post.postedBy != null ? post.postedBy : "Community Member");
             tvDescription.setText(post.description);
 
             boolean isProvider = RoleManager.isProvider(itemView.getContext());
@@ -106,11 +91,12 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
 
             btnView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), CommunityPostDetailActivity.class);
+                intent.putExtra("post_id", post.postId);
                 intent.putExtra("title", post.title);
                 intent.putExtra("description", post.description);
                 intent.putExtra("postedBy", post.postedBy);
                 intent.putExtra("location", post.location);
-                intent.putExtra("slots", post.slotsNeeded);
+                intent.putExtra("slots", post.slots != null ? post.slots.toString() : "0");
                 itemView.getContext().startActivity(intent);
             });
         }

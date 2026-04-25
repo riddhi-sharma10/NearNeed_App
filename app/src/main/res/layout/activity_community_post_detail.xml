@@ -54,6 +54,32 @@
                 android:paddingVertical="4dp"
                 android:layout_marginTop="8dp" />
 
+            <!-- Posted By & Time Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_posted_by"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Posted by someone"
+                    android:textColor="@color/text_body"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_posted_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recently"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
             <!-- Date & Time Row -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -186,6 +186,7 @@ public class ChatActivity extends AppCompatActivity {
             ensureCurrentUserInUsersCollection();
             subscribePeerProfile();
             subscribeMessages();
+            markChatAsRead();
         } else {
             seedDemoConversation(chatSnippet);
         }
@@ -570,6 +571,16 @@ public class ChatActivity extends AppCompatActivity {
             emptyStateContainer.setVisibility(View.GONE);
             rvMessages.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void markChatAsRead() {
+        if (!realtimeMode || chatId == null) return;
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("isRead", true);
+        firestore.collection("chats").document(chatId).update(updates)
+                .addOnFailureListener(e -> {
+                    // Silent fail - not critical
+                });
     }
 
     private void subscribePeerProfile() {

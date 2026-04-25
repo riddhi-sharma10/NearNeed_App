@@ -109,7 +109,12 @@ public class MessagesFragment extends Fragment {
 
     private void subscribeToRealtimeChats() {
         if (currentUserId == null || currentUserId.isEmpty()) {
-            loadChatsForRole(currentRole);
+            allChats.clear();
+            displayedChats.clear();
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+            updateEmptyState();
             return;
         }
 
@@ -123,7 +128,6 @@ public class MessagesFragment extends Fragment {
                 .orderBy("lastTimestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) {
-                        loadChatsForRole(currentRole);
                         return;
                     }
 
@@ -148,6 +152,8 @@ public class MessagesFragment extends Fragment {
                         String snippet = doc.getString("lastMessage");
                         Timestamp ts = doc.getTimestamp("lastTimestamp");
                         String time = formatChatTime(ts);
+                        Boolean isRead = doc.getBoolean("isRead");
+                        boolean unread = isRead == null || !isRead;
 
                         ChatEntry entry = new ChatEntry(
                                 doc.getId(),
@@ -157,7 +163,7 @@ public class MessagesFragment extends Fragment {
                                 snippet != null ? snippet : "Start chatting",
                                 time,
                                 false,
-                                false
+                                unread
                         );
                         merged.put(entry.chatId, entry);
                         hydrateUserInfo(entry);
@@ -266,30 +272,10 @@ public class MessagesFragment extends Fragment {
     }
 
     private void loadChatsForRole(String role) {
+        // Only show real conversations from Firestore
+        // No demo chats - empty state when offline
         allChats.clear();
-
-        if (RoleManager.ROLE_PROVIDER.equals(role)) {
-            addDemoChat("Aarav Mehta", "CLIENT REQUEST", "Can you quote the kitchen repair by tonight?", "2 min", false, true);
-            addDemoChat("Neha Sharma", "JOB REQUEST", "Need the plumbing estimate before 4 PM.", "3 hrs", true, true);
-            addDemoChat("Rahul Singh", "CLIENT", "Please send the revised schedule for the lawn job.", "1 hr", false, true);
-            addDemoChat("Pooja Verma", "JOB REQUEST", "Are you available for the weekend photo shoot?", "Yesterday", true, true);
-            addDemoChat("Kabir Joshi", "CLIENT", "The invoice is ready for approval.", "Mon", false, false);
-            addDemoChat("Ishita Jain", "JOB REQUEST", "We need one more delivery slot this evening.", "Tue", true, false);
-            addDemoChat("Aditya Rao", "CLIENT", "Thanks for the quick response.", "Wed", false, true);
-            addDemoChat("Maya Kapoor", "JOB REQUEST", "Could you confirm tomorrow's booking?", "Thu", true, false);
-        } else {
-            addDemoChat("Rachel", "SERVICE REQUEST", "I can help with the plumbing! Let me know.", "2 min", false, true);
-            addDemoChat("Manya Awasthi", "PROVIDER", "Is the Pacific Blue color still available?", "3 hrs", false, false);
-            addDemoChat("Rahul Singh", "REQUEST", "The lawn looks great, I'll be back Tuesday.", "1 hr", false, true);
-            addDemoChat("Riddhi Sharma", "PROVIDER", "Luna had a great walk today! 🐕", "2 days", false, true);
-            addDemoChat("Vishu Singh", "SERVICE REQUEST", "I've reset the router, try the connection.", "Yesterday", true, true);
-            addDemoChat("Ananya Gupta", "PROVIDER", "Can you share the recipe you mentioned? 😊", "Yesterday", false, true);
-            addDemoChat("Karan Mehta", "REQUEST", "Thanks for dropping by!", "Mon", false, true);
-            addDemoChat("Deepak Verma", "PROVIDER", "Sure, I can drop it off Saturday morning.", "Sun", true, true);
-        }
-
         displayedChats.clear();
-        displayedChats.addAll(allChats);
         adapter.notifyDataSetChanged();
         updateEmptyState();
     }
@@ -303,20 +289,6 @@ public class MessagesFragment extends Fragment {
             emptyStateContainer.setVisibility(View.GONE);
             rvMessages.setVisibility(View.VISIBLE);
         }
-    }
-
-    private void addDemoChat(String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
-        String demoUserId = "demo_" + name.toLowerCase(Locale.getDefault()).replaceAll("[^a-z0-9]", "_");
-        String demoChatId = "chat_" + demoUserId;
-        ChatEntry entry = new ChatEntry(demoChatId, demoUserId, name, gig, snippet, time, isOnline, isUnread);
-        entry.email = buildEmail(name);
-        entry.phone = buildPhone(name);
-        entry.gender = buildGender(name);
-        entry.experience = buildExperience(name);
-        entry.rating = buildRating(name);
-        entry.reviews = buildReviews(name);
-        entry.bio = buildBio(entry);
-        allChats.add(entry);
     }
 
     private void filterChats(String query) {
@@ -485,6 +457,10 @@ public class MessagesFragment extends Fragment {
             holder.tvMessageSnippet.setText(chat.snippet);
             holder.tvTime.setText(chat.time);
             holder.vUnreadIndicator.setVisibility(chat.isUnread ? View.VISIBLE : View.GONE);
+            
+            // Bold text if unread, normal if read
+            holder.tvMessageSnippet.setTypeface(null, chat.isUnread ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+            
             if (holder.ivAvatar != null) {
                 holder.ivAvatar.setImageResource(resolveAvatarForName(chat.name));
             }

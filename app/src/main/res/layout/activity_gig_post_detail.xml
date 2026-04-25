@@ -10,7 +10,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="48dp"
         android:background="@color/white"
         app:navigationIcon="@drawable/ic_back_arrow"
         app:title="" />
@@ -138,9 +138,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="#F8FAFC"
+                app:cardBackgroundColor="#EFF6FF"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#DBEAFE">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -168,6 +170,25 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Location Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location"
+                android:textColor="@color/text_header"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="32dp" />
+
+            <TextView
+                android:id="@+id/tv_gig_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sector 15, Community Hub, Near Park"
+                android:textColor="@color/text_body"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
+
             <!-- Description -->
             <TextView
                 android:layout_width="wrap_content"
@@ -176,7 +197,7 @@
                 android:textColor="@color/text_header"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="32dp" />
 
             <TextView
                 android:id="@+id/tv_gig_description"

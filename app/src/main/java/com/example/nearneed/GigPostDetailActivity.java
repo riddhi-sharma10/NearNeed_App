@@ -11,7 +11,7 @@ import com.google.android.material.button.MaterialButton;
 
 public class GigPostDetailActivity extends AppCompatActivity {
 
-    private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration;
+    private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration, tvAddress;
     private MaterialButton btnViewApplicants;
 
     @Override
@@ -32,6 +32,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvDescription = findViewById(R.id.tv_gig_description);
         tvDistance = findViewById(R.id.tv_gig_distance);
         tvDuration = findViewById(R.id.tv_gig_duration);
+        tvAddress = findViewById(R.id.tv_gig_address);
         btnViewApplicants = findViewById(R.id.btn_view_applicants);
 
         // Get data from intent
@@ -42,6 +43,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
         String description = intent.getStringExtra("description");
         String distance = intent.getStringExtra("distance");
         String duration = intent.getStringExtra("duration");
+        String address = intent.getStringExtra("address");
 
         // Set data to views
         tvTitle.setText(title != null ? title : "Gig Details");
@@ -50,6 +52,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvDescription.setText(description != null ? description : "No description available");
         tvDistance.setText(distance != null ? distance : "Distance unknown");
         tvDuration.setText(duration != null ? duration : "Duration not specified");
+        tvAddress.setText(address != null ? address : "Sector 15, Community Hub, Near Park");
 
         btnViewApplicants.setOnClickListener(v -> {
             String postTitle = tvTitle.getText().toString();

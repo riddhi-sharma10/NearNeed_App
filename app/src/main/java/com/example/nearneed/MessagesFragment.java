@@ -20,8 +20,20 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class MessagesFragment extends Fragment {
 
@@ -34,7 +46,11 @@ public class MessagesFragment extends Fragment {
     private EditText etSearch;
     private ImageView btnSearch, btnClearSearch;
     private TextView btnCancelSearch;
+    private View emptyStateContainer;
     private String currentRole;
+    private FirebaseFirestore firestore;
+    private ListenerRegistration chatsListener;
+    private String currentUserId;
 
     @Nullable
     @Override
@@ -49,11 +65,21 @@ public class MessagesFragment extends Fragment {
         rvMessages = view.findViewById(R.id.rvMessages);
         rvMessages.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
+
         adapter = new MessagesAdapter(displayedChats);
         rvMessages.setAdapter(adapter);
 
+        firestore = FirebaseFirestore.getInstance();
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = firebaseUser != null ? firebaseUser.getUid() : null;
+
         currentRole = RoleManager.getRole(requireContext());
-        loadChatsForRole(currentRole);
+        if (currentUserId != null && !currentUserId.isEmpty()) {
+            subscribeToRealtimeChats();
+        } else {
+            loadChatsForRole(currentRole);
+        }
         setupSearch(view);
         SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_CHAT);
     }
@@ -65,9 +91,139 @@ public class MessagesFragment extends Fragment {
         String latestRole = RoleManager.getRole(requireContext());
         if (!latestRole.equals(currentRole)) {
             currentRole = latestRole;
-            loadChatsForRole(currentRole);
+            if (currentUserId == null || currentUserId.isEmpty()) {
+                loadChatsForRole(currentRole);
+            }
             collapseSearch();
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (chatsListener != null) {
+            chatsListener.remove();
+            chatsListener = null;
+        }
+    }
+
+    private void subscribeToRealtimeChats() {
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            loadChatsForRole(currentRole);
+            return;
+        }
+
+        if (chatsListener != null) {
+            chatsListener.remove();
+            chatsListener = null;
+        }
+
+        chatsListener = firestore.collection("chats")
+                .whereArrayContains("participants", currentUserId)
+                .orderBy("lastTimestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) {
+                        loadChatsForRole(currentRole);
+                        return;
+                    }
+
+                    Map<String, ChatEntry> merged = new HashMap<>();
+                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                        List<String> participants = (List<String>) doc.get("participants");
+                        if (participants == null || participants.isEmpty()) {
+                            continue;
+                        }
+
+                        String otherUserId = null;
+                        for (String participant : participants) {
+                            if (participant != null && !participant.equals(currentUserId)) {
+                                otherUserId = participant;
+                                break;
+                            }
+                        }
+                        if (otherUserId == null) {
+                            continue;
+                        }
+
+                        String snippet = doc.getString("lastMessage");
+                        Timestamp ts = doc.getTimestamp("lastTimestamp");
+                        String time = formatChatTime(ts);
+
+                        ChatEntry entry = new ChatEntry(
+                                doc.getId(),
+                                otherUserId,
+                                "NearNeed User",
+                                "CHAT",
+                                snippet != null ? snippet : "Start chatting",
+                                time,
+                                false,
+                                false
+                        );
+                        merged.put(entry.chatId, entry);
+                        hydrateUserInfo(entry);
+                    }
+
+                    allChats.clear();
+                    allChats.addAll(merged.values());
+                    displayedChats.clear();
+                    displayedChats.addAll(allChats);
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
+                    updateEmptyState();
+                });
+    }
+
+    private void hydrateUserInfo(ChatEntry entry) {
+        firestore.collection("users").document(entry.userId).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot != null && snapshot.exists()) {
+                        applyUserSnapshot(entry, snapshot, true);
+                    } else {
+                        firestore.collection("Users").document(entry.userId).get()
+                                .addOnSuccessListener(legacy -> applyUserSnapshot(entry, legacy, false));
+                    }
+                });
+    }
+
+    private void applyUserSnapshot(ChatEntry entry, DocumentSnapshot snapshot, boolean modern) {
+        if (snapshot == null || !snapshot.exists()) {
+            return;
+        }
+
+        entry.name = readString(snapshot, modern ? "name" : "fullName", entry.name);
+        entry.email = readString(snapshot, "email", buildEmail(entry.name));
+        entry.phone = readString(snapshot, "phone", buildPhone(entry.name));
+        entry.gender = readString(snapshot, "gender", buildGender(entry.name));
+        entry.experience = readString(snapshot, "experience", buildExperience(entry.name));
+        entry.rating = readString(snapshot, "rating", buildRating(entry.name));
+        entry.reviews = readString(snapshot, "reviews", buildReviews(entry.name));
+        entry.bio = readString(snapshot, "bio", buildBio(entry));
+        entry.address = readString(snapshot, modern ? "address" : "location", "");
+        entry.profileImage = readString(snapshot, modern ? "profileImage" : "photoUrl", null);
+        Boolean verified = snapshot.getBoolean("isVerified");
+        entry.isVerified = verified != null && verified;
+
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private String readString(DocumentSnapshot doc, String key, String fallback) {
+        String value = doc.getString(key);
+        return value == null || value.trim().isEmpty() ? fallback : value;
+    }
+
+    private String formatChatTime(Timestamp timestamp) {
+        if (timestamp == null) return "Now";
+        long diff = new Date().getTime() - timestamp.toDate().getTime();
+        long mins = diff / (60 * 1000);
+        if (mins < 1) return "Now";
+        if (mins < 60) return mins + " min";
+        long hours = mins / 60;
+        if (hours < 24) return hours + " hr";
+        long days = hours / 24;
+        return days + " day" + (days > 1 ? "s" : "");
     }
 
     private void setupSearch(View root) {
@@ -113,28 +269,54 @@ public class MessagesFragment extends Fragment {
         allChats.clear();
 
         if (RoleManager.ROLE_PROVIDER.equals(role)) {
-            allChats.add(new ChatEntry("Aarav Mehta", "CLIENT REQUEST", "Can you quote the kitchen repair by tonight?", "2 min", false, true));
-            allChats.add(new ChatEntry("Neha Sharma", "JOB REQUEST", "Need the plumbing estimate before 4 PM.", "3 hrs", true, true));
-            allChats.add(new ChatEntry("Rahul Singh", "CLIENT", "Please send the revised schedule for the lawn job.", "1 hr", false, true));
-            allChats.add(new ChatEntry("Pooja Verma", "JOB REQUEST", "Are you available for the weekend photo shoot?", "Yesterday", true, true));
-            allChats.add(new ChatEntry("Kabir Joshi", "CLIENT", "The invoice is ready for approval.", "Mon", false, false));
-            allChats.add(new ChatEntry("Ishita Jain", "JOB REQUEST", "We need one more delivery slot this evening.", "Tue", true, false));
-            allChats.add(new ChatEntry("Aditya Rao", "CLIENT", "Thanks for the quick response.", "Wed", false, true));
-            allChats.add(new ChatEntry("Maya Kapoor", "JOB REQUEST", "Could you confirm tomorrow's booking?", "Thu", true, false));
+            addDemoChat("Aarav Mehta", "CLIENT REQUEST", "Can you quote the kitchen repair by tonight?", "2 min", false, true);
+            addDemoChat("Neha Sharma", "JOB REQUEST", "Need the plumbing estimate before 4 PM.", "3 hrs", true, true);
+            addDemoChat("Rahul Singh", "CLIENT", "Please send the revised schedule for the lawn job.", "1 hr", false, true);
+            addDemoChat("Pooja Verma", "JOB REQUEST", "Are you available for the weekend photo shoot?", "Yesterday", true, true);
+            addDemoChat("Kabir Joshi", "CLIENT", "The invoice is ready for approval.", "Mon", false, false);
+            addDemoChat("Ishita Jain", "JOB REQUEST", "We need one more delivery slot this evening.", "Tue", true, false);
+            addDemoChat("Aditya Rao", "CLIENT", "Thanks for the quick response.", "Wed", false, true);
+            addDemoChat("Maya Kapoor", "JOB REQUEST", "Could you confirm tomorrow's booking?", "Thu", true, false);
         } else {
-            allChats.add(new ChatEntry("Rachel", "SERVICE REQUEST", "I can help with the plumbing! Let me know.", "2 min", false, true));
-            allChats.add(new ChatEntry("Manya Awasthi", "PROVIDER", "Is the Pacific Blue color still available?", "3 hrs", false, false));
-            allChats.add(new ChatEntry("Rahul Singh", "REQUEST", "The lawn looks great, I'll be back Tuesday.", "1 hr", false, true));
-            allChats.add(new ChatEntry("Riddhi Sharma", "PROVIDER", "Luna had a great walk today! 🐕", "2 days", false, true));
-            allChats.add(new ChatEntry("Vishu Singh", "SERVICE REQUEST", "I've reset the router, try the connection.", "Yesterday", true, true));
-            allChats.add(new ChatEntry("Ananya Gupta", "PROVIDER", "Can you share the recipe you mentioned? 😊", "Yesterday", false, true));
-            allChats.add(new ChatEntry("Karan Mehta", "REQUEST", "Thanks for dropping by!", "Mon", false, true));
-            allChats.add(new ChatEntry("Deepak Verma", "PROVIDER", "Sure, I can drop it off Saturday morning.", "Sun", true, true));
+            addDemoChat("Rachel", "SERVICE REQUEST", "I can help with the plumbing! Let me know.", "2 min", false, true);
+            addDemoChat("Manya Awasthi", "PROVIDER", "Is the Pacific Blue color still available?", "3 hrs", false, false);
+            addDemoChat("Rahul Singh", "REQUEST", "The lawn looks great, I'll be back Tuesday.", "1 hr", false, true);
+            addDemoChat("Riddhi Sharma", "PROVIDER", "Luna had a great walk today! 🐕", "2 days", false, true);
+            addDemoChat("Vishu Singh", "SERVICE REQUEST", "I've reset the router, try the connection.", "Yesterday", true, true);
+            addDemoChat("Ananya Gupta", "PROVIDER", "Can you share the recipe you mentioned? 😊", "Yesterday", false, true);
+            addDemoChat("Karan Mehta", "REQUEST", "Thanks for dropping by!", "Mon", false, true);
+            addDemoChat("Deepak Verma", "PROVIDER", "Sure, I can drop it off Saturday morning.", "Sun", true, true);
         }
 
         displayedChats.clear();
         displayedChats.addAll(allChats);
         adapter.notifyDataSetChanged();
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        if (emptyStateContainer == null || rvMessages == null) return;
+        if (displayedChats.isEmpty()) {
+            emptyStateContainer.setVisibility(View.VISIBLE);
+            rvMessages.setVisibility(View.GONE);
+        } else {
+            emptyStateContainer.setVisibility(View.GONE);
+            rvMessages.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void addDemoChat(String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
+        String demoUserId = "demo_" + name.toLowerCase(Locale.getDefault()).replaceAll("[^a-z0-9]", "_");
+        String demoChatId = "chat_" + demoUserId;
+        ChatEntry entry = new ChatEntry(demoChatId, demoUserId, name, gig, snippet, time, isOnline, isUnread);
+        entry.email = buildEmail(name);
+        entry.phone = buildPhone(name);
+        entry.gender = buildGender(name);
+        entry.experience = buildExperience(name);
+        entry.rating = buildRating(name);
+        entry.reviews = buildReviews(name);
+        entry.bio = buildBio(entry);
+        allChats.add(entry);
     }
 
     private void filterChats(String query) {
@@ -142,6 +324,7 @@ public class MessagesFragment extends Fragment {
             displayedChats.clear();
             displayedChats.addAll(allChats);
             adapter.notifyDataSetChanged();
+            updateEmptyState();
             return;
         }
 
@@ -158,6 +341,7 @@ public class MessagesFragment extends Fragment {
         displayedChats.clear();
         displayedChats.addAll(filtered);
         adapter.notifyDataSetChanged();
+        updateEmptyState();
     }
 
     private void collapseSearch() {
@@ -172,6 +356,7 @@ public class MessagesFragment extends Fragment {
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
+        updateEmptyState();
         if (etSearch != null) {
             InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
@@ -180,32 +365,39 @@ public class MessagesFragment extends Fragment {
 
     private void openChat(ChatEntry chat) {
         Intent intent = new Intent(requireContext(), ChatActivity.class);
+        intent.putExtra("CHAT_ID", chat.chatId);
+        intent.putExtra("CHAT_USER_ID", chat.userId);
         intent.putExtra("CHAT_NAME", chat.name);
         intent.putExtra("PERSON_NAME", chat.name);
         intent.putExtra("CHAT_TIME", chat.time);
         intent.putExtra("CHAT_ONLINE", chat.isOnline);
         intent.putExtra("CHAT_SNIPPET", chat.snippet);
-        intent.putExtra("PERSON_EMAIL", buildEmail(chat.name));
-        intent.putExtra("PERSON_PHONE", buildPhone(chat.name));
-        intent.putExtra("PERSON_GENDER", buildGender(chat.name));
-        intent.putExtra("PERSON_EXPERIENCE", buildExperience(chat.name));
-        intent.putExtra("PERSON_RATING", buildRating(chat.name));
-        intent.putExtra("PERSON_REVIEWS", buildReviews(chat.name));
-        intent.putExtra("PERSON_BIO", buildBio(chat));
+        intent.putExtra("CHAT_VERIFIED", chat.isVerified);
+        intent.putExtra("PERSON_USER_ID", chat.userId);
+        intent.putExtra("PERSON_EMAIL", chat.email != null ? chat.email : buildEmail(chat.name));
+        intent.putExtra("PERSON_PHONE", chat.phone != null ? chat.phone : buildPhone(chat.name));
+        intent.putExtra("PERSON_GENDER", chat.gender != null ? chat.gender : buildGender(chat.name));
+        intent.putExtra("PERSON_EXPERIENCE", chat.experience != null ? chat.experience : buildExperience(chat.name));
+        intent.putExtra("PERSON_RATING", chat.rating != null ? chat.rating : buildRating(chat.name));
+        intent.putExtra("PERSON_REVIEWS", chat.reviews != null ? chat.reviews : buildReviews(chat.name));
+        intent.putExtra("PERSON_BIO", chat.bio != null ? chat.bio : buildBio(chat));
+        intent.putExtra("IS_VERIFIED", chat.isVerified);
         startActivity(intent);
         requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     private void openPersonProfile(ChatEntry chat) {
         Intent intent = new Intent(requireContext(), PersonProfileActivity.class);
+        intent.putExtra("PERSON_USER_ID", chat.userId);
         intent.putExtra("PERSON_NAME", chat.name);
-        intent.putExtra("PERSON_EMAIL", buildEmail(chat.name));
-        intent.putExtra("PERSON_PHONE", buildPhone(chat.name));
-        intent.putExtra("PERSON_GENDER", buildGender(chat.name));
-        intent.putExtra("PERSON_EXPERIENCE", buildExperience(chat.name));
-        intent.putExtra("PERSON_RATING", buildRating(chat.name));
-        intent.putExtra("PERSON_REVIEWS", buildReviews(chat.name));
-        intent.putExtra("PERSON_BIO", buildBio(chat));
+        intent.putExtra("PERSON_EMAIL", chat.email != null ? chat.email : buildEmail(chat.name));
+        intent.putExtra("PERSON_PHONE", chat.phone != null ? chat.phone : buildPhone(chat.name));
+        intent.putExtra("PERSON_GENDER", chat.gender != null ? chat.gender : buildGender(chat.name));
+        intent.putExtra("PERSON_EXPERIENCE", chat.experience != null ? chat.experience : buildExperience(chat.name));
+        intent.putExtra("PERSON_RATING", chat.rating != null ? chat.rating : buildRating(chat.name));
+        intent.putExtra("PERSON_REVIEWS", chat.reviews != null ? chat.reviews : buildReviews(chat.name));
+        intent.putExtra("PERSON_BIO", chat.bio != null ? chat.bio : buildBio(chat));
+        intent.putExtra("IS_VERIFIED", chat.isVerified);
         startActivity(intent);
         requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
@@ -253,10 +445,16 @@ public class MessagesFragment extends Fragment {
     }
 
     private static class ChatEntry {
+        String chatId;
+        String userId;
         String name, gig, snippet, time;
+        String email, phone, gender, experience, rating, reviews, bio, address, profileImage;
+        boolean isVerified;
         boolean isOnline, isUnread;
 
-        ChatEntry(String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
+        ChatEntry(String chatId, String userId, String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
+            this.chatId = chatId;
+            this.userId = userId;
             this.name = name;
             this.gig = gig;
             this.snippet = snippet;

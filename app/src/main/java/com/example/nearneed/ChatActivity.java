@@ -35,8 +35,22 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.SetOptions;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -47,6 +61,7 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView btnSend, btnAdd, btnBack;
     private TextView tvChatName;
     private TextView tvChatStatus;
+    private View emptyStateContainer;
     
     // Image Preview Views
     private View cvImagePreview;
@@ -67,6 +82,17 @@ public class ChatActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private static final Object PAYLOAD_AUDIO_STATE = "payload_audio_state";
     private int activeAudioPosition = RecyclerView.NO_POSITION;
+    private FirebaseFirestore firestore;
+    private ListenerRegistration messagesListener;
+    private ListenerRegistration peerProfileListener;
+    private String currentUserId;
+    private String peerUserId;
+    private String chatId;
+    private boolean realtimeMode;
+    private String peerName;
+    private String peerEmail;
+    private String peerAddress;
+    private boolean peerVerified;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +106,7 @@ public class ChatActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         tvChatName = findViewById(R.id.tvChatName);
         tvChatStatus = findViewById(R.id.tvChatStatus);
+        emptyStateContainer = findViewById(R.id.emptyStateContainer);
 
         // Bubble containers
         // Note: we'll find these in the ViewHolder since they are per-item
@@ -111,13 +138,23 @@ public class ChatActivity extends AppCompatActivity {
         String chatTime = getIntent().getStringExtra("CHAT_TIME");
         boolean isOnline = getIntent().getBooleanExtra("CHAT_ONLINE", false);
         String chatSnippet = getIntent().getStringExtra("CHAT_SNIPPET");
+        peerUserId = getIntent().getStringExtra("CHAT_USER_ID");
+        chatId = getIntent().getStringExtra("CHAT_ID");
+        firestore = FirebaseFirestore.getInstance();
+        FirebaseUser authUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = authUser != null ? authUser.getUid() : null;
+        realtimeMode = currentUserId != null && peerUserId != null && !peerUserId.trim().isEmpty();
+        if (realtimeMode && (chatId == null || chatId.trim().isEmpty())) {
+            chatId = buildChatId(currentUserId, peerUserId);
+        }
 
         if (chatName != null) {
+            peerName = chatName;
             tvChatName.setText(chatName);
         }
-        boolean chatVerified = getIntent().getBooleanExtra("CHAT_VERIFIED", false);
-        VerifiedBadgeHelper.apply(this, tvChatName, chatVerified);
-        
+        peerVerified = getIntent().getBooleanExtra("CHAT_VERIFIED", false);
+        VerifiedBadgeHelper.apply(this, tvChatName, peerVerified);
+
         View vOnlineDot = findViewById(R.id.vOnlineDot);
         if (isOnline) {
             tvChatStatus.setText("Online");
@@ -131,23 +168,6 @@ public class ChatActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        // Realistic alternating conversation
-        messageList.add(new ChatMessage("Hey! Are you available today?", false, false));       // received
-        messageList.add(new ChatMessage("Yeah, what's up?", false, true));                      // sent
-        messageList.add(new ChatMessage("I need help with the plumbing at my place.", false, false)); // received
-        messageList.add(new ChatMessage("That would be amazing, thank you!", false, true));     // sent
-        messageList.add(new ChatMessage("I can come by around 3 PM if that works?", false, false)); // received
-        messageList.add(new ChatMessage("3 PM works perfectly for me 👍", false, true));        // sent
-        messageList.add(new ChatMessage("Great! Do I need to get any parts?", false, false));   // received
-        messageList.add(new ChatMessage("Just bring the wrench set, I have everything else.", false, true)); // sent
-        messageList.add(new ChatMessage("Perfect. See you then!", false, false));               // received
-        messageList.add(new ChatMessage("See you! 🔧", false, true));                          // sent
-
-        // If opened from messages list with a snippet, show it too
-        if (chatSnippet != null && !chatSnippet.isEmpty()) {
-            messageList.add(new ChatMessage(chatSnippet, false, false));
-        }
-
         adapter = new ChatAdapter(messageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true); // messages start from bottom
@@ -158,12 +178,29 @@ public class ChatActivity extends AppCompatActivity {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
         // Scroll to the latest message
-        rvMessages.scrollToPosition(messageList.size() - 1);
+        if (!messageList.isEmpty()) {
+            rvMessages.scrollToPosition(messageList.size() - 1);
+        }
+
+        if (realtimeMode) {
+            ensureCurrentUserInUsersCollection();
+            subscribePeerProfile();
+            subscribeMessages();
+        } else {
+            seedDemoConversation(chatSnippet);
+        }
 
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
             String text = etMessageInput.getText().toString().trim();
             if (!text.isEmpty() || selectedImageUri != null) {
+                if (realtimeMode && !text.isEmpty()) {
+                    sendTextMessageRealtime(text);
+                    etMessageInput.setText("");
+                    selectedImageUri = null;
+                    if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
+                    return;
+                }
                 ChatMessage msg = new ChatMessage(text, false, true);
                 if (selectedImageUri != null) {
                     msg.imageUri = selectedImageUri.toString();
@@ -352,14 +389,16 @@ public class ChatActivity extends AppCompatActivity {
         // PROFILE / INFO area
         findViewById(R.id.topBar).setOnClickListener(v -> {
             Intent intent = new Intent(this, PersonProfileActivity.class);
-            intent.putExtra("PERSON_NAME", tvChatName.getText().toString());
-            intent.putExtra("PERSON_EMAIL", getIntent().getStringExtra("PERSON_EMAIL"));
+            intent.putExtra("PERSON_USER_ID", peerUserId);
+            intent.putExtra("PERSON_NAME", peerName != null ? peerName : tvChatName.getText().toString());
+            intent.putExtra("PERSON_EMAIL", peerEmail != null ? peerEmail : getIntent().getStringExtra("PERSON_EMAIL"));
             intent.putExtra("PERSON_PHONE", getIntent().getStringExtra("PERSON_PHONE"));
             intent.putExtra("PERSON_GENDER", getIntent().getStringExtra("PERSON_GENDER"));
             intent.putExtra("PERSON_EXPERIENCE", getIntent().getStringExtra("PERSON_EXPERIENCE"));
             intent.putExtra("PERSON_RATING", getIntent().getStringExtra("PERSON_RATING"));
             intent.putExtra("PERSON_REVIEWS", getIntent().getStringExtra("PERSON_REVIEWS"));
-            intent.putExtra("PERSON_BIO", getIntent().getStringExtra("PERSON_BIO"));
+            intent.putExtra("PERSON_BIO", peerAddress != null ? peerAddress : getIntent().getStringExtra("PERSON_BIO"));
+            intent.putExtra("IS_VERIFIED", peerVerified);
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
@@ -413,11 +452,158 @@ public class ChatActivity extends AppCompatActivity {
         super.onStop();
         handler.removeCallbacks(progressUpdater);
         activeAudioPosition = RecyclerView.NO_POSITION;
+        if (messagesListener != null) {
+            messagesListener.remove();
+            messagesListener = null;
+        }
+        if (peerProfileListener != null) {
+            peerProfileListener.remove();
+            peerProfileListener = null;
+        }
         if (recorder != null) {
             recorder.release();
             recorder = null;
         }
         releaseMediaPlayer();
+    }
+
+    private void seedDemoConversation(String chatSnippet) {
+        messageList.clear();
+        messageList.add(new ChatMessage("Hey! Are you available today?", false, false));
+        messageList.add(new ChatMessage("Yeah, what's up?", false, true));
+        messageList.add(new ChatMessage("I need help with the plumbing at my place.", false, false));
+        messageList.add(new ChatMessage("That would be amazing, thank you!", false, true));
+        messageList.add(new ChatMessage("I can come by around 3 PM if that works?", false, false));
+        messageList.add(new ChatMessage("3 PM works perfectly for me 👍", false, true));
+        messageList.add(new ChatMessage("Great! Do I need to get any parts?", false, false));
+        messageList.add(new ChatMessage("Just bring the wrench set, I have everything else.", false, true));
+        messageList.add(new ChatMessage("Perfect. See you then!", false, false));
+        messageList.add(new ChatMessage("See you! 🔧", false, true));
+        if (chatSnippet != null && !chatSnippet.isEmpty()) {
+            messageList.add(new ChatMessage(chatSnippet, false, false));
+        }
+        adapter.notifyDataSetChanged();
+        rvMessages.scrollToPosition(Math.max(0, messageList.size() - 1));
+        updateEmptyState();
+    }
+
+    private void subscribeMessages() {
+        if (!realtimeMode || chatId == null) return;
+
+        if (messagesListener != null) {
+            messagesListener.remove();
+        }
+        messagesListener = firestore.collection("messages")
+                .document(chatId)
+                .collection("messages")
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) {
+                        return;
+                    }
+
+                    List<ChatMessage> incoming = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                        String text = doc.getString("messageText");
+                        String senderId = doc.getString("senderId");
+                        if (text == null) continue;
+                        boolean outgoing = senderId != null && senderId.equals(currentUserId);
+                        ChatMessage msg = new ChatMessage(text, false, outgoing);
+                        msg.messageId = doc.getId();
+                        msg.senderId = senderId;
+                        msg.receiverId = doc.getString("receiverId");
+                        msg.timestamp = doc.getTimestamp("timestamp");
+                        incoming.add(msg);
+                    }
+
+                    messageList.clear();
+                    messageList.addAll(incoming);
+                    adapter.notifyDataSetChanged();
+                    if (!messageList.isEmpty()) {
+                        rvMessages.scrollToPosition(messageList.size() - 1);
+                    }
+                    updateEmptyState();
+                });
+    }
+
+    private void sendTextMessageRealtime(String text) {
+        if (!realtimeMode || chatId == null || text == null || text.trim().isEmpty()) return;
+
+        Map<String, Object> messageMap = new HashMap<>();
+        messageMap.put("senderId", currentUserId);
+        messageMap.put("receiverId", peerUserId);
+        messageMap.put("messageText", text.trim());
+        messageMap.put("timestamp", FieldValue.serverTimestamp());
+
+        firestore.collection("messages")
+                .document(chatId)
+                .collection("messages")
+                .add(messageMap)
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
+
+        Map<String, Object> chatMeta = new HashMap<>();
+        chatMeta.put("participants", Arrays.asList(currentUserId, peerUserId));
+        chatMeta.put("lastMessage", text.trim());
+        chatMeta.put("lastTimestamp", FieldValue.serverTimestamp());
+        firestore.collection("chats")
+                .document(chatId)
+                .set(chatMeta, SetOptions.merge());
+    }
+
+    private void ensureCurrentUserInUsersCollection() {
+        if (currentUserId == null || currentUserId.isEmpty()) return;
+        Map<String, Object> data = new HashMap<>();
+        String localName = UserPrefs.getName(this);
+        data.put("name", (localName == null || localName.trim().isEmpty()) ? "NearNeed User" : localName.trim());
+        data.put("address", UserPrefs.getLocation(this) == null ? "" : UserPrefs.getLocation(this));
+        data.put("profileImage", UserPrefs.getPhotoUri(this) == null ? "" : UserPrefs.getPhotoUri(this));
+        data.put("isVerified", UserPrefs.isVerified(this));
+        firestore.collection("users").document(currentUserId).set(data, SetOptions.merge());
+    }
+
+    private void updateEmptyState() {
+        if (emptyStateContainer == null || rvMessages == null) return;
+        if (messageList.isEmpty()) {
+            emptyStateContainer.setVisibility(View.VISIBLE);
+            rvMessages.setVisibility(View.GONE);
+        } else {
+            emptyStateContainer.setVisibility(View.GONE);
+            rvMessages.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void subscribePeerProfile() {
+        if (!realtimeMode || peerUserId == null || peerUserId.trim().isEmpty()) return;
+        if (peerProfileListener != null) {
+            peerProfileListener.remove();
+        }
+
+        peerProfileListener = firestore.collection("users")
+                .document(peerUserId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null) return;
+                    if (snapshot == null || !snapshot.exists()) return;
+
+                    peerName = readProfileString(snapshot, "name", tvChatName.getText().toString());
+                    peerEmail = readProfileString(snapshot, "email", getIntent().getStringExtra("PERSON_EMAIL"));
+                    peerAddress = readProfileString(snapshot, "address", getIntent().getStringExtra("PERSON_BIO"));
+                    Boolean verified = snapshot.getBoolean("isVerified");
+                    peerVerified = verified != null && verified;
+
+                    tvChatName.setText(peerName);
+                    VerifiedBadgeHelper.apply(this, tvChatName, peerVerified);
+                });
+    }
+
+    private String readProfileString(DocumentSnapshot doc, String key, String fallback) {
+        String value = doc.getString(key);
+        return value == null || value.trim().isEmpty() ? fallback : value;
+    }
+
+    private String buildChatId(String uid1, String uid2) {
+        if (uid1 == null) uid1 = "";
+        if (uid2 == null) uid2 = "";
+        return uid1.compareTo(uid2) < 0 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
     }
 
     private void startRecording() {
@@ -567,6 +753,7 @@ public class ChatActivity extends AppCompatActivity {
         messageList.add(message);
         adapter.notifyItemInserted(messageList.size() - 1);
         rvMessages.scrollToPosition(messageList.size() - 1);
+        updateEmptyState();
     }
 
     private Runnable progressUpdater = new Runnable() {
@@ -622,6 +809,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     class ChatMessage {
+        String messageId;
+        String senderId;
+        String receiverId;
+        Timestamp timestamp;
         String text;
         boolean isVoice;
         boolean isOutgoing;

@@ -18,9 +18,11 @@ public class AddScheduleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_schedule);
 
         ImageButton btnBack = findViewById(R.id.btnBack);
+        ImageButton btnSearch = findViewById(R.id.btnSearch);
         MaterialButton btnAddSchedule = findViewById(R.id.btnAddSchedule);
 
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        btnSearch.setOnClickListener(v -> Toast.makeText(this, "Search is not available yet", Toast.LENGTH_SHORT).show());
 
         // DATE PICKER
         findViewById(R.id.layoutDate).setOnClickListener(v -> {
@@ -63,7 +65,9 @@ public class AddScheduleActivity extends AppCompatActivity {
         updateChipState(chipCommunity, false, "#F1F5F9", "#64748B");
 
         btnAddSchedule.setOnClickListener(v -> {
-            Toast.makeText(this, "Schedule Item Added Successfully", Toast.LENGTH_SHORT).show();
+            String selectedDate = ((android.widget.TextView) findViewById(R.id.tvSelectedDate)).getText().toString();
+            String selectedTime = ((android.widget.TextView) findViewById(R.id.tvSelectedTime)).getText().toString();
+            Toast.makeText(this, "Added to schedule: " + selectedDate + " at " + selectedTime, Toast.LENGTH_SHORT).show();
             finish();
         });
     }

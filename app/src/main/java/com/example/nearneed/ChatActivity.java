@@ -56,6 +56,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView rvMessages;
     private ChatAdapter adapter;
+    private ChatViewModel viewModel;
     private List<ChatMessage> messageList = new ArrayList<>();
     private EditText etMessageInput;
     private ImageView btnSend, btnAdd, btnBack;
@@ -82,13 +83,9 @@ public class ChatActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private static final Object PAYLOAD_AUDIO_STATE = "payload_audio_state";
     private int activeAudioPosition = RecyclerView.NO_POSITION;
-    private FirebaseFirestore firestore;
-    private ListenerRegistration messagesListener;
-    private ListenerRegistration peerProfileListener;
     private String currentUserId;
     private String peerUserId;
     private String chatId;
-    private boolean realtimeMode;
     private String peerName;
     private String peerEmail;
     private String peerAddress;
@@ -107,6 +104,8 @@ public class ChatActivity extends AppCompatActivity {
         tvChatName = findViewById(R.id.tvChatName);
         tvChatStatus = findViewById(R.id.tvChatStatus);
         emptyStateContainer = findViewById(R.id.emptyStateContainer);
+
+        viewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
 
         // Bubble containers
         // Note: we'll find these in the ViewHolder since they are per-item
@@ -140,12 +139,14 @@ public class ChatActivity extends AppCompatActivity {
         String chatSnippet = getIntent().getStringExtra("CHAT_SNIPPET");
         peerUserId = getIntent().getStringExtra("CHAT_USER_ID");
         chatId = getIntent().getStringExtra("CHAT_ID");
-        firestore = FirebaseFirestore.getInstance();
+        
         FirebaseUser authUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = authUser != null ? authUser.getUid() : null;
-        realtimeMode = currentUserId != null && peerUserId != null && !peerUserId.trim().isEmpty();
-        if (realtimeMode && (chatId == null || chatId.trim().isEmpty())) {
-            chatId = buildChatId(currentUserId, peerUserId);
+        
+        if (peerUserId != null && !peerUserId.trim().isEmpty()) {
+            if (chatId == null || chatId.trim().isEmpty()) {
+                chatId = buildChatId(currentUserId, peerUserId);
+            }
         }
 
         if (chatName != null) {
@@ -182,11 +183,8 @@ public class ChatActivity extends AppCompatActivity {
             rvMessages.scrollToPosition(messageList.size() - 1);
         }
 
-        if (realtimeMode) {
-            ensureCurrentUserInUsersCollection();
-            subscribePeerProfile();
-            subscribeMessages();
-            markChatAsRead();
+        if (chatId != null) {
+            setupObservers();
         } else {
             seedDemoConversation(chatSnippet);
         }
@@ -194,22 +192,20 @@ public class ChatActivity extends AppCompatActivity {
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
             String text = etMessageInput.getText().toString().trim();
-            if (!text.isEmpty() || selectedImageUri != null) {
-                if (realtimeMode && !text.isEmpty()) {
-                    sendTextMessageRealtime(text);
+            if (!text.isEmpty()) {
+                if (chatId != null) {
+                    viewModel.sendMessage(chatId, peerUserId, text);
                     etMessageInput.setText("");
                     selectedImageUri = null;
                     if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
-                    return;
+                } else {
+                    ChatMessage msg = new ChatMessage(text, false, true);
+                    addMessage(msg);
+                    etMessageInput.setText("");
                 }
-                ChatMessage msg = new ChatMessage(text, false, true);
-                if (selectedImageUri != null) {
-                    msg.imageUri = selectedImageUri.toString();
-                    selectedImageUri = null;
-                    if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
-                }
-                addMessage(msg);
-                etMessageInput.setText("");
+            } else if (selectedImageUri != null) {
+                // TODO: Handle image sending via Storage in Phase 4
+                Toast.makeText(this, "Image sending coming soon!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -448,24 +444,19 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        handler.removeCallbacks(progressUpdater);
-        activeAudioPosition = RecyclerView.NO_POSITION;
-        if (messagesListener != null) {
-            messagesListener.remove();
-            messagesListener = null;
-        }
-        if (peerProfileListener != null) {
-            peerProfileListener.remove();
-            peerProfileListener = null;
-        }
-        if (recorder != null) {
-            recorder.release();
-            recorder = null;
-        }
-        releaseMediaPlayer();
+    private void setupObservers() {
+        viewModel.getMessages().observe(this, messages -> {
+            messageList.clear();
+            messageList.addAll(messages);
+            adapter.notifyDataSetChanged();
+            if (!messageList.isEmpty()) {
+                rvMessages.scrollToPosition(messageList.size() - 1);
+            }
+            updateEmptyState();
+        });
+
+        viewModel.observeMessages(chatId);
+        viewModel.markAsRead(chatId);
     }
 
     private void seedDemoConversation(String chatSnippet) {
@@ -486,129 +477,6 @@ public class ChatActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
         rvMessages.scrollToPosition(Math.max(0, messageList.size() - 1));
         updateEmptyState();
-    }
-
-    private void subscribeMessages() {
-        if (!realtimeMode || chatId == null) return;
-
-        if (messagesListener != null) {
-            messagesListener.remove();
-        }
-        messagesListener = firestore.collection("messages")
-                .document(chatId)
-                .collection("messages")
-                .orderBy("timestamp", Query.Direction.ASCENDING)
-                .addSnapshotListener((snapshots, error) -> {
-                    if (error != null || snapshots == null) {
-                        return;
-                    }
-
-                    List<ChatMessage> incoming = new ArrayList<>();
-                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
-                        String text = doc.getString("messageText");
-                        String senderId = doc.getString("senderId");
-                        if (text == null) continue;
-                        boolean outgoing = senderId != null && senderId.equals(currentUserId);
-                        ChatMessage msg = new ChatMessage(text, false, outgoing);
-                        msg.messageId = doc.getId();
-                        msg.senderId = senderId;
-                        msg.receiverId = doc.getString("receiverId");
-                        msg.timestamp = doc.getTimestamp("timestamp");
-                        incoming.add(msg);
-                    }
-
-                    messageList.clear();
-                    messageList.addAll(incoming);
-                    adapter.notifyDataSetChanged();
-                    if (!messageList.isEmpty()) {
-                        rvMessages.scrollToPosition(messageList.size() - 1);
-                    }
-                    updateEmptyState();
-                });
-    }
-
-    private void sendTextMessageRealtime(String text) {
-        if (!realtimeMode || chatId == null || text == null || text.trim().isEmpty()) return;
-
-        Map<String, Object> messageMap = new HashMap<>();
-        messageMap.put("senderId", currentUserId);
-        messageMap.put("receiverId", peerUserId);
-        messageMap.put("messageText", text.trim());
-        messageMap.put("timestamp", FieldValue.serverTimestamp());
-
-        firestore.collection("messages")
-                .document(chatId)
-                .collection("messages")
-                .add(messageMap)
-                .addOnFailureListener(e -> Toast.makeText(this, "Failed to send message", Toast.LENGTH_SHORT).show());
-
-        Map<String, Object> chatMeta = new HashMap<>();
-        chatMeta.put("participants", Arrays.asList(currentUserId, peerUserId));
-        chatMeta.put("lastMessage", text.trim());
-        chatMeta.put("lastTimestamp", FieldValue.serverTimestamp());
-        firestore.collection("chats")
-                .document(chatId)
-                .set(chatMeta, SetOptions.merge());
-    }
-
-    private void ensureCurrentUserInUsersCollection() {
-        if (currentUserId == null || currentUserId.isEmpty()) return;
-        Map<String, Object> data = new HashMap<>();
-        String localName = UserPrefs.getName(this);
-        data.put("name", (localName == null || localName.trim().isEmpty()) ? "NearNeed User" : localName.trim());
-        data.put("address", UserPrefs.getLocation(this) == null ? "" : UserPrefs.getLocation(this));
-        data.put("profileImage", UserPrefs.getPhotoUri(this) == null ? "" : UserPrefs.getPhotoUri(this));
-        data.put("isVerified", UserPrefs.isVerified(this));
-        firestore.collection("users").document(currentUserId).set(data, SetOptions.merge());
-    }
-
-    private void updateEmptyState() {
-        if (emptyStateContainer == null || rvMessages == null) return;
-        if (messageList.isEmpty()) {
-            emptyStateContainer.setVisibility(View.VISIBLE);
-            rvMessages.setVisibility(View.GONE);
-        } else {
-            emptyStateContainer.setVisibility(View.GONE);
-            rvMessages.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void markChatAsRead() {
-        if (!realtimeMode || chatId == null) return;
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("isRead", true);
-        firestore.collection("chats").document(chatId).update(updates)
-                .addOnFailureListener(e -> {
-                    // Silent fail - not critical
-                });
-    }
-
-    private void subscribePeerProfile() {
-        if (!realtimeMode || peerUserId == null || peerUserId.trim().isEmpty()) return;
-        if (peerProfileListener != null) {
-            peerProfileListener.remove();
-        }
-
-        peerProfileListener = firestore.collection("users")
-                .document(peerUserId)
-                .addSnapshotListener((snapshot, error) -> {
-                    if (error != null) return;
-                    if (snapshot == null || !snapshot.exists()) return;
-
-                    peerName = readProfileString(snapshot, "name", tvChatName.getText().toString());
-                    peerEmail = readProfileString(snapshot, "email", getIntent().getStringExtra("PERSON_EMAIL"));
-                    peerAddress = readProfileString(snapshot, "address", getIntent().getStringExtra("PERSON_BIO"));
-                    Boolean verified = snapshot.getBoolean("isVerified");
-                    peerVerified = verified != null && verified;
-
-                    tvChatName.setText(peerName);
-                    VerifiedBadgeHelper.apply(this, tvChatName, peerVerified);
-                });
-    }
-
-    private String readProfileString(DocumentSnapshot doc, String key, String fallback) {
-        String value = doc.getString(key);
-        return value == null || value.trim().isEmpty() ? fallback : value;
     }
 
     private String buildChatId(String uid1, String uid2) {
@@ -819,26 +687,16 @@ public class ChatActivity extends AppCompatActivity {
         handler.post(progressUpdater);
     }
 
-    class ChatMessage {
-        String messageId;
-        String senderId;
-        String receiverId;
-        Timestamp timestamp;
-        String text;
-        boolean isVoice;
-        boolean isOutgoing;
-        boolean isPlaying = false;
-        int progress = 0;
-        int durationSecs = 0;
-        String imageUri;
-        String audioPath;
-
-        ChatMessage(String text, boolean isVoice, boolean isOutgoing) {
-            this.text = text;
-            this.isVoice = isVoice;
-            this.isOutgoing = isOutgoing;
-            if (this.isVoice) this.durationSecs = 7;
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handler.removeCallbacks(progressUpdater);
+        activeAudioPosition = RecyclerView.NO_POSITION;
+        if (recorder != null) {
+            recorder.release();
+            recorder = null;
         }
+        releaseMediaPlayer();
     }
 
     class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
@@ -907,8 +765,8 @@ public class ChatActivity extends AppCompatActivity {
             } else {
                 if (llBubble != null) llBubble.setVisibility(View.VISIBLE);
                 if (holder.tvMessage != null) {
-                    holder.tvMessage.setText(message.text);
-                    holder.tvMessage.setVisibility((message.text == null || message.text.isEmpty()) ? View.GONE : View.VISIBLE);
+                    holder.tvMessage.setText(message.messageText);
+                    holder.tvMessage.setVisibility((message.messageText == null || message.messageText.isEmpty()) ? View.GONE : View.VISIBLE);
                 }
                 if (holder.clVoiceMessage != null) {
                     holder.clVoiceMessage.setVisibility(View.GONE);

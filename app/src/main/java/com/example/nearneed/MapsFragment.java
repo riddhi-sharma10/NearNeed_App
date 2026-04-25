@@ -83,11 +83,10 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.slider.Slider;
 
-import androidx.lifecycle.ViewModelProvider;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import com.google.firebase.auth.FirebaseAuth;
-
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
@@ -109,13 +108,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private ImageView recenterButton;
     private RecyclerView jobsList;
     private JobListAdapter jobAdapter;
-    private List<Job> allJobs = new ArrayList<>();
-    private List<Job> filteredJobs = new ArrayList<>();
+    private List<Job> allJobs;
+    private List<Job> filteredJobs;
     private BottomSheetBehavior<?> bottomSheetBehavior;
     private View bottomSheetPanel;
     private TextView bottomSheetCount;
-    private PostViewModel postViewModel;
-
 
     // Filter state
     private boolean filterUrgency = false;
@@ -243,18 +240,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             rvPredictions.setAdapter(searchPredictionAdapter);
         }
 
-        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
-
         initUI(view);
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
             setupProviderMode(view);
-        } else {
-            allJobs = new ArrayList<>();
-            filteredJobs = new ArrayList<>();
         }
 
-        setupObservers();
         applyInitialSearchState(view);
 
         // Obtain the MapView
@@ -352,7 +343,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             if (infoCard != null) infoCard.setVisibility(View.GONE);
         });
     }
+
     private void setupProviderMode(View view) {
+        
+        allJobs = new ArrayList<>();
+        filteredJobs = new ArrayList<>();
+
+        // Initialize jobs data
+        initializeSampleJobs();
+
         // Setup bottom sheet
         bottomSheetPanel = view.findViewById(R.id.provider_bottom_sheet);
         bottomSheetCount = view.findViewById(R.id.bottom_sheet_count);
@@ -437,41 +436,77 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void setupObservers() {
-        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
-            allJobs.clear();
-            for (Post post : posts) {
-                Job job = mapPostToJob(post);
-                allJobs.add(job);
-            }
-            applyFilters();
-        });
+    private void initializeSampleJobs() {
+        allJobs.add(new Job(
+            "Plumbing Repair",
+            "Pipe repair in kitchen area",
+            "0.5km away",
+            "₹500 - 800",
+            "High Urgency",
+            R.drawable.ic_plumber,
+            R.color.sapphire_primary,
+            new LatLng(19.0850, 72.8750),
+            "GIG"
+        ));
 
-        // Trigger observation - default to Gurgaon
-        double lat = 28.4595;
-        double lng = 77.0266;
-        postViewModel.observeNearbyPosts(requireContext(), lat, lng, 50.0);
-    }
+        allJobs.add(new Job(
+            "TV Mounting",
+            "Wall mount installation needed",
+            "1.2km away",
+            "₹1200 - 1500",
+            "Normal",
+            R.drawable.ic_toolbox_seeker,
+            R.color.sapphire_primary,
+            new LatLng(19.0650, 72.8650),
+            "GIG"
+        ));
 
-    private Job mapPostToJob(Post p) {
-        Job job = new Job(
-            p.title,
-            p.description,
-            p.distance != null ? p.distance : "Nearby",
-            p.budget != null ? p.budget : "",
-            p.urgency != null ? p.urgency : "Normal",
-            p.type != null && p.type.equals("COMMUNITY") ? R.drawable.ic_gardening : R.drawable.ic_toolbox_seeker,
-            p.type != null && p.type.equals("COMMUNITY") ? R.color.brand_success : R.color.sapphire_primary,
-            new LatLng(p.lat != null ? p.lat : 28.4595, p.lng != null ? p.lng : 77.0266),
-            p.type
+        allJobs.add(new Job(
+            "Electrical Work",
+            "Wiring repair needed",
+            "0.8km away",
+            "₹800 - 1200",
+            "High Urgency",
+            R.drawable.ic_plug_blue,
+            R.color.sapphire_primary,
+            new LatLng(19.0750, 72.8800),
+            "GIG"
+        ));
+
+        // Add community volunteer posts
+        Job communityJob1 = new Job(
+            "Grocery Assistance",
+            "Help an elderly neighbor with weekly grocery run",
+            "0.4km away",
+            "",
+            "Normal",
+            R.drawable.ic_gardening,
+            R.color.brand_success,
+            new LatLng(19.0790, 72.8720),
+            "COMMUNITY"
         );
-        job.slots = p.slots != null ? p.slots : 0;
-        job.slotsFilled = p.slotsFilled != null ? p.slotsFilled : 0;
-        job.hasApplied = p.hasApplied != null ? p.hasApplied : false;
-        job.applicationStatus = p.applicationStatus;
-        return job;
-    }
+        communityJob1.slots = 5;
+        communityJob1.slotsFilled = 1;
+        allJobs.add(communityJob1);
 
+        Job communityJob2 = new Job(
+            "Park Cleanup",
+            "Community park cleaning drive this Saturday",
+            "0.9km away",
+            "",
+            "Normal",
+            R.drawable.ic_gardening,
+            R.color.brand_success,
+            new LatLng(19.0720, 72.8810),
+            "COMMUNITY"
+        );
+        communityJob2.slots = 8;
+        communityJob2.slotsFilled = 0;
+        allJobs.add(communityJob2);
+
+        filteredJobs.addAll(allJobs);
+        updateBottomSheetCount();
+    }
 
     private void updateChipAppearance(Chip chip, boolean isSelected) {
         if (isSelected) {
@@ -490,23 +525,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         for (Job job : allJobs) {
             boolean matches = true;
 
-            // Seeker mode: Filter by GIG vs COMMUNITY toggle
-            if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
-                String expectedType = isGigsMode ? "GIG" : "COMMUNITY";
-                if (!expectedType.equals(job.type)) {
-                    matches = false;
-                }
-            }
-
-            if (matches && filterUrgency && !job.category.equals("High Urgency")) {
+            if (filterUrgency && !job.category.equals("High Urgency")) {
                 matches = false;
             }
 
-            if (matches && filterBudget && !job.budget.contains("500")) {
+            if (filterBudget && !job.budget.contains("500")) {
                 matches = false;
             }
 
-            if (matches && filterDistance && !job.distance.contains("0.5")) {
+            if (filterDistance && !job.distance.contains("0.5")) {
                 matches = false;
             }
 
@@ -530,7 +557,99 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-        private void setupSearchIntegration(EditText editText) {
+        private void performGeocoding(String query) {
+        if (query.trim().isEmpty() || rvPredictions == null || searchPredictionAdapter == null) {
+            if (rvPredictions != null) rvPredictions.setVisibility(View.GONE);
+            return;
+        }
+
+        geocodeExecutor.submit(() -> {
+            List<SearchPredictionAdapter.GeocodingResult> aggregated = new ArrayList<>();
+            CountDownLatch latch = new CountDownLatch(2);
+            
+            String encodedQuery = query;
+            try { encodedQuery = URLEncoder.encode(query, "UTF-8"); } catch (Exception ignored) {}
+
+            // 1. Photon Call (lang=en)
+            String photonUrl = "https://photon.komoot.io/api/?limit=5&lang=en&q=" + encodedQuery;
+            Request req1 = new Request.Builder().url(photonUrl).build();
+            httpClient.newCall(req1).enqueue(new Callback() {
+                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
+                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
+                    try {
+                        if (r.isSuccessful() && r.body() != null) {
+                            JSONObject obj = new JSONObject(r.body().string());
+                            JSONArray features = obj.optJSONArray("features");
+                            if (features != null) {
+                                for(int i=0; i<features.length(); i++) {
+                                    JSONObject f = features.getJSONObject(i);
+                                    JSONObject p = f.optJSONObject("properties");
+                                    if(p==null) continue;
+                                    String name = p.optString("name", p.optString("street", "Unknown location"));
+                                    String sec = p.optString("city", "");
+                                    if(!p.optString("state", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("state");
+                                    if(!p.optString("country", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("country");
+                                    JSONArray coords = f.getJSONObject("geometry").getJSONArray("coordinates");
+                                    aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, coords.getDouble(1), coords.getDouble(0)));
+                                }
+                            }
+                        }
+                    } catch(Exception ignored) {}
+                    finally { latch.countDown(); }
+                }
+            });
+
+            // 2. Nominatim Call (Accept-Language: en)
+            String nomUrl = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=" + encodedQuery;
+            Request req2 = new Request.Builder().url(nomUrl).addHeader("Accept-Language", "en").addHeader("User-Agent", "NearNeed-AndroidApp").build();
+            httpClient.newCall(req2).enqueue(new Callback() {
+                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
+                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
+                    try {
+                        if (r.isSuccessful() && r.body() != null) {
+                            JSONArray arr = new JSONArray(r.body().string());
+                            for(int i=0; i<arr.length(); i++) {
+                                JSONObject o = arr.getJSONObject(i);
+                                String[] parts = o.optString("display_name", "Unknown").split(",", 2);
+                                String name = parts[0].trim();
+                                String sec = parts.length > 1 ? parts[1].trim() : "";
+                                aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, o.getDouble("lat"), o.getDouble("lon")));
+                            }
+                        }
+                    } catch(Exception ignored) {}
+                    finally { latch.countDown(); }
+                }
+            });
+
+            try {
+                latch.await(4, TimeUnit.SECONDS);
+            } catch (InterruptedException ignored) {}
+
+            List<SearchPredictionAdapter.GeocodingResult> finalList = new ArrayList<>();
+            for (SearchPredictionAdapter.GeocodingResult res : aggregated) {
+                boolean dup = false;
+                for (SearchPredictionAdapter.GeocodingResult existing : finalList) {
+                    float[] results = new float[1];
+                    android.location.Location.distanceBetween(res.lat, res.lng, existing.lat, existing.lng, results);
+                    if (results[0] < 500) { // Same place if within 500 meters
+                        dup = true; break;
+                    }
+                }
+                if (!dup && finalList.size() < 6) finalList.add(res);
+            }
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (!finalList.isEmpty()) {
+                    rvPredictions.setVisibility(View.VISIBLE);
+                    searchPredictionAdapter.setPredictions(finalList);
+                } else {
+                    rvPredictions.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
+
+    private void setupSearchIntegration(EditText editText) {
         if (editText == null) return;
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -542,18 +661,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     searchHandler.removeCallbacks(searchRunnable);
                 }
                 
-                searchRunnable = () -> {
-                    GeocodingHelper.performSearch(s.toString(), results -> {
-                        if (!results.isEmpty()) {
-                            rvPredictions.setVisibility(View.VISIBLE);
-                            searchPredictionAdapter.setPredictions(results);
-                        } else {
-                            rvPredictions.setVisibility(View.GONE);
-                        }
-                    });
-                };
+                searchRunnable = () -> performGeocoding(s.toString());
                 if (searchHandler != null) {
-                    searchHandler.postDelayed(searchRunnable, 500);
+                    searchHandler.postDelayed(searchRunnable, 500); // 500ms debounce
                 }
             }
 
@@ -561,7 +671,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             public void afterTextChanged(Editable s) {}
         });
     }
-
 
     private void performSearch(String query) {
         if (filteredJobs == null) return;
@@ -625,11 +734,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private void recenterMap() {
         if (mMap != null) {
-            LatLng gurgaon = new LatLng(28.4595, 77.0266);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(gurgaon, 12f));
+            LatLng mumbai = new LatLng(19.0760, 72.8777);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
         }
     }
-
 
     private void updateMapMarkers() {
         if (mMap == null) return;
@@ -768,7 +876,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         
 
-        applyFilters();
+        updateMarkers();
     }
 
     @Override
@@ -780,15 +888,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mMap.setStyle(new Style.Builder().fromUri(styleUrl), new Style.OnStyleLoaded() {
             @Override
             public void onStyleLoaded(@NonNull Style style) {
-                // Default fallback to Gurgaon
-                LatLng gurgaon = new LatLng(28.4595, 77.0266);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(gurgaon, 12f));
+                // Default fallback to Mumbai
+                LatLng mumbai = new LatLng(19.0760, 72.8777);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
 
                 if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
                     updateMapMarkers();
                     setupProviderMapListeners();
                 } else {
-                    updateMapMarkers();
+                    updateMarkers();
                     setupSeekerMapListeners();
                 }
                 
@@ -842,7 +950,30 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    // Legacy methods removed
+    private void updateMarkers() {
+        if (mMap == null) return;
+        mMap.removeAnnotations();
+
+        int blue = ContextCompat.getColor(requireContext(), R.color.sapphire_primary);
+        int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
+        int yellow = ContextCompat.getColor(requireContext(), R.color.sapphire_tertiary);
+
+        if (isGigsMode) {
+            addSampleMarker(new LatLng(19.0820, 72.8850), "Marcus Watts", "Electrician", blue, R.drawable.ic_plug_blue);
+            addSampleMarker(new LatLng(19.0700, 72.8700), "Sarah Chen", "Cleaning", blue, R.drawable.ic_cleaning);
+        } else {
+            addSampleMarker(new LatLng(19.0750, 72.8800), "Park Cleanup", "Community", green, R.drawable.ic_gardening);
+        }
+    }
+
+    private void addSampleMarker(LatLng pos, String title, String snippet, int color, int iconResId) {
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(pos)
+                .title(title)
+                .snippet(snippet)
+                .icon(getMarkerBitmapDescriptor(title, iconResId, color, false)));
+        if (marker != null) if (markerDataMap != null) markerDataMap.put(marker, new MarkerData(iconResId, color));
+    }
 
     private Icon getMarkerBitmapDescriptor(String title, int iconResId, int bgColor, boolean isSelected) {
         int iconSize = 100;

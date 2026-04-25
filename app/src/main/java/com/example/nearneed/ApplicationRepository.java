@@ -62,7 +62,8 @@ public class ApplicationRepository {
      * Submit an application to a post (Gig or Community).
      */
     public static void submitApplication(String postId, String postTitle, String postType, 
-                                         String creatorId, String message, SaveCallback callback) {
+                                         String creatorId, String message, String budget, 
+                                         String paymentMethod, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
         String applicantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -71,12 +72,43 @@ public class ApplicationRepository {
         Application app = new Application(postId, postTitle, postType, applicantId, creatorId);
         app.applicationId = applicationId;
         app.message = message;
+        app.paymentMethod = paymentMethod;
+        try {
+            if (budget != null && budget.startsWith("₹")) {
+                app.proposedBudget = Double.parseDouble(budget.substring(1));
+            } else if (budget != null) {
+                app.proposedBudget = Double.parseDouble(budget);
+            }
+        } catch (Exception e) {
+            app.proposedBudget = 0.0;
+        }
         app.appliedAt = System.currentTimeMillis();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .set(app)
+                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Update application status generically.
+     */
+    public static void updateApplicationStatus(String applicationId, String status, SaveCallback callback) {
+        if (applicationId == null || callback == null) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", status);
+        updates.put("updatedAt", System.currentTimeMillis());
+        if ("accepted".equals(status)) {
+            updates.put("acceptedAt", System.currentTimeMillis());
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(APPLICATIONS_COLLECTION)
+                .document(applicationId)
+                .update(updates)
                 .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
                 .addOnFailureListener(callback::onFailure);
     }

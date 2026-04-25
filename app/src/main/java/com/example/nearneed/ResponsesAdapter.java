@@ -2,8 +2,8 @@ package com.example.nearneed;
 
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,65 +21,58 @@ import java.util.Locale;
 
 public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.ResponseViewHolder> {
 
-    private List<Response> responses;
+    private List<Application> applications;
     private OnResponseActionListener listener;
-    private final boolean showBudgetInfo;
 
     public interface OnResponseActionListener {
-        void onAccept(String responseId, int position);
-        void onDecline(String responseId, int position);
-        void onCall(Response response);
-        void onMessage(Response response);
+        void onAccept(Application application, int position);
+        void onDecline(Application application, int position);
+        void onCall(Application application);
+        void onMessage(Application application);
     }
 
-    public ResponsesAdapter(List<Response> responses, OnResponseActionListener listener, boolean showBudgetInfo) {
-        this.responses = responses;
+    public ResponsesAdapter(List<Application> applications, OnResponseActionListener listener) {
+        this.applications = applications;
         this.listener = listener;
-        this.showBudgetInfo = showBudgetInfo;
+    }
+
+    public void setApplications(List<Application> applications) {
+        this.applications = applications;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ResponseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext())
-            .inflate(R.layout.item_response_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_response_card, parent, false);
         return new ResponseViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ResponseViewHolder holder, int position) {
-        Response response = responses.get(position);
-        holder.bind(response, position, listener, showBudgetInfo);
+        Application app = applications.get(position);
+        holder.bind(app, position, listener);
     }
 
     @Override
     public int getItemCount() {
-        return responses.size();
+        return applications.size();
     }
 
     public static class ResponseViewHolder extends RecyclerView.ViewHolder {
-        private ImageView ivAvatar;
-        private TextView tvName;
-        private TextView tvRating;
-        private TextView tvMessage;
-        private TextView tvLocation;
-        private TextView tvTime;
-        private TextView tvStatus;
+        private TextView tvName, tvRating, tvMessage, tvLocation, tvTime;
         private ImageButton btnCallApplicant, btnMessageApplicant;
         private MaterialButton btnAccept, btnDecline;
-        private LinearLayout mainContainer, llBudgetCard;
+        private LinearLayout llBudgetCard;
         private TextView tvProposedBudget, tvPaymentMethod, tvPriceAppliedValue;
 
-        public ResponseViewHolder(@NonNull LinearLayout itemView) {
+        public ResponseViewHolder(@NonNull View itemView) {
             super(itemView);
-            mainContainer = itemView;
-            ivAvatar = itemView.findViewById(R.id.ivApplicantAvatar);
             tvName = itemView.findViewById(R.id.tvApplicantName);
             tvRating = itemView.findViewById(R.id.tvApplicantRating);
             tvMessage = itemView.findViewById(R.id.tvApplicantMessage);
             tvLocation = itemView.findViewById(R.id.tvApplicantLocation);
             tvTime = itemView.findViewById(R.id.tvAppliedTime);
-            tvStatus = null;
             btnCallApplicant = itemView.findViewById(R.id.btnCallApplicant);
             btnMessageApplicant = itemView.findViewById(R.id.btnMessageApplicant);
             btnAccept = itemView.findViewById(R.id.btnAccept);
@@ -90,141 +83,63 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
             tvPriceAppliedValue = itemView.findViewById(R.id.tvPriceAppliedValue);
         }
 
-        public void bind(Response response, int position, OnResponseActionListener listener, boolean showBudgetInfo) {
-            tvName.setText(response.getApplicantName());
-            VerifiedBadgeHelper.apply(itemView.getContext(), tvName, response.isVerified());
-            tvRating.setText(String.format("★ %.1f", response.getApplicantRating()));
-            tvMessage.setText(response.getMessage());
-            tvLocation.setText(response.getLocation());
-            tvTime.setText(formatTime(response.getTimestamp()));
+        public void bind(Application app, int position, OnResponseActionListener listener) {
+            tvName.setText(app.applicantName);
+            tvRating.setText(String.format(Locale.getDefault(), "★ %.1f", app.applicantRating != null ? app.applicantRating : 0.0f));
+            tvMessage.setText(app.message);
+            tvLocation.setText(app.applicantLocation != null ? app.applicantLocation : "Nearby");
+            tvTime.setText(formatTime(app.appliedAt));
 
-            // Always show what the applicant quoted as budget.
-            llBudgetCard.setVisibility(LinearLayout.VISIBLE);
-            if (response.getProposedBudget() > 0) {
-                tvProposedBudget.setText("₹" + response.getProposedBudget());
-                tvPriceAppliedValue.setText("₹" + response.getProposedBudget());
+            // Budget Info
+            if (app.proposedBudget != null && app.proposedBudget > 0) {
+                llBudgetCard.setVisibility(View.VISIBLE);
+                String budgetStr = "₹" + String.format(Locale.getDefault(), "%.0f", app.proposedBudget);
+                tvProposedBudget.setText(budgetStr);
+                tvPriceAppliedValue.setText(budgetStr);
+                tvPaymentMethod.setText(app.paymentMethod != null ? app.paymentMethod : "CASH");
             } else {
-                tvProposedBudget.setText("Not quoted");
-                tvPriceAppliedValue.setText("Not quoted");
-            }
-            tvPaymentMethod.setText(response.getPaymentMethod() != null ? response.getPaymentMethod() : "Not specified");
-
-            // Set status badge
-            String status = response.getStatus();
-            if (tvStatus != null) {
-                tvStatus.setText(status.toUpperCase());
-                updateStatusBadge(status);
+                llBudgetCard.setVisibility(View.GONE);
             }
 
-            applyPrimaryButtonStyle();
-            applyOutlineButtonStyle();
-
-            // Keep button visuals consistent with theme, even when disabled by status.
-            if ("accepted".equals(status)) {
-                mainContainer.setAlpha(1.0f);
+            // Status Logic
+            if ("accepted".equals(app.status)) {
                 btnAccept.setText("Accepted");
-                btnAccept.setAlpha(1.0f);
+                btnAccept.setEnabled(false);
+                btnDecline.setVisibility(View.GONE);
+            } else if ("declined".equals(app.status)) {
                 btnDecline.setText("Declined");
-                btnDecline.setAlpha(1.0f);
-            } else if ("declined".equals(status)) {
-                mainContainer.setAlpha(1.0f);
-                btnAccept.setText("Accept");
-                btnAccept.setAlpha(1.0f);
-                btnDecline.setText("Declined");
-                btnDecline.setAlpha(1.0f);
+                btnDecline.setEnabled(false);
+                btnAccept.setVisibility(View.GONE);
             } else {
                 btnAccept.setText("Accept");
-                btnAccept.setAlpha(1.0f);
+                btnAccept.setEnabled(true);
+                btnAccept.setVisibility(View.VISIBLE);
                 btnDecline.setText("Decline");
-                btnDecline.setAlpha(1.0f);
-                mainContainer.setAlpha(1.0f);
+                btnDecline.setEnabled(true);
+                btnDecline.setVisibility(View.VISIBLE);
             }
-
-            // Keep visual style active and gate click actions by status.
-            btnAccept.setEnabled(true);
-            btnDecline.setEnabled(true);
 
             btnAccept.setOnClickListener(v -> {
-                if (listener != null && "new".equals(response.getStatus())) {
-                    listener.onAccept(response.getResponseId(), position);
-                }
+                if (listener != null) listener.onAccept(app, position);
             });
-
             btnDecline.setOnClickListener(v -> {
-                if (listener != null && "new".equals(response.getStatus())) {
-                    listener.onDecline(response.getResponseId(), position);
-                }
+                if (listener != null) listener.onDecline(app, position);
             });
-
             btnCallApplicant.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onCall(response);
-                }
+                if (listener != null) listener.onCall(app);
             });
-
             btnMessageApplicant.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onMessage(response);
-                }
+                if (listener != null) listener.onMessage(app);
             });
-        }
-
-        private void updateStatusBadge(String status) {
-            if (tvStatus == null) {
-                return;
-            }
-            switch (status.toLowerCase()) {
-                case "new":
-                    tvStatus.setTextColor(0xFF1E3A8A);
-                    tvStatus.setBackgroundColor(0xFFDBEAFE);
-                    break;
-                case "accepted":
-                    tvStatus.setTextColor(0xFF065F46);
-                    tvStatus.setBackgroundColor(0xFFD1FAE5);
-                    break;
-                case "declined":
-                    tvStatus.setTextColor(0xFFB91C1C);
-                    tvStatus.setBackgroundColor(0xFFFEE2E2);
-                    break;
-            }
         }
 
         private String formatTime(long timestamp) {
-            long now = System.currentTimeMillis();
-            long diff = now - timestamp;
-
+            long diff = System.currentTimeMillis() - timestamp;
             long minutes = diff / (60 * 1000);
             long hours = diff / (60 * 60 * 1000);
-            long days = diff / (24 * 60 * 60 * 1000);
-
-            if (minutes < 60) {
-                return minutes + " min ago";
-            } else if (hours < 24) {
-                return hours + " hours ago";
-            } else if (days < 7) {
-                return days + " days ago";
-            } else {
-                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd", Locale.getDefault());
-                return sdf.format(new Date(timestamp));
-            }
-        }
-
-        private void applyPrimaryButtonStyle() {
-            int sapphire = ContextCompat.getColor(itemView.getContext(), R.color.sapphire_primary);
-            int white = ContextCompat.getColor(itemView.getContext(), R.color.white);
-            btnAccept.setBackgroundTintList(ColorStateList.valueOf(sapphire));
-            btnAccept.setTextColor(white);
-            btnAccept.setCornerRadius((int) (24 * itemView.getResources().getDisplayMetrics().density));
-        }
-
-        private void applyOutlineButtonStyle() {
-            int white = ContextCompat.getColor(itemView.getContext(), R.color.white);
-            int sapphire = ContextCompat.getColor(itemView.getContext(), R.color.sapphire_primary);
-            btnDecline.setBackgroundTintList(ColorStateList.valueOf(white));
-            btnDecline.setTextColor(sapphire);
-            btnDecline.setStrokeColor(ColorStateList.valueOf(sapphire));
-            btnDecline.setStrokeWidth((int) (1 * itemView.getResources().getDisplayMetrics().density));
-            btnDecline.setCornerRadius((int) (24 * itemView.getResources().getDisplayMetrics().density));
+            if (minutes < 60) return minutes + "m ago";
+            if (hours < 24) return hours + "h ago";
+            return new SimpleDateFormat("MMM dd", Locale.getDefault()).format(new Date(timestamp));
         }
     }
 }

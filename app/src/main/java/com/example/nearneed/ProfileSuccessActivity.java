@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,7 +20,14 @@ public class ProfileSuccessActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile_success);
 
         View successContainer = findViewById(R.id.successContainer);
+        TextView tvUserNamePreview = findViewById(R.id.tvUserNamePreview);
         MaterialButton btnDone = findViewById(R.id.btnDone);
+
+        // Sync real name
+        String name = UserPrefs.getName(this);
+        if (name != null && !name.isEmpty()) {
+            tvUserNamePreview.setText(name);
+        }
 
         // Apply Pop-in effect
         applyPopAnimation(successContainer);

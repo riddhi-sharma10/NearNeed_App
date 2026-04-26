@@ -79,12 +79,13 @@
                     android:gravity="center_vertical">
 
                     <TextView
+                        android:id="@+id/tvUserNameVerified"
                         style="@style/AppHeading"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/txt_abhinav_oberoi"
+                        android:text="User Name"
                         android:textColor="@color/text_header"
-                        android:textSize="15sp" />
+                        android:textSize="16sp" />
 
                     <ImageView
                         android:layout_width="16dp"
@@ -94,12 +95,13 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tvUserDetailsVerified"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="@string/txt_verified_neighbour_downtown"
+                    android:text="Verified Neighbor • Location"
                     android:textColor="@color/text_subheadline"
-                    android:textSize="12sp" />
+                    android:textSize="13sp" />
             </LinearLayout>
         </LinearLayout>
 

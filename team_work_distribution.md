@@ -1,84 +1,91 @@
 # NearNeed: Team Task Distribution & Learning Guide
 
-This document divides the NearNeed application into 4 distinct, balanced domains. It outlines the specific files each person is responsible for, the core features they need to build/maintain, and **the specific technical concepts they must learn and understand** for the Viva.
+This document divides the NearNeed application into 4 distinct, balanced domains based on the user journey flows. It outlines the specific files each person is responsible for, the pages they must own, and the core technical concepts for the Viva.
 
 ---
 
-## 👤 Person 1: Auth & Identity Architect
-**Core Focus:** User onboarding, security, AI identity verification, and role management.
-You are responsible for getting users into the app securely and managing their profiles and dual-role states.
+## 👤 Person 1: Identity & Trust Architect
+**Core Flow:** Onboarding -> Authentication -> Profile Construction -> Security.
 
-**📚 Key Concepts You Must Learn (Viva Prep):**
-*   **Firebase Authentication:** Understand token lifecycles, session persistence, and secure credential storage.
-*   **On-Device Machine Learning:** Learn how Google ML Kit processes images (Bitmaps) locally without sending sensitive PII data to a server.
-*   **Android SharedPreferences:** Understand how to save local states (like "Is the user currently a Seeker?") so the app remembers them on restart.
-*   **Android Intent Flags:** Learn how to manipulate the "Back Stack" (e.g., `FLAG_ACTIVITY_CLEAR_TASK`) so users can't press the "Back" button to bypass the login screen.
+### 🛣️ Owned Pages & User Flow:
+1.  **Entry Flow:** `LoadingActivity` -> `WelcomeActivity` -> `MainActivity` (Entry Router).
+2.  **Auth Flow:** `OtpEnterActivity` -> `OtpVerifyActivity` -> `CreateNewPasswordActivity`.
+3.  **Onboarding Flow:** `AccountTypeActivity` -> `ProfileSetupActivity` -> `IdVerificationActivity` -> `IdVerifiedActivity` -> `ProfileSuccessActivity`.
+4.  **Profile Hub:** `ProfileActivity`, `ProfileFragment`, `PersonProfileActivity`, `ProfileInfoActivity`, `EditProfileActivity`, `EditProfileProviderActivity`.
+5.  **Support Flow:** `SettingsActivity`, `HelpSupportActivity`, `TermsConditionsActivity`.
 
-**Associated Files & Pages:**
-*   **Onboarding:** `LoadingActivity`, `WelcomeActivity`, `MainActivity`
-*   **Auth:** `OtpEnterActivity`, `OtpVerifyActivity`, `CreateNewPasswordActivity`
-*   **Profiles:** `ProfileSetupActivity`, `ProfileInfoActivity`, `AccountTypeActivity`
-*   **Verification:** `IdVerificationActivity`, `IdVerifiedActivity`
-*   **Settings/UI:** `ProfileActivity`, `PersonProfileActivity`, `EditProfileActivity`, `EditProfileProviderActivity`
-*   **Core Logic:** `RoleManager`, `UserRepository`, `UserPrefs`
+### 🏗️ Underlying Logic & Models:
+*   **Models:** `UserProfile`, `UserEntity`, `UserDao`.
+*   **Logic:** `RoleManager`, `UserRepository`, `UserPrefs` (LocalStorage), `VerifiedBadgeHelper`.
 
----
-
-## 🙋‍♂️ Person 2: Demand Side (Seeker) Lead
-**Core Focus:** The process of asking for help, managing active requests, and selecting candidates.
-You are responsible for the entire Seeker ecosystem and the AI Category prediction engine.
-
-**📚 Key Concepts You Must Learn (Viva Prep):**
-*   **RecyclerViews & DiffUtil:** Understand how Android recycles list items for 60fps scrolling, and how DiffUtil calculates precise list changes instead of reloading the whole screen.
-*   **NoSQL Schema Design:** Learn the difference between SQL tables and Firestore Documents. Understand how to flatten data for fast UI reads.
-*   **Natural Language Processing (NLP) Basics:** Understand how text classification works (analyzing keywords in a Gig description to auto-suggest categories).
-*   **Advanced UI Components:** Learn to implement interactive `BottomSheetDialogs`, dynamic `ChipGroups`, and `TextWatchers` (for live word counting).
-
-**Associated Files & Pages:**
-*   **Dashboards:** `HomeSeekerActivity`, `HomeSeekerNoPostsActivity`, `SeekerNavbarController`
-*   **Post Creation (Paid):** `CreatePostActivity`, `CreatePostStep2Activity`, `CategoryPredictor`
-*   **Post Creation (Free):** `CommunityPostActivity`, `CommunityPostStep2Activity`
-*   **Applicant Review:** `ResponsesActivity`, `VolunteersActivity`
-*   **UI Components:** `RequestApplyBottomSheet`, `CommunityVolunteerBottomSheet`
-*   **Core Logic:** `PostRepository`, `MyPostsActivity`
+### 📚 Key Viva Concepts:
+*   **Firebase Auth State Persistence:** Explain how `onStart()` checks for an existing user session to skip the login screen.
+*   **Local Image Processing:** Explain how Google ML Kit (in `IdVerificationActivity`) detects faces/text locally on the device for security.
+*   **Navigation & Flags:** Explain `Intent.FLAG_ACTIVITY_CLEAR_TASK` to prevent users from "backing" into auth screens after logging in.
+*   **SharedPreferences:** Explain how `UserPrefs` stores small pieces of data (Role, Name) to avoid frequent database hits.
 
 ---
 
-## 🛠️ Person 3: Supply Side (Provider) & Geo-Intelligence Lead
-**Core Focus:** Job discovery, Map integration, GPS math, and the Provider's financial wallet.
-You are responsible for making sure Providers can find work near them and track their earnings.
+## 🙋‍♂️ Person 2: Seeker & Demand Lead
+**Core Flow:** Discovery -> Post Creation -> Candidate Selection -> Response Management.
 
-**📚 Key Concepts You Must Learn (Viva Prep):**
-*   **The Haversine Formula:** You must mathematically understand how to calculate "great-circle" distances on a spherical Earth using Latitude and Longitude.
-*   **Geocoding vs. Reverse Geocoding:** Learn how to convert a typed address ("123 Main St") into coordinates (Geocoding), and coordinates into a readable address (Reverse Geocoding).
-*   **Map Rendering (MapLibre):** Understand vector maps, camera bounding boxes, and how to plot custom icon markers on a map canvas.
-*   **Android Concurrency:** Learn how to execute heavy network tasks (like calling the Photon Geocoding API) on background threads using `ExecutorService` so the UI doesn't freeze (ANR).
+### 🛣️ Owned Pages & User Flow:
+1.  **Seeker Dashboards:** `HomeSeekerActivity`, `HomeSeekerNoPostsActivity`, `SeekerNavbarController`, `HomeFragment`.
+2.  **Gig Creation Flow:** `PostOptionsActivity` -> `CreatePostActivity` -> `CreatePostStep2Activity` -> `CategoryPredictor` (AI) -> `PostedSuccessfullyActivity`.
+3.  **Community Creation Flow:** `CommunityPostActivity` -> `CommunityPostStep2Activity`.
+4.  **Request Management:** `MyPostsActivity`, `RequestDetailActivity`, `GigPostListActivity`.
+5.  **Applicant Review:** `ResponsesActivity` -> `VolunteersActivity` -> `VolunteerProfileActivity` -> `CommunityVolunteerDetailActivity`.
 
-**Associated Files & Pages:**
-*   **Dashboards:** `HomeProviderActivity`, `NearbyRequestsAdapter`
-*   **Geo/Maps:** `MapsActivity`, `MapsFragment`, `LocationHelper`, `GeocodingHelper`, `LocationPickerHelper`
-*   **Job Viewing:** `GigPostDetailActivity`, `CommunityPostDetailActivity`, `ProviderJobDetailActivity`
-*   **Financials:** `MyEarningsActivity`, `PaymentFlowActivity`, `PaymentSuccessActivity`
-*   **Scheduling:** `CalendarProviderActivity`, `AddScheduleActivity`
-*   **Core Logic:** `PostRepository` (Radius filtering logic)
+### 🏗️ Underlying Logic & Models:
+*   **Models:** `Post`, `PostEntity`, `PostDao`, `Response`, `Volunteer`.
+*   **Logic:** `PostRepository`, `PostViewModel`, `CategoryPredictor`, `RequestApplyBottomSheet`, `CommunityVolunteerBottomSheet`.
+
+### 📚 Key Viva Concepts:
+*   **Dynamic UI Components:** Explain `BottomSheetDialog` implementation for quick applicant reviews.
+*   **Recycler Optimization:** Explain how `DashboardGigsAdapter` handles horizontal scrolling and view recycling.
+*   **Text Classification:** Explain how the app analyzes job descriptions to suggest categories (Plumbing vs. Gardening) in real-time.
+*   **Callback Interfaces:** Explain how `LocationPickerHelper` uses callbacks to pass Lat/Lng back to the posting activities.
 
 ---
 
-## 💬 Person 4: Real-time Systems & Lifecycle Manager
-**Core Focus:** Chat, Push Notifications, the Booking State Machine, and the Reputation system.
-You are responsible for the "Live" aspects of the app after a job has been accepted.
+## 🛠️ Person 3: Provider & Market Intelligence
+**Core Flow:** Professional Setup -> Global Discovery -> Scheduling -> Financials.
 
-**📚 Key Concepts You Must Learn (Viva Prep):**
-*   **WebSockets vs REST APIs:** Understand why polling a server every 5 seconds for messages is terrible, and how Firestore's persistent WebSocket (Snapshot Listeners) solves this.
-*   **Firebase Cloud Messaging (FCM):** Learn the lifecycle of a Push Notification token, and how background Services wake up the app when the user receives a message.
-*   **Database ACID & Atomic Transactions:** You must be able to explain the "Race Condition." Learn how Firebase Transactions lock documents so that two people rating a provider at the same exact time don't overwrite each other's data.
-*   **State Machine Architecture:** Understand how to build logic that strictly enforces transitions (e.g., A job cannot go from "Pending" directly to "Completed" without passing through "In Progress").
+### 🛣️ Owned Pages & User Flow:
+1.  **Provider Onboarding:** `ProfessionalSetupProviderActivity`, `CommunityPreferencesActivity`.
+2.  **Provider Dashboard:** `HomeProviderActivity`, `NearbyRequestsAdapter`, `CommunityVolunteeringAdapter`.
+3.  **Discovery Flow (Maps):** `MapsActivity`, `MapsFragment`, `LocationPickerHelper`, `GeocodingHelper`.
+4.  **Job Detail Flow:** `GigPostDetailActivity`, `CommunityPostDetailActivity`, `ProviderJobDetailActivity`.
+5.  **Financials & Schedule:** `MyEarningsActivity`, `PaymentFlowActivity`, `PaymentSuccessActivity`, `CalendarProviderActivity`, `AddScheduleActivity`.
 
-**Associated Files & Pages:**
-*   **Chat Engine:** `MessagesActivity`, `MessagesFragment`, `ChatActivity`, `ChatRepository`
-*   **Notifications:** `NearNeedMessagingService` (FCM), `NotificationCenter`, `DashboardNotificationPopup`
-*   **Job Tracking:** `BookingsActivity`, `BookingsFragment`, `BookingsPagerAdapter`
-*   **State Machine UIs:** `SeekerOngoingFragment`, `ProviderOngoingFragment`, `SeekerPastFragment`, `ProviderPastFragment`
-*   **Status Management:** `UpdateStatusActivity`, `CancellationDetailsActivity`
-*   **Trust System:** `ReviewsActivity`, `RatingDialog`, `Review` (Model)
-*   **Core Logic:** `BookingRepository` (Transaction logic)
+### 🏗️ Underlying Logic & Models:
+*   **Models:** `PaymentMethod`, `LocationHelper`, `GeocodingHelper`.
+*   **Logic:** `StorageRepository` (Image uploads), `GeocodingHelper` (Photon API), `NearbyRequestsAdapter`, `SearchPredictionAdapter`.
+
+### 📚 Key Viva Concepts:
+*   **Map Rendering Architecture:** Explain MapLibre's camera management and how markers are custom-rendered based on job types.
+*   **Geocoding vs Reverse Geocoding:** Explain the difference between converting text addresses to Lat/Lng and vice-versa using the Photon API.
+*   **Geo-Distance Math:** Explain how the app uses Latitude and Longitude to calculate how far a job is from the Provider's current position.
+*   **Multi-Threading:** Explain how background executors prevent the UI from freezing during heavy Map or Geocoding network calls.
+
+---
+
+## 💬 Person 4: Engagement & Real-time Systems
+**Core Flow:** Instant Messaging -> Booking Lifecycle -> Status Updates -> Reputation.
+
+### 🛣️ Owned Pages & User Flow:
+1.  **Live Interaction:** `MessagesActivity`, `MessagesFragment`, `ChatActivity`, `ChatRepository`.
+2.  **Lifecycle Management:** `BookingsActivity`, `BookingsFragment`, `BookingsPagerAdapter`.
+3.  **Status Flow:** `SeekerUpcomingFragment`/`ProviderUpcomingFragment` -> `OngoingFragment` -> `UpdateStatusActivity` -> `CompleteBookingDialogFragment`.
+4.  **Conflict & Review:** `CancellationDetailsActivity`, `ReviewsActivity`, `RatingDialog`.
+5.  **Notification Hub:** `NearNeedMessagingService` (FCM), `NotificationCenter`, `DashboardNotificationPopup`.
+
+### 🏗️ Underlying Logic & Models:
+*   **Models:** `Booking`, `BookingEntity`, `BookingDao`, `ChatMessage`, `Review`, `Status`.
+*   **Logic:** `BookingRepository`, `BookingViewModel`, `BookingStateManager`, `UpcomingJobManager`, `ChatRepository`, `ChatViewModel`.
+
+### 📚 Key Viva Concepts:
+*   **Real-time Snapshot Listeners:** Explain how the app updates chat messages and job statuses instantly without refreshing the page.
+*   **State Machine Logic:** Explain how the app enforces the "Active -> In Progress -> Completed" flow and prevents illegal status jumps.
+*   **Database Transactions:** Explain how `BookingRepository` prevents "double-booking" or data loss when two users update a job status at the same time.
+*   **Push Notification Lifecycle:** Explain how Firebase Cloud Messaging (FCM) tokens are generated and used to target specific users for alerts.

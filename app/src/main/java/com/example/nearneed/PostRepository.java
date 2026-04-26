@@ -82,6 +82,34 @@ public class PostRepository {
     }
 
     /**
+     * Observe all active posts in real-time.
+     * Useful for global feeds or when location filtering is not desired.
+     */
+    public static ListenerRegistration observeAllActivePosts(PostListener listener) {
+        if (listener == null) return null;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        return db.collection(POSTS_COLLECTION)
+                .whereEqualTo("status", "active")
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        listener.onError(e);
+                        return;
+                    }
+                    if (snapshot != null) {
+                        java.util.List<Post> posts = new java.util.ArrayList<>();
+                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                            Post post = fromSnapshot(doc);
+                            if (post != null) {
+                                posts.add(post);
+                            }
+                        }
+                        listener.onPostsLoaded(posts);
+                    }
+                });
+    }
+
+    /**
      * Observe nearby posts (within radius) in real-time, optionally filtered by type.
      * Returns a ListenerRegistration for cleanup in onStop().
      * Note: Firestore doesn't support spatial queries directly; this fetches all posts
@@ -118,6 +146,7 @@ public class PostRepository {
                     }
                 });
     }
+
 
     /**
      * Fetch all active posts (used by adapters that don't need real-time updates).

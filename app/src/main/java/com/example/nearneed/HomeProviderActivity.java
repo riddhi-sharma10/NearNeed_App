@@ -11,10 +11,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,130 +23,68 @@ import java.util.List;
 public class HomeProviderActivity extends AppCompatActivity {
 
     private TextView tvGreeting;
-    private TextView tvDeliveryLocation;
-    private TextView tvDashboardNotificationBadge;
-    private ListenerRegistration notifListener;
+    private PostViewModel postViewModel;
+    private UserViewModel userViewModel;
+    
     private NearbyRequestsAdapter nearbyRequestsAdapter;
     private CommunityVolunteeringAdapter communityVolunteeringAdapter;
-    private UserViewModel userViewModel;
-    private PostViewModel postViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (RoleManager.ROLE_SEEKER.equals(RoleManager.getRole(this))) {
-            startActivity(new Intent(this, MainActivity.class));
-            finish();
-            return;
-        }
+        
+        // Premium transparent status bar
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, android.R.color.transparent));
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         setContentView(R.layout.activity_home_provider);
 
+        // Bind Navbar - Provider uses Seeker Navbar for now as per instructions
+        SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
+
         tvGreeting = findViewById(R.id.tvGreeting);
-        tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
 
-        // Show cached values immediately so there's no blank flash
-        String cachedName = UserPrefs.getName(this);
-        String cachedLocation = UserPrefs.getLocation(this);
-        if (!cachedName.isEmpty()) {
-            tvGreeting.setText("Hello, " + cachedName);
-        }
-        if (cachedLocation != null && !cachedLocation.isEmpty()) {
-            tvDeliveryLocation.setText(cachedLocation);
-        }
-
-        // ViewModel drives real-time updates from Firestore
+        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+
+        setupHeader();
+        setupNearbyRequests();
+        setupCommunityVolunteering();
+        setupObservers();
+        setupDashboardNotifications();
+        setupRoleToggle();
+
+        findViewById(R.id.viewAllRequestsContainer).setOnClickListener(v ->
+            startActivity(new Intent(this, MapsActivity.class)));
+            
+        findViewById(R.id.btnPostCommunityRequest).setOnClickListener(v -> 
+            startActivity(new Intent(this, MapsActivity.class))); // View Community visibility in Map
+            
+        findViewById(R.id.locationSection).setOnClickListener(v -> showLocationPicker());
+    }
+
+    private void setupHeader() {
+        String cachedName = UserPrefs.getName(this);
+        if (!cachedName.isEmpty()) tvGreeting.setText("Hello, " + cachedName);
+
         userViewModel.getName().observe(this, name -> {
             tvGreeting.setText("Hello, " + name);
             UserPrefs.saveName(this, name);
         });
-        userViewModel.getLocation().observe(this, location -> {
-            tvDeliveryLocation.setText(location);
-            UserPrefs.saveLocation(this, location);
-        });
-
-        // Location section click
-        View locationSection = findViewById(R.id.locationSection);
-        if (locationSection != null) {
-            locationSection.setOnClickListener(v -> showLocationPicker());
-        }
-
-        setupRoleToggle();
-        setupDashboardNotifications();
-
-        findViewById(R.id.viewCalendar).setOnClickListener(v ->
-            startActivity(new Intent(this, CalendarProviderActivity.class)));
-
-        findViewById(R.id.btnPostCommunityRequest).setOnClickListener(v ->
-            new MaterialAlertDialogBuilder(this)
-                .setTitle("Switch to Seeker Mode")
-                .setMessage("To post a community request, please switch to Seeker mode.")
-                .setPositiveButton("Switch Now", (d, w) -> switchRole(RoleManager.ROLE_SEEKER))
-                .setNegativeButton("Cancel", null)
-                .show());
-
-        findViewById(R.id.earningsCard).setOnClickListener(v ->
-            startActivity(new Intent(this, MyEarningsActivity.class)));
-
-        View activeJobsCard = findViewById(R.id.statsGridActiveJobs);
-        if (activeJobsCard != null) {
-            activeJobsCard.setOnClickListener(v -> {
-                Intent intent = new Intent(this, BookingsActivity.class);
-                intent.putExtra("active_tab", "ongoing");
-                startActivity(intent);
-            });
-        }
-
-        View ratingCard = findViewById(R.id.statsGridRating);
-        if (ratingCard != null) {
-            ratingCard.setOnClickListener(v ->
-                startActivity(new Intent(this, ProfileActivity.class)));
-        }
-
-        findViewById(R.id.viewAllRequestsContainer).setOnClickListener(v ->
-            startActivity(new Intent(this, MapsActivity.class)));
-
-        setupNearbyRequests();
-
-        EditText searchEdit = findViewById(R.id.searchEditText);
-        TextView searchEmptyState = findViewById(R.id.tvSearchEmptyState);
-        DashboardSearchHelper.bindProviderSearch(searchEdit, nearbyRequestsAdapter,
-            communityVolunteeringAdapter, searchEmptyState);
-
-        postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
-        setupObservers();
-        requestLocationUpdates();
-
-        SeekerNavbarController.bind(this, findViewById(android.R.id.content),
-            SeekerNavbarController.TAB_HOME);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        notifListener = NotificationCenter.listenUnreadCount(this::updateBadge);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (notifListener != null) {
-            notifListener.remove();
-            notifListener = null;
-        }
     }
 
     private void showLocationPicker() {
-        LocationPickerHelper.show(this, location -> userViewModel.saveLocation(location));
+        LocationPickerHelper.show(this, (location, lat, lng) -> {
+            userViewModel.saveLocation(location);
+        });
     }
 
     private void setupNearbyRequests() {
         RecyclerView rvNearbyRequests = findViewById(R.id.rvNearbyRequests);
         nearbyRequestsAdapter = new NearbyRequestsAdapter();
-        rvNearbyRequests.setAdapter(nearbyRequestsAdapter);
-        setupCommunityVolunteering();
+        if (rvNearbyRequests != null) {
+            rvNearbyRequests.setAdapter(nearbyRequestsAdapter);
+        }
     }
 
     private void setupCommunityVolunteering() {
@@ -157,99 +96,51 @@ public class HomeProviderActivity extends AppCompatActivity {
     }
 
     private void setupObservers() {
-        // Default radius 5km
+        // Observe posts and filter by type (GIG vs COMMUNITY)
         postViewModel.getNearbyPosts().observe(this, posts -> {
+            if (posts == null) return;
             List<Post> gigs = new ArrayList<>();
             List<Post> community = new ArrayList<>();
             for (Post p : posts) {
-                if ("GIG".equals(p.type)) gigs.add(p);
-                else if ("COMMUNITY".equals(p.type)) community.add(p);
+                if ("GIG".equalsIgnoreCase(p.type)) {
+                    gigs.add(p);
+                } else if ("COMMUNITY".equalsIgnoreCase(p.type)) {
+                    community.add(p);
+                }
             }
             nearbyRequestsAdapter.setPosts(gigs);
             communityVolunteeringAdapter.setPosts(community);
         });
 
-        // Observation triggered by requestLocationUpdates()
-        
-        userViewModel.getLocation().observe(this, loc -> {
-            // Re-fetch if manual location picker was used
-            requestLocationUpdates();
-        });
-    }
-
-    private void requestLocationUpdates() {
-        if (LocationHelper.hasLocationPermissions(this)) {
-            LocationHelper.getCurrentLocation(this, new LocationHelper.LocationCallback() {
-                @Override
-                public void onLocationReceived(double lat, double lng) {
-                    postViewModel.observeNearbyPosts(HomeProviderActivity.this, lat, lng, 5.0);
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    postViewModel.observeNearbyPosts(HomeProviderActivity.this, 28.4595, 77.0266, 5.0);
-                }
-            });
-        } else {
-            postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 5.0);
-        }
+        // Use observeAllActivePosts to ensure everything is synced immediately and globally
+        postViewModel.observeAllActivePosts();
     }
 
     private void setupDashboardNotifications() {
         ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
-        tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
-
         if (ivDashboardNotifications != null) {
-            ivDashboardNotifications.setOnClickListener(v ->
-                DashboardNotificationPopup.show(this, v, null));
+            ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, null));
+        }
+        
+        // Search bar binding
+        View searchEdit = findViewById(R.id.searchEditText);
+        View searchEmptyState = findViewById(R.id.tvSearchEmptyState);
+        if (searchEdit instanceof EditText && searchEmptyState instanceof TextView) {
+            DashboardSearchHelper.bindProviderSearch((EditText) searchEdit, nearbyRequestsAdapter, 
+                communityVolunteeringAdapter, (TextView) searchEmptyState);
         }
     }
 
-    private void updateBadge(int count) {
-        if (tvDashboardNotificationBadge == null) return;
-        if (count <= 0) {
-            tvDashboardNotificationBadge.setVisibility(View.GONE);
-            return;
-        }
-        tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
-        tvDashboardNotificationBadge.setText(String.valueOf(Math.min(count, 9)));
+    private void setupRoleToggle() {
+        findViewById(R.id.tab_seeker).setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
+        findViewById(R.id.tab_provider).setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
     }
 
     private void switchRole(String newRole) {
         if (newRole.equals(RoleManager.getRole(this))) return;
-
         RoleManager.setRole(this, newRole);
-        String msg = RoleManager.ROLE_SEEKER.equals(newRole)
-            ? "Switched to Seeker mode" : "Switched to Provider mode";
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
-
-    private void setupRoleToggle() {
-        TextView tabSeeker = findViewById(R.id.tab_seeker);
-        TextView tabProvider = findViewById(R.id.tab_provider);
-
-        if (tabSeeker != null) tabSeeker.setOnClickListener(v -> switchRole(RoleManager.ROLE_SEEKER));
-        if (tabProvider != null) tabProvider.setOnClickListener(v -> switchRole(RoleManager.ROLE_PROVIDER));
-
-        updateToggleAppearance();
-    }
-
-    private void updateToggleAppearance() {
-        TextView tabSeeker = findViewById(R.id.tab_seeker);
-        TextView tabProvider = findViewById(R.id.tab_provider);
-
-        if (tabSeeker != null) {
-            tabSeeker.setBackground(null);
-            tabSeeker.setTextColor(ContextCompat.getColor(this, R.color.text_muted));
-        }
-        if (tabProvider != null) {
-            tabProvider.setBackgroundResource(R.drawable.bg_seeker_tab_active);
-            tabProvider.setTextColor(ContextCompat.getColor(this, R.color.brand_primary));
-        }
+        // Navigate back to MainActivity to handle role routing
+        startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        finish();
     }
 }

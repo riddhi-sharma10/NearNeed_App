@@ -8,6 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,6 +18,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -48,27 +52,17 @@ import org.maplibre.android.maps.OnMapReadyCallback;
 import org.maplibre.android.annotations.Icon;
 import org.maplibre.android.annotations.IconFactory;
 
-
-
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.json.JSONObject;
-import org.json.JSONArray;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.net.URLEncoder;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Locale;
 
-import java.io.IOException;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -83,63 +77,52 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.slider.Slider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private MapLibreMap mMap;
     private ActivityResultLauncher<String> requestPermissionLauncher;
     private MapView mapView;
     private String currentRole;
-    private boolean isGigsMode = true;
     private PostViewModel postViewModel;
 
     // UI elements - Common
-    
     private View infoCard;
     private Marker selectedMarker;
     private ApplicationViewModel applicationViewModel;
 
     // UI elements - Provider specific
-    private MaterialCardView jobDetailCard;
-    private Chip chipUrgency, chipBudget, chipDistance;
-    private EditText providerSearchEdit;
-    private ImageView recenterButton;
     private RecyclerView jobsList;
-    private JobListAdapter jobAdapter;
-    private List<Job> allJobs;
-    private List<Job> filteredJobs;
-    private BottomSheetBehavior<?> bottomSheetBehavior;
-    private View bottomSheetPanel;
-    private TextView bottomSheetCount;
+    private List<Job> filteredJobs = new ArrayList<>();
+    private Map<Job, Marker> jobToMarkerMap = new HashMap<>();
+    private Map<Marker, MarkerData> markerDataMap = new HashMap<>();
 
-    // Filter state
-    private boolean filterUrgency = false;
-    private boolean filterBudget = false;
-    private boolean filterDistance = false;
-
-    // Map of jobs to markers for syncing
-    private Map<Job, Marker> jobToMarkerMap;
-    private Map<Marker, MarkerData> markerDataMap;
-
-    // Track currently displayed job in detail card
-    private Job currentDetailJob;
-
-    private RecyclerView rvPredictions;
-    private SearchPredictionAdapter searchPredictionAdapter;
-    private OkHttpClient httpClient;
-    private final ExecutorService geocodeExecutor = Executors.newFixedThreadPool(2);
-    private Handler searchHandler;
+    // Search logic
+    private EditText searchEditText;
+    private RecyclerView rvSearchPredictions;
+    private SearchPredictionsAdapter searchAdapter;
+    private List<Address> searchResults = new ArrayList<>();
+    private Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
+    // Real-time state
+    private List<Post> latestPosts = new ArrayList<>();
+    private List<UserProfile> latestProviders = new ArrayList<>();
 
     private static class MarkerData {
         int iconResId;
         int color;
-        MarkerData(int icon, int col) { iconResId = icon; color = col; }
+        String title;
+        String snippet;
+        String budget;
+        String type;
+        MarkerData(int icon, int col, String title, String snippet, String budget, String type) { 
+            this.iconResId = icon; 
+            this.color = col;
+            this.title = title;
+            this.snippet = snippet;
+            this.budget = budget;
+            this.type = type;
+        }
     }
 
     // Job data class
@@ -148,17 +131,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         public String description;
         public String distance;
         public String budget;
-        public String category; // "High Urgency", "Normal", etc.
+        public String category; 
         public int iconResId;
         public int colorResId;
         public LatLng location;
-        public String type; // "GIG" or "COMMUNITY"
+        public String type; 
         public String postId;
         public String creatorId;
-        public int slots;        // total slots for COMMUNITY jobs (0 = not applicable)
-        public int slotsFilled;  // how many have applied
-        public boolean hasApplied;     // true if provider has already applied
-        public String applicationStatus; // "pending", "accepted", "rejected"
 
         public Job(String title, String description, String distance, String budget,
                    String category, int iconResId, int colorResId, LatLng location, String type) {
@@ -171,15 +150,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             this.colorResId = colorResId;
             this.location = location;
             this.type = type;
-            this.slots = 0;
-            this.slotsFilled = 0;
-            this.hasApplied = false;
-            this.applicationStatus = null;
-            this.postId = null;
-            this.creatorId = null;
         }
     }
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -187,1055 +159,434 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted && mMap != null && mMap.getStyle() != null) {
                 enableLocationComponent(mMap.getStyle());
-            } else if (!isGranted) {
-                Toast.makeText(requireContext(), "Location permission denied. Showing default location.", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @SuppressWarnings({"MissingPermission"})
-    private void enableLocationComponent(@NonNull Style loadedMapStyle) {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationComponent locationComponent = mMap.getLocationComponent();
-            LocationComponentActivationOptions locationComponentActivationOptions =
-                    LocationComponentActivationOptions.builder(requireContext(), loadedMapStyle)
-                            .useDefaultLocationEngine(true)
-                            .build();
-
-            locationComponent.activateLocationComponent(locationComponentActivationOptions);
-            locationComponent.setLocationComponentEnabled(true);
-            locationComponent.setCameraMode(CameraMode.TRACKING);
-            locationComponent.setRenderMode(RenderMode.COMPASS);
-        } else {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle bundle) {
-        // Initialize MapLibre before inflating layout
-        MapLibre.getInstance(requireContext());
-        
-        jobToMarkerMap = new HashMap<>();
-        markerDataMap = new HashMap<>();
-        currentRole = RoleManager.getRole(requireContext());
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Context context = getContext();
+        if (context != null) {
+            MapLibre.getInstance(context.getApplicationContext());
+            currentRole = RoleManager.getRole(context);
+        } else {
+            currentRole = RoleManager.ROLE_SEEKER;
+        }
 
-        int layoutId = RoleManager.ROLE_SEEKER.equals(currentRole) ?
-                R.layout.layout_maps_seeker : R.layout.layout_maps_provider;
-
+        int layoutId = RoleManager.ROLE_PROVIDER.equals(currentRole) ? R.layout.layout_maps_provider : R.layout.layout_maps_seeker;
         View view = inflater.inflate(layoutId, container, false);
 
-        
-        httpClient = new OkHttpClient();
-        searchHandler = new Handler(Looper.getMainLooper());
-        
-        rvPredictions = view.findViewById(R.id.rv_search_predictions);
-        if (rvPredictions != null) {
-            rvPredictions.setLayoutManager(new LinearLayoutManager(requireContext()));
-            searchPredictionAdapter = new SearchPredictionAdapter((lat, lng, name) -> {
-                InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null && view.getWindowToken() != null) {
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                rvPredictions.setVisibility(View.GONE);
-                if (mMap != null) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 15f));
-                }
-            });
-            rvPredictions.setAdapter(searchPredictionAdapter);
+        if (getActivity() != null) {
+            postViewModel = new ViewModelProvider(requireActivity()).get(PostViewModel.class);
+            applicationViewModel = new ViewModelProvider(requireActivity(), 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
+                .get(ApplicationViewModel.class);
         }
 
-        initUI(view);
-
-        postViewModel = new androidx.lifecycle.ViewModelProvider(this).get(PostViewModel.class);
-        applicationViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ApplicationViewModel.class);
-
-        if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
-            setupProviderMode(view);
-        }
-
-        applyInitialSearchState(view);
-
-        // Obtain the MapView
-        mapView = view.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.map : R.id.provider_map);
+        int mapId = RoleManager.ROLE_PROVIDER.equals(currentRole) ? R.id.provider_map : R.id.map;
+        mapView = view.findViewById(mapId);
+        
         if (mapView != null) {
-            mapView.onCreate(bundle);
+            mapView.onCreate(savedInstanceState);
             mapView.getMapAsync(this);
         }
 
-        SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_MAP);
+        if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
+            initProviderUI(view);
+        } else {
+            initSeekerUI(view);
+        }
 
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mapView != null) mapView.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mapView != null) mapView.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mapView != null) mapView.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mapView != null) mapView.onStop();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        if (mapView != null) mapView.onLowMemory();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (mapView != null) mapView.onDestroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mapView != null) mapView.onSaveInstanceState(outState);
-    }
-
-    private void initUI(View view) {
-        if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
-
-            infoCard = view.findViewById(R.id.seeker_info_card);
-
-            View bookNow = view.findViewById(R.id.btn_book_now);
-            if (bookNow != null) {
-                bookNow.setOnClickListener(v -> {
-                    if (selectedMarker != null) {
-                        String title = selectedMarker.getTitle();
-                        // For now, treat all seeker interactions as community volunteer posts
-                        // Check if this is a community pin by checking marker position against community jobs
-                        boolean isCommunity = allJobs.stream()
-                            .anyMatch(job -> "COMMUNITY".equals(job.type) && job.title.equals(title));
-                        if (isCommunity) {
-                            showVolunteerSheet(title);
-                        } else {
-                            Toast.makeText(getContext(), "Seeker Booking...", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-
-            EditText searchEdit = view.findViewById(R.id.search_edit_text);
-            setupSearchIntegration(searchEdit);
-            
-            ImageView icCompass = view.findViewById(R.id.ic_compass);
-            if (icCompass != null) {
-                icCompass.setOnClickListener(v -> recenterMapToUser());
-            }
-
-        } else {
-
-            infoCard = view.findViewById(R.id.provider_info_card);
-        }
-
+    private void initProviderUI(View view) {
+        infoCard = view.findViewById(R.id.provider_info_card);
         View closeBtn = view.findViewById(R.id.ic_close_card);
         if (closeBtn != null) closeBtn.setOnClickListener(v -> {
             if (infoCard != null) infoCard.setVisibility(View.GONE);
         });
-    }
 
-    private void setupProviderMode(View view) {
+        View bottomSheet = view.findViewById(R.id.provider_bottom_sheet);
+        if (bottomSheet != null) bottomSheet.setVisibility(View.GONE);
+
+        // Search Implementation
+        searchEditText = view.findViewById(R.id.provider_search_edit_text);
+        rvSearchPredictions = view.findViewById(R.id.rv_search_predictions);
         
-        allJobs = new ArrayList<>();
-        filteredJobs = new ArrayList<>();
-
-        // Real-time observation
-        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
-            allJobs.clear();
-            for (Post p : posts) {
-                Job j = new Job(
-                    p.title,
-                    p.description,
-                    String.format("%.1fkm", p.distance != null ? p.distance : 0.0),
-                    p.budget != null ? "₹" + p.budget : "Voluntary",
-                    "Normal",
-                    "GIG".equals(p.type) ? R.drawable.ic_plumber : R.drawable.ic_gardening,
-                    "GIG".equals(p.type) ? R.color.sapphire_primary : R.color.brand_success,
-                    new LatLng(p.latitude, p.longitude),
-                    p.type
-                );
-                j.postId = p.postId;
-                j.creatorId = p.userId;
-                allJobs.add(j);
-            }
-            applyFilters();
-        });
-
-        // Trigger observation (Gurgaon default if no loc)
-        postViewModel.observeNearbyPosts(getViewLifecycleOwner(), 28.4595, 77.0266, 10.0);
-
-        // Setup bottom sheet
-        bottomSheetPanel = view.findViewById(R.id.provider_bottom_sheet);
-        bottomSheetCount = view.findViewById(R.id.bottom_sheet_count);
-        jobsList = view.findViewById(R.id.provider_jobs_list);
-
-        if (bottomSheetPanel != null) {
-            bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetPanel);
-            bottomSheetBehavior.setPeekHeight(72);
-            bottomSheetBehavior.setHideable(false);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        if (rvSearchPredictions != null && getContext() != null) {
+            rvSearchPredictions.setLayoutManager(new LinearLayoutManager(getContext()));
+            searchAdapter = new SearchPredictionsAdapter(searchResults, address -> {
+                moveCameraToAddress(address);
+                if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
+                if (searchEditText != null) searchEditText.setText(address.getAddressLine(0));
+            });
+            rvSearchPredictions.setAdapter(searchAdapter);
         }
 
-        // Setup job list adapter
-        jobAdapter = new JobListAdapter(filteredJobs, new JobListAdapter.OnJobClickListener() {
-            @Override
-            public void onJobClick(Job job, int position) {
-                selectJob(job);
-                showJobDetailCard(job);
-            }
-
-            @Override
-            public void onViewPostClick(Job job) {
-                showProviderJobDetail(job);
-            }
-        });
-
-        if (jobsList != null) {
-            jobsList.setAdapter(jobAdapter);
-        }
-
-        // Setup search
-        providerSearchEdit = view.findViewById(R.id.provider_search_edit_text);
-        setupSearchIntegration(providerSearchEdit);
-        if (providerSearchEdit != null) {
-            providerSearchEdit.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    performSearch(s.toString());
+        if (searchEditText != null) {
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    scheduleSearch(s.toString());
                 }
-
-                @Override
-                public void afterTextChanged(Editable s) {}
+                @Override public void afterTextChanged(Editable s) {}
+            });
+            searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    performSearch(v.getText().toString());
+                    return true;
+                }
+                return false;
             });
         }
 
-        // Setup recenter button
-        recenterButton = view.findViewById(R.id.ic_recenter_location);
-        if (recenterButton != null) {
-            recenterButton.setOnClickListener(v -> recenterMapToUser());
-        }
-
-        // Setup job detail card
-        jobDetailCard = view.findViewById(R.id.provider_info_card);
-        View closeCard = view.findViewById(R.id.ic_close_card);
-        if (closeCard != null) {
-            closeCard.setOnClickListener(v -> {
-                if (jobDetailCard != null) jobDetailCard.setVisibility(View.GONE);
+        MaterialButton btnViewJob = view.findViewById(R.id.btn_accept_job);
+        if (btnViewJob != null) {
+            btnViewJob.setOnClickListener(v -> {
+                MarkerData data = (selectedMarker != null) ? markerDataMap.get(selectedMarker) : null;
+                if (data != null && getContext() != null) {
+                    Toast.makeText(getContext(), "Opening details for: " + data.title, Toast.LENGTH_SHORT).show();
+                }
             });
         }
-
-        View viewJobBtn = view.findViewById(R.id.btn_accept_job);
-        if (viewJobBtn != null) {
-            viewJobBtn.setOnClickListener(v -> {
-                if (currentDetailJob != null) {
-                    // Check if provider has already applied
-                    if (currentDetailJob.hasApplied) {
-                        // Show application status dialog
-                        showApplicationStatusDialog(currentDetailJob);
-                    } else {
-                        // Allow application
-                        if ("COMMUNITY".equals(currentDetailJob.type)) {
-                            showVolunteerSheet(currentDetailJob.title);
-                        } else {
-                            showGigApplySheet(currentDetailJob);
-                        }
-                    }
+        
+        View recenterBtn = view.findViewById(R.id.ic_recenter_location);
+        if (recenterBtn != null) {
+            recenterBtn.setOnClickListener(v -> {
+                if (mMap != null && mMap.getStyle() != null) {
+                    enableLocationComponent(mMap.getStyle());
                 }
             });
         }
     }
 
-
-    private void updateChipAppearance(Chip chip, boolean isSelected) {
-        if (isSelected) {
-            chip.setBackgroundTintList(ColorStateList.valueOf(
-                ContextCompat.getColor(requireContext(), R.color.sapphire_primary)));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
-        } else {
-            chip.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_body_dark));
-        }
-    }
-
-    private void applyFilters() {
-        filteredJobs.clear();
-
-        for (Job job : allJobs) {
-            boolean matches = true;
-
-            if (filterUrgency && !job.category.equals("High Urgency")) {
-                matches = false;
-            }
-
-            if (filterBudget && !job.budget.contains("500")) {
-                matches = false;
-            }
-
-            if (filterDistance && !job.distance.contains("0.5")) {
-                matches = false;
-            }
-
-            if (matches) {
-                filteredJobs.add(job);
-            }
-        }
-
-        if (jobAdapter != null) {
-            jobAdapter.updateList(filteredJobs);
-        }
-        updateMapMarkers();
-        updateBottomSheetCount();
-    }
-
-    
-    private void recenterMapToUser() {
-        if (mMap != null && mMap.getLocationComponent() != null && mMap.getLocationComponent().isLocationComponentActivated()) {
-            mMap.getLocationComponent().setCameraMode(CameraMode.TRACKING);
-            mMap.getLocationComponent().setRenderMode(RenderMode.COMPASS);
-        }
-    }
-
-        private void performGeocoding(String query) {
-        if (query.trim().isEmpty() || rvPredictions == null || searchPredictionAdapter == null) {
-            if (rvPredictions != null) rvPredictions.setVisibility(View.GONE);
+    private void scheduleSearch(String query) {
+        if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+        if (query.length() < 3) {
+            if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
             return;
         }
-
-        geocodeExecutor.submit(() -> {
-            List<SearchPredictionAdapter.GeocodingResult> aggregated = new ArrayList<>();
-            CountDownLatch latch = new CountDownLatch(2);
-            
-            String encodedQuery = query;
-            try { encodedQuery = URLEncoder.encode(query, "UTF-8"); } catch (Exception ignored) {}
-
-            // 1. Photon Call (lang=en)
-            String photonUrl = "https://photon.komoot.io/api/?limit=5&lang=en&q=" + encodedQuery;
-            Request req1 = new Request.Builder().url(photonUrl).build();
-            httpClient.newCall(req1).enqueue(new Callback() {
-                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
-                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
-                    try {
-                        if (r.isSuccessful() && r.body() != null) {
-                            JSONObject obj = new JSONObject(r.body().string());
-                            JSONArray features = obj.optJSONArray("features");
-                            if (features != null) {
-                                for(int i=0; i<features.length(); i++) {
-                                    JSONObject f = features.getJSONObject(i);
-                                    JSONObject p = f.optJSONObject("properties");
-                                    if(p==null) continue;
-                                    String name = p.optString("name", p.optString("street", "Unknown location"));
-                                    String sec = p.optString("city", "");
-                                    if(!p.optString("state", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("state");
-                                    if(!p.optString("country", "").isEmpty()) sec += (sec.isEmpty()?"":", ") + p.optString("country");
-                                    JSONArray coords = f.getJSONObject("geometry").getJSONArray("coordinates");
-                                    aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, coords.getDouble(1), coords.getDouble(0)));
-                                }
-                            }
-                        }
-                    } catch(Exception ignored) {}
-                    finally { latch.countDown(); }
-                }
-            });
-
-            // 2. Nominatim Call (Accept-Language: en)
-            String nomUrl = "https://nominatim.openstreetmap.org/search?format=json&limit=5&q=" + encodedQuery;
-            Request req2 = new Request.Builder().url(nomUrl).addHeader("Accept-Language", "en").addHeader("User-Agent", "NearNeed-AndroidApp").build();
-            httpClient.newCall(req2).enqueue(new Callback() {
-                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) { latch.countDown(); }
-                @Override public void onResponse(@NonNull Call call, @NonNull Response r) {
-                    try {
-                        if (r.isSuccessful() && r.body() != null) {
-                            JSONArray arr = new JSONArray(r.body().string());
-                            for(int i=0; i<arr.length(); i++) {
-                                JSONObject o = arr.getJSONObject(i);
-                                String[] parts = o.optString("display_name", "Unknown").split(",", 2);
-                                String name = parts[0].trim();
-                                String sec = parts.length > 1 ? parts[1].trim() : "";
-                                aggregated.add(new SearchPredictionAdapter.GeocodingResult(name, sec, o.getDouble("lat"), o.getDouble("lon")));
-                            }
-                        }
-                    } catch(Exception ignored) {}
-                    finally { latch.countDown(); }
-                }
-            });
-
-            try {
-                latch.await(4, TimeUnit.SECONDS);
-            } catch (InterruptedException ignored) {}
-
-            List<SearchPredictionAdapter.GeocodingResult> finalList = new ArrayList<>();
-            for (SearchPredictionAdapter.GeocodingResult res : aggregated) {
-                boolean dup = false;
-                for (SearchPredictionAdapter.GeocodingResult existing : finalList) {
-                    float[] results = new float[1];
-                    android.location.Location.distanceBetween(res.lat, res.lng, existing.lat, existing.lng, results);
-                    if (results[0] < 500) { // Same place if within 500 meters
-                        dup = true; break;
-                    }
-                }
-                if (!dup && finalList.size() < 6) finalList.add(res);
-            }
-
-            new Handler(Looper.getMainLooper()).post(() -> {
-                if (!finalList.isEmpty()) {
-                    rvPredictions.setVisibility(View.VISIBLE);
-                    searchPredictionAdapter.setPredictions(finalList);
-                } else {
-                    rvPredictions.setVisibility(View.GONE);
-                }
-            });
-        });
-    }
-
-    private void setupSearchIntegration(EditText editText) {
-        if (editText == null) return;
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (searchHandler != null && searchRunnable != null) {
-                    searchHandler.removeCallbacks(searchRunnable);
-                }
-                
-                searchRunnable = () -> performGeocoding(s.toString());
-                if (searchHandler != null) {
-                    searchHandler.postDelayed(searchRunnable, 500); // 500ms debounce
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
+        searchRunnable = () -> performSearch(query);
+        searchHandler.postDelayed(searchRunnable, 600);
     }
 
     private void performSearch(String query) {
-        if (filteredJobs == null) return;
-
-        filteredJobs.clear();
-
-        if (query.isEmpty()) {
-            applyFilters();
-            return;
-        }
-
-        String queryLower = query.toLowerCase();
-
-        for (Job job : allJobs) {
-            if (job.title.toLowerCase().contains(queryLower) ||
-                job.description.toLowerCase().contains(queryLower)) {
-                filteredJobs.add(job);
+        if (query == null || query.isEmpty() || getContext() == null) return;
+        
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        new Thread(() -> {
+            try {
+                List<Address> addresses = geocoder.getFromLocationName(query, 5);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (addresses != null && !addresses.isEmpty()) {
+                            searchResults.clear();
+                            searchResults.addAll(addresses);
+                            if (searchAdapter != null) searchAdapter.notifyDataSetChanged();
+                            if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.VISIBLE);
+                        } else {
+                            if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
-
-        if (jobAdapter != null) {
-            jobAdapter.updateList(filteredJobs);
-        }
-        updateMapMarkers();
-        updateBottomSheetCount();
+        }).start();
     }
 
-    private void applyInitialSearchState(View view) {
-        if (view == null || getActivity() == null) {
-            return;
+    private void moveCameraToAddress(Address address) {
+        if (mMap != null) {
+            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14f));
         }
+    }
 
-        android.content.Intent intent = requireActivity().getIntent();
-        String query = intent.getStringExtra("SEARCH_QUERY");
-        boolean focusSearch = intent.getBooleanExtra("FOCUS_SEARCH", false);
-
-        EditText searchEdit = RoleManager.ROLE_SEEKER.equals(currentRole)
-                ? view.findViewById(R.id.search_edit_text)
-                : view.findViewById(R.id.provider_search_edit_text);
-
-        if (searchEdit == null) {
-            return;
-        }
-
-        if (query != null && !query.trim().isEmpty()) {
-            searchEdit.setText(query);
-            searchEdit.setSelection(searchEdit.getText().length());
-            focusSearch = true;
-        }
-
-        if (focusSearch) {
-            view.post(() -> {
-                searchEdit.requestFocus();
-                InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null) {
-                    imm.showSoftInput(searchEdit, InputMethodManager.SHOW_IMPLICIT);
+    private void initSeekerUI(View view) {
+        infoCard = view.findViewById(R.id.seeker_info_card);
+        MaterialButton btnBook = view.findViewById(R.id.btn_book_now);
+        if (btnBook != null) {
+            btnBook.setOnClickListener(v -> {
+                Context context = getContext();
+                if (context != null) {
+                    Toast.makeText(context, "Booking system coming soon", Toast.LENGTH_SHORT).show();
                 }
             });
         }
-    }
-
-    private void recenterMap() {
-        if (mMap != null) {
-            LatLng mumbai = new LatLng(19.0760, 72.8777);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
-        }
-    }
-
-    private void updateMapMarkers() {
-        if (mMap == null) return;
-        mMap.removeAnnotations();
-        jobToMarkerMap.clear();
-        markerDataMap.clear();
-
-        int yellow = ContextCompat.getColor(requireContext(), R.color.sapphire_tertiary);
-        int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
-
-        for (Job job : filteredJobs) {
-            // Use green for community, yellow for gigs
-            int markerColor = "COMMUNITY".equals(job.type) ? green : yellow;
-
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(job.location)
-                .title(job.title)
-                .snippet(job.description)
-                .icon(getMarkerBitmapDescriptor(job.title, job.iconResId, markerColor, false)));
-
-            if (marker != null) {
-                jobToMarkerMap.put(job, marker);
-                if (markerDataMap != null) markerDataMap.put(marker, new MarkerData(job.iconResId, markerColor));
-            }
-        }
-    }
-
-    private void selectJob(Job job) {
-        int yellow = ContextCompat.getColor(requireContext(), R.color.sapphire_tertiary);
-        int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
-
-        // Clear previous selection
-        for (Map.Entry<Job, Marker> entry : jobToMarkerMap.entrySet()) {
-            Marker marker = entry.getValue();
-            Job j = entry.getKey();
-            if (markerDataMap.containsKey(marker)) {
-                MarkerData data = markerDataMap.get(marker);
-                int markerColor = "COMMUNITY".equals(j.type) ? green : yellow;
-                marker.setIcon(getMarkerBitmapDescriptor(marker.getTitle(), data.iconResId, markerColor, false));
-            }
-        }
-
-        // Highlight new selection
-        if (jobToMarkerMap.containsKey(job)) {
-            Marker marker = jobToMarkerMap.get(job);
-            if (marker != null) {
-                int markerColor = "COMMUNITY".equals(job.type) ? green : yellow;
-                marker.setIcon(getMarkerBitmapDescriptor(job.title, job.iconResId, markerColor, true));
-                selectedMarker = marker;
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(job.location));
-            }
-        }
-    }
-
-    private void showJobDetailCard(Job job) {
-        if (jobDetailCard == null) return;
-
-        jobDetailCard.setVisibility(View.VISIBLE);
-        currentDetailJob = job;
-
-        TextView title = jobDetailCard.findViewById(R.id.job_title);
-        TextView description = jobDetailCard.findViewById(R.id.job_description);
-        TextView distance = jobDetailCard.findViewById(R.id.job_distance);
-        TextView budget = jobDetailCard.findViewById(R.id.job_budget);
-        TextView tagGig = jobDetailCard.findViewById(R.id.tag_gig);
-        ImageView icon = jobDetailCard.findViewById(R.id.ic_job_type);
-        MaterialButton actionBtn = jobDetailCard.findViewById(R.id.btn_accept_job);
-
-        if (title != null) title.setText(job.title);
-        if (description != null) description.setText(job.description);
-        if (distance != null) distance.setText(job.distance);
-        if (budget != null) budget.setText(job.budget);
-        if (tagGig != null) tagGig.setText(job.type);
-
-        if (icon != null) {
-            icon.setImageResource(job.iconResId);
-            int color = ContextCompat.getColor(requireContext(), job.colorResId);
-            ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(color));
-        }
-
-        // Update action button based on job type and application status
-        if (actionBtn != null) {
-            if (job.hasApplied) {
-                // Provider has already applied - show status
-                actionBtn.setEnabled(false);
-                actionBtn.setAlpha(0.6f);
-
-                if ("pending".equals(job.applicationStatus)) {
-                    actionBtn.setText("Application Pending");
-                } else if ("accepted".equals(job.applicationStatus)) {
-                    actionBtn.setText("✓ Selected");
-                } else if ("rejected".equals(job.applicationStatus)) {
-                    actionBtn.setText("Application Rejected");
-                } else {
-                    actionBtn.setText("Already Applied");
-                }
-                actionBtn.setBackgroundTintList(ColorStateList.valueOf(
-                    ContextCompat.getColor(requireContext(), R.color.text_muted)));
-            } else {
-                // Provider hasn't applied yet - show apply option
-                actionBtn.setEnabled(true);
-                actionBtn.setAlpha(1.0f);
-
-                if ("COMMUNITY".equals(job.type)) {
-                    actionBtn.setText("Help");
-                    actionBtn.setBackgroundTintList(ColorStateList.valueOf(
-                        ContextCompat.getColor(requireContext(), R.color.brand_success)));
-                } else {
-                    actionBtn.setText("View Job");
-                    actionBtn.setBackgroundTintList(ColorStateList.valueOf(
-                        ContextCompat.getColor(requireContext(), R.color.sapphire_primary)));
-                }
-            }
-        }
-
-        // Display slots for COMMUNITY jobs
-        View rowSlots = jobDetailCard.findViewById(R.id.row_slots);
-        TextView tvSlots = jobDetailCard.findViewById(R.id.tvSlotsAvailable);
-        if ("COMMUNITY".equals(job.type) && job.slots > 0) {
-            if (rowSlots != null) rowSlots.setVisibility(View.VISIBLE);
-            if (tvSlots != null) tvSlots.setText(job.slotsFilled + " / " + job.slots + " slots filled");
-        } else {
-            if (rowSlots != null) rowSlots.setVisibility(View.GONE);
-        }
-    }
-
-    private void updateBottomSheetCount() {
-        if (bottomSheetCount != null) {
-            bottomSheetCount.setText(filteredJobs.size() + " available");
-        }
-    }
-
-    private void toggleMode(boolean gigs) {
-        if (isGigsMode == gigs) return;
-        isGigsMode = gigs;
-
-        
-
-        updateMarkers();
     }
 
     @Override
     public void onMapReady(@NonNull MapLibreMap mapLibreMap) {
         mMap = mapLibreMap;
-        mMap.getUiSettings().setCompassEnabled(false);
+        String styleUrl = "https://api.maptiler.com/maps/streets/style.json?key=64XK5FEM8kBYRPoTcYBu";
+        mMap.setStyle(new Style.Builder().fromUri(styleUrl), style -> {
+            if (mMap == null || !isAdded()) return;
+            
+            LatLng defaultPos = new LatLng(28.4595, 77.0266);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultPos, 13f));
 
-        String styleUrl = "https://api.maptiler.com/maps/streets-v2/style.json?key=" + BuildConfig.MAPTILER_API_KEY;
-        mMap.setStyle(new Style.Builder().fromUri(styleUrl), new Style.OnStyleLoaded() {
-            @Override
-            public void onStyleLoaded(@NonNull Style style) {
-                // Default fallback to Mumbai
-                LatLng mumbai = new LatLng(19.0760, 72.8777);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mumbai, 14f));
-
-                if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
-                    updateMapMarkers();
-                    setupProviderMapListeners();
-                } else {
-                    observePostsForSeeker();
-                    setupSeekerMapListeners();
-                }
-                
-                // Now check for permissions and launch tracking if allowed
-                enableLocationComponent(style);
+            if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
+                observeRealTimeDataForProvider();
+            } else {
+                observeRealTimeDataForSeeker();
             }
+            
+            enableLocationComponent(style);
+            
+            mMap.setOnMarkerClickListener(this::onMarkerClicked);
+            mMap.addOnMapClickListener(latLng -> {
+                if (infoCard != null) infoCard.setVisibility(View.GONE);
+                return true;
+            });
         });
     }
 
-    private void setupProviderMapListeners() {
-        mMap.setOnMarkerClickListener(marker -> {
-            // Find job by marker
-            for (Job job : filteredJobs) {
-                if (jobToMarkerMap.containsKey(job) && jobToMarkerMap.get(job) == marker) {
-                    selectJob(job);
-                    showJobDetailCard(job);
-                    return true;
-                }
-            }
-            return true;
-        });
-
-        mMap.addOnMapClickListener(latLng -> {
-            if (jobDetailCard != null) {
-                jobDetailCard.setVisibility(View.GONE);
-            }
-            return true;
-        });
-    }
-
-    private void setupSeekerMapListeners() {
-        mMap.setOnMarkerClickListener(marker -> {
-            if (selectedMarker != null && markerDataMap.containsKey(selectedMarker)) {
-                MarkerData oldData = markerDataMap.get(selectedMarker);
+    private boolean onMarkerClicked(@NonNull Marker marker) {
+        if (!isAdded()) return false;
+        
+        if (selectedMarker != null && markerDataMap.containsKey(selectedMarker)) {
+            MarkerData oldData = markerDataMap.get(selectedMarker);
+            if (oldData != null) {
                 selectedMarker.setIcon(getMarkerBitmapDescriptor(selectedMarker.getTitle(), oldData.iconResId, oldData.color, false));
             }
+        }
 
-            if (markerDataMap.containsKey(marker)) {
-                MarkerData newData = markerDataMap.get(marker);
+        if (markerDataMap.containsKey(marker)) {
+            MarkerData newData = markerDataMap.get(marker);
+            if (newData != null) {
                 marker.setIcon(getMarkerBitmapDescriptor(marker.getTitle(), newData.iconResId, newData.color, true));
-            }
-
-            selectedMarker = marker;
-            showInfoCard(marker);
-            return true;
-        });
-
-        mMap.addOnMapClickListener(latLng -> {
-            if (infoCard != null) infoCard.setVisibility(View.GONE);
-            return true;
-        });
-    }
-
-    private void observePostsForSeeker() {
-        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
-            mMap.removeAnnotations();
-            markerDataMap.clear();
-            
-            int blue = ContextCompat.getColor(requireContext(), R.color.sapphire_primary);
-            int green = ContextCompat.getColor(requireContext(), R.color.brand_success);
-
-            for (Post p : posts) {
-                if ("COMMUNITY".equals(p.type)) {
-                    addSampleMarker(new LatLng(p.latitude, p.longitude), p.title, p.description, green, R.drawable.ic_gardening);
-                } else if ("GIG".equals(p.type)) {
-                    // For now, seekers only see community posts or we can show gigs if we want
-                    addSampleMarker(new LatLng(p.latitude, p.longitude), p.title, p.description, blue, R.drawable.ic_toolbox_seeker);
+                selectedMarker = marker;
+                showInfoCard(marker, newData);
+                if (mMap != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
                 }
             }
+        }
+        return true;
+    }
+
+    private void showInfoCard(Marker marker, MarkerData data) {
+        if (infoCard == null || data == null || !isAdded()) return;
+        infoCard.setVisibility(View.VISIBLE);
+        
+        TextView titleTv = infoCard.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.provider_name : R.id.job_title);
+        TextView descTv = infoCard.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.provider_desc : R.id.job_description);
+        
+        if (titleTv != null) titleTv.setText(data.title != null ? data.title : "Untitled");
+        if (descTv != null) {
+            String type = data.type != null ? data.type : "";
+            String budgetStr = (data.budget != null && !data.budget.isEmpty() && !"N/A".equals(data.budget)) ? " • ₹" + data.budget : "";
+            descTv.setText(type + budgetStr);
+        }
+
+        if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
+            TextView budgetTv = infoCard.findViewById(R.id.job_budget);
+            if (budgetTv != null) budgetTv.setText("₹" + (data.budget != null ? data.budget : "0"));
+        }
+    }
+
+    private void observeRealTimeDataForProvider() {
+        if (postViewModel == null || !isAdded()) return;
+        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null && isAdded()) {
+                latestPosts = posts;
+                refreshProviderMap();
+            }
         });
-        postViewModel.observeNearbyPosts(getViewLifecycleOwner(), 28.4595, 77.0266, 10.0);
+        postViewModel.observeAllActivePosts();
     }
 
-    private void updateMarkers() {
-        // Obsolete - handled by observePostsForSeeker
-    }
+    private void refreshProviderMap() {
+        if (mMap == null || !isAdded()) return;
+        mMap.removeAnnotations();
+        jobToMarkerMap.clear();
+        markerDataMap.clear();
+        filteredJobs.clear();
 
-    private void addSampleMarker(LatLng pos, String title, String snippet, int color, int iconResId) {
-        Marker marker = mMap.addMarker(new MarkerOptions()
+        Context context = getContext();
+        if (context == null) return;
+
+        int orange = ContextCompat.getColor(context, R.color.brand_warning);
+        int green = ContextCompat.getColor(context, R.color.brand_success);
+
+        for (Post p : latestPosts) {
+            if (p == null) continue;
+            LatLng pos = new LatLng(p.lat != null ? p.lat : 28.4595, p.lng != null ? p.lng : 77.0266);
+            int color = "COMMUNITY".equalsIgnoreCase(p.type) ? green : orange;
+            int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;
+            
+            String title = p.title != null ? p.title : "Request";
+            Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(pos)
                 .title(title)
-                .snippet(snippet)
-                .icon(getMarkerBitmapDescriptor(title, iconResId, color, false)));
-        if (marker != null) if (markerDataMap != null) markerDataMap.put(marker, new MarkerData(iconResId, color));
+                .icon(getMarkerBitmapDescriptor(title, icon, color, false)));
+            
+            Job j = new Job(title, p.description, p.distance, p.budget, p.urgency, icon, color, pos, p.type);
+            j.postId = p.postId;
+            j.creatorId = p.userId;
+            
+            jobToMarkerMap.put(j, marker);
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type));
+            filteredJobs.add(j);
+        }
+    }
+
+    private void observeRealTimeDataForSeeker() {
+        if (postViewModel == null || !isAdded()) return;
+        UserProfileRepository.observeAllProviders(latestProviders, this::refreshSeekerMap);
+        postViewModel.getNearbyPosts().observe(getViewLifecycleOwner(), posts -> {
+            if (posts != null && isAdded()) {
+                latestPosts = posts;
+                refreshSeekerMap();
+            }
+        });
+        Context context = getContext();
+        if (context != null) {
+            postViewModel.observeNearbyPosts(context, 28.4595, 77.0266, 10.0);
+        }
+    }
+
+    private void refreshSeekerMap() {
+        if (mMap == null || !isAdded()) return;
+        mMap.removeAnnotations();
+        markerDataMap.clear();
+
+        Context context = getContext();
+        if (context == null) return;
+
+        int blue = ContextCompat.getColor(context, R.color.palette_primary);
+        int orange = ContextCompat.getColor(context, R.color.brand_warning);
+        int green = ContextCompat.getColor(context, R.color.brand_success);
+
+        for (UserProfile p : latestProviders) {
+            if (p != null && p.lat != null && p.lng != null) {
+                LatLng pos = new LatLng(p.lat, p.lng);
+                String name = p.fullName != null ? p.fullName : "Provider";
+                Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(getMarkerBitmapDescriptor(name, R.drawable.ic_toolbox_seeker, blue, false)));
+                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER"));
+            }
+        }
+
+        for (Post p : latestPosts) {
+            if (p == null) continue;
+            LatLng pos = new LatLng(p.lat != null ? p.lat : 28.4595, p.lng != null ? p.lng : 77.0266);
+            int color = "COMMUNITY".equalsIgnoreCase(p.type) ? green : orange;
+            int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;
+            String title = p.title != null ? p.title : "Request";
+            Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(title).icon(getMarkerBitmapDescriptor(title, icon, color, false)));
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type));
+        }
     }
 
     private Icon getMarkerBitmapDescriptor(String title, int iconResId, int bgColor, boolean isSelected) {
+        Context context = getContext();
+        if (context == null) return null;
+
         int iconSize = 100;
         int width = 240;
         int height = iconSize + 60;
-
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
         float centerX = width / 2f;
         float centerY = iconSize / 2f;
-
+        
         paint.setColor(Color.parseColor("#40000000"));
         canvas.drawCircle(centerX, centerY + 3, iconSize / 2f - 2, paint);
-
+        
         paint.setColor(bgColor);
         canvas.drawCircle(centerX, centerY, iconSize / 2f - 2, paint);
-
-        Drawable drawable = ContextCompat.getDrawable(requireContext(), iconResId);
+        
+        Drawable drawable = ContextCompat.getDrawable(context, iconResId);
         if (drawable != null) {
             drawable.setTint(Color.WHITE);
-            int dPadding = 25;
-            drawable.setBounds((int)(centerX - iconSize/2f + dPadding),
-                             (int)(centerY - iconSize/2f + dPadding),
-                             (int)(centerX + iconSize/2f - dPadding),
-                             (int)(centerY + iconSize/2f - dPadding));
+            int p = 25;
+            drawable.setBounds((int)(centerX - iconSize/2f + p), (int)(centerY - iconSize/2f + p), (int)(centerX + iconSize/2f - p), (int)(centerY + iconSize/2f - p));
             drawable.draw(canvas);
         }
-
-        String labelText = title.length() > 12 ? title.substring(0, 10) + ".." : title;
-        paint.setTextSize(24f);
+        
+        String safeTitle = title != null ? title : "Pin";
+        String label = safeTitle.length() > 12 ? safeTitle.substring(0, 10) + ".." : safeTitle;
+        paint.setTextSize(24f); 
         paint.setFakeBoldText(true);
-        float textWidth = paint.measureText(labelText);
-        float bubblePaddingH = 16f;
-        float bubblePaddingV = 8f;
-        float bubbleWidth = textWidth + (bubblePaddingH * 2);
-        float bubbleHeight = 36f;
-
-        float bubbleLeft = centerX - (bubbleWidth / 2f);
-        float bubbleTop = iconSize + 4;
-
-        paint.setColor(isSelected ? ContextCompat.getColor(requireContext(), R.color.sapphire_primary) : Color.WHITE);
-        canvas.drawRoundRect(bubbleLeft, bubbleTop, bubbleLeft + bubbleWidth, bubbleTop + bubbleHeight, 10f, 10f, paint);
-
+        float tw = paint.measureText(label);
+        float bh = 36f; 
+        float bw = tw + 32f;
+        float bl = centerX - (bw / 2f); 
+        float bt = iconSize + 4;
+        
+        paint.setColor(isSelected ? ContextCompat.getColor(context, R.color.palette_primary) : Color.WHITE);
+        canvas.drawRoundRect(bl, bt, bl + bw, bt + bh, 10f, 10f, paint);
+        
         paint.setColor(isSelected ? Color.WHITE : Color.parseColor("#0F172A"));
-        canvas.drawText(labelText, bubbleLeft + bubblePaddingH, bubbleTop + bubbleHeight - 10f, paint);
-
-        return IconFactory.getInstance(requireContext()).fromBitmap(bitmap);
+        canvas.drawText(label, bl + 16f, bt + bh - 10f, paint);
+        
+        return IconFactory.getInstance(context).fromBitmap(bitmap);
     }
 
-    private void showInfoCard(Marker marker) {
-        if (infoCard == null) return;
-        infoCard.setVisibility(View.VISIBLE);
-        if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
-
-            TextView name = infoCard.findViewById(R.id.provider_name);
-            TextView desc = infoCard.findViewById(R.id.provider_desc);
-            if (name != null) name.setText(marker.getTitle());
-            if (desc != null) desc.setText(marker.getSnippet() + " • 0.8 miles away");
-        } else {
-            TextView title = infoCard.findViewById(R.id.job_title);
-            if (title != null) title.setText(marker.getTitle());
+    @SuppressWarnings({"MissingPermission"})
+    private void enableLocationComponent(@NonNull Style style) {
+        if (!isAdded()) return;
+        Context context = getContext();
+        if (context != null && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationComponent lc = mMap.getLocationComponent();
+            lc.activateLocationComponent(LocationComponentActivationOptions.builder(context, style).useDefaultLocationEngine(true).build());
+            lc.setLocationComponentEnabled(true);
+            lc.setCameraMode(CameraMode.TRACKING);
+            lc.setRenderMode(RenderMode.COMPASS);
+        } else if (context != null) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
-    /**
-     * Shows the volunteer message bottom sheet.
-     */
-    private void showVolunteerSheet(String postTitle) {
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View sheetView = getLayoutInflater().inflate(R.layout.layout_community_respond_sheet, null);
-        dialog.setContentView(sheetView);
-
-        MaterialButton applyBtn = sheetView.findViewById(R.id.btn_apply_volunteer);
-        if (applyBtn != null) {
-            applyBtn.setOnClickListener(v -> {
-                // Mark job as applied with pending status
-                if (currentDetailJob != null) {
-                    currentDetailJob.hasApplied = true;
-                    currentDetailJob.applicationStatus = "pending";
-
-                    // Increment slot count if available
-                    if (currentDetailJob.slots > 0) {
-                        currentDetailJob.slotsFilled = Math.min(currentDetailJob.slotsFilled + 1, currentDetailJob.slots);
-                    }
-
-                    // Real-time submit
-                    applicationViewModel.submitApplication(
-                        currentDetailJob.postId,
-                        currentDetailJob.title,
-                        currentDetailJob.type,
-                        currentDetailJob.creatorId,
-                        "I would like to volunteer for this community request.",
-                        "0", "VOLUNTEER", null
-                    );
-                }
-                dialog.dismiss();
-                showSuccessDialog();
-
-                // Update the detail card to show application status
-                if (currentDetailJob != null) {
-                    showJobDetailCard(currentDetailJob);
-                }
-            });
+    @Override public void onStart() { super.onStart(); if (mapView != null) mapView.onStart(); }
+    @Override public void onResume() { super.onResume(); if (mapView != null) mapView.onResume(); }
+    @Override public void onPause() { super.onPause(); if (mapView != null) mapView.onPause(); }
+    @Override public void onStop() { super.onStop(); if (mapView != null) mapView.onStop(); }
+    @Override public void onLowMemory() { super.onLowMemory(); if (mapView != null) mapView.onLowMemory(); }
+    @Override public void onDestroyView() { 
+        if (mapView != null) {
+            mapView.onDestroy(); 
         }
-
-        dialog.show();
+        super.onDestroyView(); 
     }
+    @Override public void onSaveInstanceState(@NonNull Bundle outState) { super.onSaveInstanceState(outState); if (mapView != null) mapView.onSaveInstanceState(outState); }
 
-    /**
-     * Shows the gig application bottom sheet for GIG type jobs.
-     */
-    private void showGigApplySheet(Job job) {
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View sheetView = getLayoutInflater().inflate(R.layout.layout_gig_apply_sheet, null);
-        dialog.setContentView(sheetView);
+    // Helper Adapter for Search Predictions
+    private static class SearchPredictionsAdapter extends RecyclerView.Adapter<SearchPredictionsAdapter.ViewHolder> {
+        private final List<Address> results;
+        private final OnAddressClickListener listener;
 
-        EditText messageField = sheetView.findViewById(R.id.et_gig_message);
-        View cardCash = sheetView.findViewById(R.id.card_cash);
-        View cardUpi = sheetView.findViewById(R.id.card_upi);
-        Slider budgetSlider = sheetView.findViewById(R.id.slider_budget);
-        TextView budgetValue = sheetView.findViewById(R.id.tv_budget_value);
-        MaterialButton submitBtn = sheetView.findViewById(R.id.btn_submit_application);
+        interface OnAddressClickListener { void onAddressClick(Address address); }
 
-        // Track selected payment method (default to Cash)
-        final String[] selectedPayment = {"CASH"};
-
-        // Handle budget slider
-        if (budgetSlider != null && budgetValue != null) {
-            budgetSlider.addOnChangeListener((slider, value, fromUser) -> {
-                budgetValue.setText("₹" + String.format("%.0f", value));
-            });
+        SearchPredictionsAdapter(List<Address> results, OnAddressClickListener listener) {
+            this.results = results;
+            this.listener = listener;
         }
 
-        // Handle Cash card selection
-        if (cardCash != null) {
-            cardCash.setOnClickListener(v -> {
-                selectedPayment[0] = "CASH";
-                updatePaymentCardUI(cardCash, cardUpi, true);
-            });
+        @NonNull @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+            return new ViewHolder(view);
         }
 
-        // Handle UPI card selection
-        if (cardUpi != null) {
-            cardUpi.setOnClickListener(v -> {
-                selectedPayment[0] = "UPI";
-                updatePaymentCardUI(cardCash, cardUpi, false);
-            });
+        @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Address address = results.get(position);
+            holder.text1.setText(address.getFeatureName());
+            holder.text2.setText(address.getAddressLine(0));
+            holder.itemView.setOnClickListener(v -> listener.onAddressClick(address));
         }
 
-        // Handle submit
-        if (submitBtn != null) {
-            submitBtn.setOnClickListener(v -> {
-                String message = messageField != null ? messageField.getText().toString().trim() : "";
+        @Override public int getItemCount() { return results.size(); }
 
-                if (message.isEmpty()) {
-                    if (messageField != null) {
-                        messageField.setError("Please write a short message about yourself");
-                    }
-                    return;
-                }
-
-                // Mark job as applied with pending status
-                job.hasApplied = true;
-                job.applicationStatus = "pending";
-
-                // Real-time submit
-                applicationViewModel.submitApplication(
-                    job.postId,
-                    job.title,
-                    job.type,
-                    job.creatorId,
-                    message,
-                    budgetValue != null ? budgetValue.getText().toString() : "0",
-                    selectedPayment[0], null
-                );
-
-                dialog.dismiss();
-                showGigApplicationSuccessDialog();
-
-                // Update the detail card to show application status
-                if (currentDetailJob != null) {
-                    showJobDetailCard(currentDetailJob);
-                }
-            });
-        }
-
-        dialog.show();
-    }
-
-    /**
-     * Updates the visual state of payment method cards.
-     */
-    private void updatePaymentCardUI(View cardCash, View cardUpi, boolean isCashSelected) {
-        if (cardCash != null) {
-            MaterialCardView cashCard = (MaterialCardView) cardCash;
-            if (isCashSelected) {
-                cashCard.setStrokeWidth(2);
-                cashCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.sapphire_primary));
-                cashCard.setCardElevation(2);
-            } else {
-                cashCard.setStrokeWidth(1);
-                cashCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
-                cashCard.setCardElevation(0);
+        static class ViewHolder extends RecyclerView.ViewHolder {
+            TextView text1, text2;
+            ViewHolder(View itemView) {
+                super(itemView);
+                text1 = itemView.findViewById(android.R.id.text1);
+                text2 = itemView.findViewById(android.R.id.text2);
             }
         }
-
-        if (cardUpi != null) {
-            MaterialCardView upiCard = (MaterialCardView) cardUpi;
-            if (!isCashSelected) {
-                upiCard.setStrokeWidth(2);
-                upiCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.sapphire_primary));
-                upiCard.setCardElevation(2);
-            } else {
-                upiCard.setStrokeWidth(1);
-                upiCard.setStrokeColor(ContextCompat.getColor(requireContext(), R.color.text_muted));
-                upiCard.setCardElevation(0);
-            }
-        }
-    }
-
-    /**
-     * Shows success dialog for gig application.
-     */
-    private void showGigApplicationSuccessDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Application Sent!")
-                .setMessage("The seeker will review your request. You'll be notified when they respond.")
-                .setIcon(android.R.drawable.ic_dialog_info);
-
-        Dialog dialog = builder.show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (dialog != null && dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }, 3000);
-    }
-
-    /**
-     * Shows success dialog and auto-closes after 3 seconds.
-     */
-    private void showSuccessDialog() {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(requireContext())
-                .setTitle("You're in!")
-                .setMessage("Your response has been sent. Redirecting to home...")
-                .setIcon(android.R.drawable.ic_dialog_info);
-
-        Dialog dialog = builder.show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (dialog != null && dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }, 3000);
-    }
-
-    /**
-     * Shows a dialog displaying the provider's current application status.
-     */
-    private void showApplicationStatusDialog(Job job) {
-        String title = "Application Status";
-        String message;
-
-        if ("pending".equals(job.applicationStatus)) {
-            message = "Your application is pending review. The seeker will notify you soon.";
-        } else if ("accepted".equals(job.applicationStatus)) {
-            message = "Congratulations! You have been selected for this job.";
-        } else if ("rejected".equals(job.applicationStatus)) {
-            message = "Unfortunately, your application was not selected for this opportunity.";
-        } else {
-            message = "You have already applied for this job. Check back for updates.";
-        }
-
-        new MaterialAlertDialogBuilder(requireContext())
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", null)
-            .show();
-    }
-
-    /**
-     * Navigates to ProviderJobDetailActivity with job details.
-     */
-    private void showProviderJobDetail(Job job) {
-        Intent intent = new Intent(requireContext(), ProviderJobDetailActivity.class);
-        intent.putExtra("title", job.title);
-        intent.putExtra("description", job.description);
-        intent.putExtra("category", job.category);
-        intent.putExtra("budget", job.budget);
-        intent.putExtra("distance", job.distance);
-        intent.putExtra("duration", "2-3 hours");
-        intent.putExtra("type", job.type);
-        startActivity(intent);
     }
 }

@@ -5,12 +5,16 @@ import android.view.Window;
 import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import org.maplibre.android.MapLibre;
 
 public class MapsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // MapLibre MUST be initialized before any MapView is created
+        MapLibre.getInstance(getApplicationContext());
         
         // Premium transparent status bar
         Window window = getWindow();

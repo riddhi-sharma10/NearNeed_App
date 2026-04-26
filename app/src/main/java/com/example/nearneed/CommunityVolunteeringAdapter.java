@@ -51,9 +51,12 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
     @NonNull
     @Override
     public CommunityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new CommunityViewHolder(
-            LayoutInflater.from(parent.getContext()).inflate(R.layout.item_community_post_card, parent, false)
-        );
+        android.view.View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_community_post_card, parent, false);
+        // Adjust width for horizontal scroll
+        ViewGroup.LayoutParams lp = view.getLayoutParams();
+        lp.width = (int) (300 * parent.getContext().getResources().getDisplayMetrics().density);
+        view.setLayoutParams(lp);
+        return new CommunityViewHolder(view);
     }
 
     @Override

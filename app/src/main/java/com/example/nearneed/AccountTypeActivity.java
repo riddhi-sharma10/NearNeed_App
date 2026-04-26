@@ -41,18 +41,23 @@ public class AccountTypeActivity extends AppCompatActivity {
     }
 
     private void completeRegistration(String role) {
+        String finalRole = "seeker".equals(role) ? RoleManager.ROLE_SEEKER : RoleManager.ROLE_PROVIDER;
+        RoleManager.setRole(this, finalRole);
+
+        // Save role to Firestore so other users can find providers
+        java.util.Map<String, Object> updates = new java.util.HashMap<>();
+        updates.put("role", finalRole);
+        UserProfileRepository.saveCurrentUserProfile(updates, null);
+
         if ("seeker".equals(role)) {
-            RoleManager.setRole(this, RoleManager.ROLE_SEEKER);
-            // Navigate to main seeker home screen (empty state handled within the activity)
             Intent intent = new Intent(this, HomeSeekerActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         } else {
-            RoleManager.setRole(this, RoleManager.ROLE_PROVIDER);
-            // Standard flow for providers
             Intent intent = new Intent(this, CommunityPreferencesActivity.class);
             intent.putExtra("USER_ROLE", role);
             startActivity(intent);
         }
     }
+
 }

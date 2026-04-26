@@ -18,6 +18,15 @@ public class Review {
         // Required for Firestore
     }
 
+    public String reviewerName; // Added for UI convenience
+
+    public Review(String reviewerName, float rating, String comment, long createdAt) {
+        this.reviewerName = reviewerName;
+        this.rating = rating;
+        this.comment = comment;
+        this.createdAt = createdAt;
+    }
+
     public Review(String bookingId, String postId, String reviewerId, String revieweeId, float rating, String comment) {
         this.bookingId = bookingId;
         this.postId = postId;
@@ -27,4 +36,10 @@ public class Review {
         this.comment = comment;
         this.createdAt = System.currentTimeMillis();
     }
+
+    public String getReviewerName() { return reviewerName != null ? reviewerName : "Anonymous"; }
+    public float getRating() { return rating; }
+    public String getReviewText() { return comment; }
+    public long getReviewDate() { return createdAt; }
+
 }

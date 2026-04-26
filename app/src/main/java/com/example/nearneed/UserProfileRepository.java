@@ -124,6 +124,7 @@ public final class UserProfileRepository {
         profile.isVerified = snapshot.getBoolean("isVerified");
         profile.lat = snapshot.getDouble("lat");
         profile.lng = snapshot.getDouble("lng");
+        profile.role = snapshot.getString("role");
         return profile;
     }
 
@@ -181,5 +182,43 @@ public final class UserProfileRepository {
                 });
             }
         }).start();
+    }
+
+    /**
+     * Observe nearby providers in real-time.
+     */
+    public static ListenerRegistration observeNearbyProviders(ProfileListener listener) {
+        return FirebaseFirestore.getInstance().collection(USERS_COLLECTION)
+                .whereEqualTo("role", RoleManager.ROLE_PROVIDER)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) {
+                        return;
+                    }
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        UserProfile profile = fromSnapshot(doc);
+                        if (profile != null && profile.lat != null && profile.lng != null) {
+                            listener.onProfileChanged(profile);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Observe all providers in real-time.
+     */
+    public static ListenerRegistration observeAllProviders(java.util.List<UserProfile> providerList, Runnable onComplete) {
+        return FirebaseFirestore.getInstance().collection(USERS_COLLECTION)
+                .whereEqualTo("role", RoleManager.ROLE_PROVIDER)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+                    providerList.clear();
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        UserProfile profile = fromSnapshot(doc);
+                        if (profile != null) {
+                            providerList.add(profile);
+                        }
+                    }
+                    if (onComplete != null) onComplete.run();
+                });
     }
 }

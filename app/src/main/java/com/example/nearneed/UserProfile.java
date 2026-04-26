@@ -12,6 +12,7 @@ public class UserProfile {
     public Double lng;
     public String email;
     public String phone;
+    public String role;
 
     public UserProfile() {
     }

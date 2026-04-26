@@ -90,27 +90,6 @@ public class HomeSeekerActivity extends AppCompatActivity {
         setupFAB();
         setupDashboardNotifications();
         setupObservers();
-        requestLocationUpdates();
-    }
-
-    private void requestLocationUpdates() {
-        if (LocationHelper.hasLocationPermissions(this)) {
-            LocationHelper.getCurrentLocation(this, new LocationHelper.LocationCallback() {
-                @Override
-                public void onLocationReceived(double lat, double lng) {
-                    postViewModel.observeNearbyPosts(HomeSeekerActivity.this, lat, lng, 10.0);
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    // Fallback to default or cached
-                    postViewModel.observeNearbyPosts(HomeSeekerActivity.this, 28.4595, 77.0266, 10.0);
-                }
-            });
-        } else {
-            // Request permissions if needed, or fallback
-            postViewModel.observeNearbyPosts(this, 28.4595, 77.0266, 10.0);
-        }
     }
 
     private void setupRecyclerViews() {
@@ -123,7 +102,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
         gigsAdapter = new DashboardGigsAdapter();
         rvMyGigs.setAdapter(gigsAdapter);
 
-        rvCommunity.setLayoutManager(new LinearLayoutManager(this));
+        rvCommunity.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         communityAdapter = new CommunityVolunteeringAdapter();
         rvCommunity.setAdapter(communityAdapter);
         
@@ -148,7 +127,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
             postViewModel.getUserPosts().observe(this, posts -> {
                 List<Post> myGigs = new ArrayList<>();
                 for (Post p : posts) {
-                    if ("GIG".equals(p.type)) myGigs.add(p);
+                    if ("GIG".equalsIgnoreCase(p.type)) myGigs.add(p);
                 }
                 gigsAdapter.setPosts(myGigs);
                 
@@ -163,15 +142,20 @@ public class HomeSeekerActivity extends AppCompatActivity {
             postViewModel.observeUserPosts(this, userId);
         }
 
+        // Observe global active posts for Community Needs to ensure immediate sync from all users
         postViewModel.getNearbyPosts().observe(this, posts -> {
+            if (posts == null) return;
             List<Post> communityPosts = new ArrayList<>();
             for (Post p : posts) {
-                if ("COMMUNITY".equals(p.type)) communityPosts.add(p);
+                if ("COMMUNITY".equalsIgnoreCase(p.type)) {
+                    communityPosts.add(p);
+                }
             }
             communityAdapter.setPosts(communityPosts);
         });
         
-        // Observation triggered by requestLocationUpdates()
+        // Sync globally to ensure all community posts appear immediately
+        postViewModel.observeAllActivePosts();
     }
 
     private void setupFAB() {
@@ -182,7 +166,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
     }
 
     private void showLocationPicker() {
-        LocationPickerHelper.show(this, location -> userViewModel.saveLocation(location));
+        LocationPickerHelper.show(this, (location, lat, lng) -> userViewModel.saveLocation(location));
     }
 
     private void setupDashboardNotifications() {

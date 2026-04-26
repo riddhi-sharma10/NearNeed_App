@@ -39,6 +39,8 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     
     private String postType, title, description, category;
     private PostViewModel postViewModel;
+    private Double selectedLat = 28.4595; // Default Gurgaon
+    private Double selectedLng = 77.0266;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,13 +96,15 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         }
 
         findViewById(R.id.llLocationSearch).setOnClickListener(v -> {
-            LocationPickerHelper.show(this, displayText -> {
+            LocationPickerHelper.show(this, (displayText, lat, lng) -> {
                 String loc = displayText;
                 if (loc.startsWith("DELIVER TO: ")) {
                     loc = loc.substring("DELIVER TO: ".length());
                 }
                 tvLocationSearch.setText(loc);
                 tvLocationSearch.setTextColor(Color.parseColor("#111827"));
+                selectedLat = lat;
+                selectedLng = lng;
                 updatePostButtonState();
             });
         });
@@ -222,8 +226,8 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         post.status = "active";
         post.imageUrls = imageUrls; // Assuming Post model has this field
         
-        post.lat = 28.4595; 
-        post.lng = 77.0266;
+        post.lat = selectedLat; 
+        post.lng = selectedLng;
 
         btnPostRequest.setText("Posting...");
 

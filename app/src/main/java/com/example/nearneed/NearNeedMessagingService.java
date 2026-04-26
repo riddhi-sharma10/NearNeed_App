@@ -71,7 +71,7 @@ public class NearNeedMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_notification_bell) // Ensure this icon exists
+                .setSmallIcon(R.drawable.ic_bell) // Using existing bell icon
                 .setContentTitle(title)
                 .setContentText(body)
                 .setAutoCancel(true)

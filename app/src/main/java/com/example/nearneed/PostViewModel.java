@@ -84,6 +84,31 @@ public class PostViewModel extends ViewModel {
     }
 
     /**
+     * Observe all active posts globally.
+     */
+    public void observeAllActivePosts() {
+        if (nearbyPostsListener != null) {
+            nearbyPostsListener.remove();
+        }
+
+        isLoading.setValue(true);
+        nearbyPostsListener = PostRepository.observeAllActivePosts(new PostRepository.PostListener() {
+            @Override
+            public void onPostsLoaded(List<Post> posts) {
+                nearbyPosts.setValue(posts);
+                isLoading.setValue(false);
+                errorMessage.setValue(null);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                errorMessage.setValue("Error loading all posts: " + e.getMessage());
+                isLoading.setValue(false);
+            }
+        });
+    }
+
+    /**
      * Observe nearby posts in real-time.
      */
     public void observeNearbyPosts(Context context, double latitude, double longitude, double radiusKm) {
@@ -108,6 +133,7 @@ public class PostViewModel extends ViewModel {
             }
         });
     }
+
 
     /**
      * Create a new post.

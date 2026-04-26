@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.google.firebase.FirebaseApp;
+import org.maplibre.android.MapLibre;
 
 public class NearNeedApp extends Application {
 
@@ -13,6 +14,10 @@ public class NearNeedApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        
+        // Initialize MapLibre at the Application level
+        MapLibre.getInstance(this);
+        
         try {
             FirebaseApp.initializeApp(this);
             firebaseReady = !FirebaseApp.getApps(this).isEmpty();

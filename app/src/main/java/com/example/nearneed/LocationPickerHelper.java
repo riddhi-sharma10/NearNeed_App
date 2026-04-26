@@ -30,7 +30,7 @@ import android.text.TextWatcher;
 public class LocationPickerHelper {
 
     public interface OnLocationSelectedListener {
-        void onSelected(String displayText);
+        void onSelected(String displayText, double lat, double lng);
     }
 
     private static final int LOCATION_PERMISSION_REQ = 101;
@@ -56,7 +56,7 @@ public class LocationPickerHelper {
         View rowHome = view.findViewById(R.id.rowHome);
         if (rowHome != null) {
             rowHome.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: HOME - SECTOR 15");
+                selectLocation("DELIVER TO: HOME - SECTOR 15", 28.4671, 77.0425);
                 dialog.dismiss();
             });
         }
@@ -65,7 +65,7 @@ public class LocationPickerHelper {
         View rowWork = view.findViewById(R.id.rowWork);
         if (rowWork != null) {
             rowWork.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: WORK - DLF CYBER CITY");
+                selectLocation("DELIVER TO: WORK - DLF CYBER CITY", 28.4951, 77.0881);
                 dialog.dismiss();
             });
         }
@@ -74,7 +74,7 @@ public class LocationPickerHelper {
         View rowRecent1 = view.findViewById(R.id.rowRecent1);
         if (rowRecent1 != null) {
             rowRecent1.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: SECTOR 21, GURUGRAM");
+                selectLocation("DELIVER TO: SECTOR 21, GURUGRAM", 28.5034, 77.0678);
                 dialog.dismiss();
             });
         }
@@ -83,7 +83,7 @@ public class LocationPickerHelper {
         View rowRecent2 = view.findViewById(R.id.rowRecent2);
         if (rowRecent2 != null) {
             rowRecent2.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: CONNAUGHT PLACE, DELHI");
+                selectLocation("DELIVER TO: CONNAUGHT PLACE, DELHI", 28.6304, 77.2177);
                 dialog.dismiss();
             });
         }
@@ -107,7 +107,7 @@ public class LocationPickerHelper {
             SearchPredictionAdapter adapter = new SearchPredictionAdapter((lat, lng, name) -> {
                 // When a search result is clicked
                 String displayText = "DELIVER TO: " + name;
-                selectLocation(displayText);
+                selectLocation(displayText, lat, lng);
                 dialog.dismiss();
             });
             rvPredictions.setAdapter(adapter);
@@ -140,9 +140,9 @@ public class LocationPickerHelper {
     }
 
 
-    private static void selectLocation(String displayText) {
+    private static void selectLocation(String displayText, double lat, double lng) {
         if (currentCallback != null) {
-            currentCallback.onSelected(displayText);
+            currentCallback.onSelected(displayText, lat, lng);
         }
     }
 
@@ -178,7 +178,7 @@ public class LocationPickerHelper {
                         Address address = addresses.get(0);
                         String addressText = address.getAddressLine(0);
                         String displayText = "DELIVER TO: " + addressText;
-                        selectLocation(displayText);
+                        selectLocation(displayText, location.getLatitude(), location.getLongitude());
                         dialog.dismiss();
                     } else {
                         Toast.makeText(activity, "Unable to get address", Toast.LENGTH_SHORT).show();

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class HomeProviderActivity extends AppCompatActivity {
     
     private NearbyRequestsAdapter nearbyRequestsAdapter;
     private CommunityVolunteeringAdapter communityVolunteeringAdapter;
+    private ListenerRegistration badgeListener;
+    private TextView tvDashboardNotificationBadge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +121,22 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void setupDashboardNotifications() {
         ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
+        tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
         if (ivDashboardNotifications != null) {
             ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, null));
         }
+
+        // Real-time badge sync
+        badgeListener = NotificationCenter.listenUnreadCount(count -> {
+            if (tvDashboardNotificationBadge != null) {
+                if (count > 0) {
+                    tvDashboardNotificationBadge.setText(String.valueOf(count));
+                    tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvDashboardNotificationBadge.setVisibility(View.GONE);
+                }
+            }
+        });
         
         // Search bar binding
         View searchEdit = findViewById(R.id.searchEditText);
@@ -142,5 +158,14 @@ public class HomeProviderActivity extends AppCompatActivity {
         // Navigate back to MainActivity to handle role routing
         startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         finish();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (badgeListener != null) {
+            badgeListener.remove();
+            badgeListener = null;
+        }
     }
 }

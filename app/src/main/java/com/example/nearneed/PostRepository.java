@@ -123,7 +123,6 @@ public class PostRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(POSTS_COLLECTION)
                 .whereEqualTo("status", "active")
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);

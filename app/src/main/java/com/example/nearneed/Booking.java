@@ -40,6 +40,7 @@ public class Booking {
     
     // Application reference (optional)
     public String applicationId;        // Reference to the application that led to this booking
+    public java.util.List<String> participants; // [seekerId, providerId] for easier querying
 
     public Booking() {}
 

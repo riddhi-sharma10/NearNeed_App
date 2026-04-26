@@ -49,6 +49,8 @@ public class BookingRepository {
         booking.status = "confirmed";
         booking.paymentStatus = "pending";
 
+        booking.participants = java.util.Arrays.asList(seekerId, providerId);
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
@@ -72,8 +74,7 @@ public class BookingRepository {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
-                .whereEqualTo("seekerId", currentUserId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereArrayContains("participants", currentUserId)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -125,8 +126,7 @@ public class BookingRepository {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
-                .whereEqualTo("seekerId", currentUserId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereArrayContains("participants", currentUserId)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -154,7 +154,6 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);

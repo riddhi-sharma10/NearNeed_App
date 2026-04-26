@@ -173,11 +173,34 @@ public class HomeSeekerActivity extends AppCompatActivity {
         ImageView ivDashboardNotifications = findViewById(R.id.ivDashboardNotifications);
         tvDashboardNotificationBadge = findViewById(R.id.tvDashboardNotificationBadge);
         if (ivDashboardNotifications != null) {
-            ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, null));
+            ivDashboardNotifications.setOnClickListener(v -> DashboardNotificationPopup.show(this, v, () -> {
+                // Potential callback logic
+            }));
         }
+
+        // Real-time badge sync
+        notifListener = NotificationCenter.listenUnreadCount(count -> {
+            if (tvDashboardNotificationBadge != null) {
+                if (count > 0) {
+                    tvDashboardNotificationBadge.setText(String.valueOf(count));
+                    tvDashboardNotificationBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvDashboardNotificationBadge.setVisibility(View.GONE);
+                }
+            }
+        });
         
         // Bind search
         DashboardSearchHelper.bindSeekerSearch(findViewById(android.R.id.content), gigsAdapter, communityAdapter, this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (notifListener != null) {
+            notifListener.remove();
+            notifListener = null;
+        }
     }
 
     private void setupRoleToggle() {

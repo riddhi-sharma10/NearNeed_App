@@ -181,12 +181,17 @@ public class IdVerificationActivity extends AppCompatActivity {
                     .addOnSuccessListener(visionText -> {
                         String resultText = visionText.getText();
                         if (resultText != null && !resultText.isEmpty()) {
-                            // Basic logic to confirm it looks like an ID
-                            boolean looksLikeId = resultText.length() > 20; 
+                            // Deep analysis for authenticity
+                            boolean hasGovKeywords = checkGovKeywords(resultText);
+                            boolean hasIdPatterns = checkIdPatterns(resultText);
+                            
+                            // High confidence if it has patterns, medium if it has keywords + length
+                            boolean looksLikeId = hasIdPatterns || (hasGovKeywords && resultText.length() > 50);
+                            
                             if (looksLikeId) {
                                 finalizeOcrResult(card, icon, title, desc, tick, side, true);
                             } else {
-                                Toast.makeText(this, "Image too blurry or not an ID", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Document not recognized as a valid ID. Please try again.", Toast.LENGTH_LONG).show();
                                 finalizeOcrResult(card, icon, title, desc, tick, side, false);
                             }
                         } else {
@@ -232,6 +237,27 @@ public class IdVerificationActivity extends AppCompatActivity {
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 .collection("Users").document(user.getUid())
                 .set(data, com.google.firebase.firestore.SetOptions.merge());
+    }
+
+    private boolean checkGovKeywords(String text) {
+        String upper = text.toUpperCase();
+        return upper.contains("INDIA") || upper.contains("GOVERNMENT") || 
+               upper.contains("AADHAAR") || upper.contains("INCOME TAX") || 
+               upper.contains("ELECTION COMMISSION") || upper.contains("IDENTITY CARD") ||
+               upper.contains("LICENSE") || upper.contains("PASSPORT") || upper.contains("UIDAI");
+    }
+
+    private boolean checkIdPatterns(String text) {
+        // Aadhaar: 12 digits (often with spaces)
+        boolean hasAadhaar = text.matches(".*\\d{4}\\s\\d{4}\\s\\d{4}.*") || text.matches(".*\\d{12}.*");
+        
+        // PAN: 5 letters, 4 digits, 1 letter
+        boolean hasPan = text.matches(".*[A-Z]{5}[0-9]{4}[A-Z]{1}.*");
+        
+        // Passport: Letter + 7 digits
+        boolean hasPassport = text.matches(".*[A-Z]{1}[0-9]{7}.*");
+        
+        return hasAadhaar || hasPan || hasPassport;
     }
 
     private void checkReadyToSubmit() {

@@ -68,6 +68,16 @@ public class HelpSupportActivity extends AppCompatActivity {
                 R.id.faqChatAnswer,
                 R.id.faqChatArrow
         );
+        setupFaq(
+                R.id.faqProfileHeader,
+                R.id.faqProfileAnswer,
+                R.id.faqProfileArrow
+        );
+        setupFaq(
+                R.id.faqSecurityHeader,
+                R.id.faqSecurityAnswer,
+                R.id.faqSecurityArrow
+        );
 
         View btnContactUs = findViewById(R.id.btnContactUs);
         if (btnContactUs != null) {
@@ -122,6 +132,22 @@ public class HelpSupportActivity extends AppCompatActivity {
         updateFaqText(R.id.faqChatHeader, R.id.faqChatAnswer,
                 "Can I cancel a job I accepted?",
                 "Yes, from the 'My Bookings' tab. However, frequent cancellations negatively impact your profile score, so only cancel if absolutely necessary.");
+
+        updateFaqText(R.id.faqNotificationsHeader, R.id.faqNotificationsAnswer,
+                "How do I get notified of new jobs?",
+                "Ensure notifications are enabled in your phone settings and set your service area to receive alerts for nearby requests.");
+
+        updateFaqText(R.id.faqReportHeader, R.id.faqReportAnswer,
+                "What if a Seeker is unresponsive?",
+                "You can cancel the booking if they don't respond, or report them using the menu options in the chat.");
+
+        updateFaqText(R.id.faqProfileHeader, R.id.faqProfileAnswer,
+                "How do I showcase my skills?",
+                "Add a clear profile photo and list your primary skills in your bio so Seekers know exactly what services you offer.");
+
+        updateFaqText(R.id.faqSecurityHeader, R.id.faqSecurityAnswer,
+                "Is my contact info shared?",
+                "Your exact phone number is kept private unless you share it in chat. We encourage keeping all communication on the platform for safety.");
     }
 
     private void updateFaqText(@IdRes int headerId, @IdRes int answerId, String question, String answer) {

@@ -7,32 +7,33 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-import android.net.Uri;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class UpdateStatusActivity extends AppCompatActivity {
 
     private String currentStatus = "pending";
     private String selectedStatus = "pending";
+    private String selectedPaymentMethod = ""; // "upi" or "cash"
+
     private MaterialButton btnStatusPending, btnStatusOngoing, btnStatusCompleted, btnStatusCancelled;
     private MaterialButton btnSubmitStatus;
     private ImageView btnClose;
+    
+    private LinearLayout layoutCancellationReason, layoutPaymentMethod;
+    private TextInputEditText etCancellationReason;
+    
+    private MaterialCardView cardPayUPI, cardPayCash;
+    private TextView tvUpiLabel, tvCashLabel;
+
     private String bookingId;
     private String bookingTitle;
 
@@ -62,30 +63,45 @@ public class UpdateStatusActivity extends AppCompatActivity {
         btnStatusCancelled = findViewById(R.id.btnStatusCancelled);
         btnSubmitStatus = findViewById(R.id.btnSubmitStatus);
         btnClose = findViewById(R.id.btnClose);
+        
+        layoutCancellationReason = findViewById(R.id.layoutCancellationReason);
+        layoutPaymentMethod = findViewById(R.id.layoutPaymentMethod);
+        etCancellationReason = findViewById(R.id.etCancellationReason);
+        
+        cardPayUPI = findViewById(R.id.cardPayUPI);
+        cardPayCash = findViewById(R.id.cardPayCash);
+        tvUpiLabel = findViewById(R.id.tvUpiLabel);
+        tvCashLabel = findViewById(R.id.tvCashLabel);
 
-        // Setup status button listeners
+        // Setup listeners
         setupStatusButtons();
+        setupPaymentMethods();
 
-        // Setup submit button
         btnSubmitStatus.setOnClickListener(v -> submitStatusUpdate());
-
-        // Setup close button
         btnClose.setOnClickListener(v -> finish());
     }
 
     private void setupStatusButtons() {
-        btnStatusPending.setOnClickListener(v -> selectStatus("pending", btnStatusPending));
-        btnStatusOngoing.setOnClickListener(v -> selectStatus("ongoing", btnStatusOngoing));
-        btnStatusCompleted.setOnClickListener(v -> selectStatus("completed", btnStatusCompleted));
-        btnStatusCancelled.setOnClickListener(v -> selectStatus("cancelled", btnStatusCancelled));
+        btnStatusPending.setOnClickListener(v -> selectStatus("pending"));
+        btnStatusOngoing.setOnClickListener(v -> selectStatus("ongoing"));
+        btnStatusCompleted.setOnClickListener(v -> selectStatus("completed"));
+        btnStatusCancelled.setOnClickListener(v -> selectStatus("cancelled"));
 
-        // Set initial state
         updateStatusButtonStyles();
     }
 
-    private void selectStatus(String status, MaterialButton selectedButton) {
+    private void selectStatus(String status) {
         selectedStatus = status;
         updateStatusButtonStyles();
+        
+        // Show/Hide expanding sections
+        layoutCancellationReason.setVisibility("cancelled".equals(status) ? View.VISIBLE : View.GONE);
+        layoutPaymentMethod.setVisibility("completed".equals(status) ? View.VISIBLE : View.GONE);
+        
+        if (!"completed".equals(status)) {
+            selectedPaymentMethod = "";
+            updatePaymentMethodStyles();
+        }
     }
 
     private void updateStatusButtonStyles() {
@@ -94,38 +110,66 @@ public class UpdateStatusActivity extends AppCompatActivity {
         int textMutedColor = ContextCompat.getColor(this, R.color.text_muted);
 
         // Reset all buttons
-        btnStatusPending.setStrokeColor(ColorStateList.valueOf(mutedColor));
-        btnStatusOngoing.setStrokeColor(ColorStateList.valueOf(mutedColor));
-        btnStatusCompleted.setStrokeColor(ColorStateList.valueOf(mutedColor));
-        btnStatusCancelled.setStrokeColor(ColorStateList.valueOf(mutedColor));
-
-        btnStatusPending.setTextColor(textMutedColor);
-        btnStatusOngoing.setTextColor(textMutedColor);
-        btnStatusCompleted.setTextColor(textMutedColor);
-        btnStatusCancelled.setTextColor(textMutedColor);
+        MaterialButton[] buttons = {btnStatusPending, btnStatusOngoing, btnStatusCompleted, btnStatusCancelled};
+        for (MaterialButton btn : buttons) {
+            btn.setStrokeColor(ColorStateList.valueOf(mutedColor));
+            btn.setTextColor(textMutedColor);
+            btn.setIconTint(ColorStateList.valueOf(textMutedColor));
+        }
 
         // Highlight selected button
         switch (selectedStatus) {
             case "pending":
-                btnStatusPending.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusPending.setTextColor(primaryColor);
+                highlightButton(btnStatusPending, primaryColor);
                 break;
             case "ongoing":
-                btnStatusOngoing.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusOngoing.setTextColor(primaryColor);
+                highlightButton(btnStatusOngoing, primaryColor);
                 break;
             case "completed":
-                btnStatusCompleted.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusCompleted.setTextColor(primaryColor);
+                highlightButton(btnStatusCompleted, primaryColor);
                 break;
             case "cancelled":
-                btnStatusCancelled.setStrokeColor(ColorStateList.valueOf(primaryColor));
-                btnStatusCancelled.setTextColor(primaryColor);
+                highlightButton(btnStatusCancelled, ContextCompat.getColor(this, R.color.urgent_red));
                 break;
         }
     }
+    
+    private void highlightButton(MaterialButton btn, int color) {
+        btn.setStrokeColor(ColorStateList.valueOf(color));
+        btn.setTextColor(color);
+        btn.setIconTint(ColorStateList.valueOf(color));
+    }
 
-
+    private void setupPaymentMethods() {
+        cardPayUPI.setOnClickListener(v -> {
+            selectedPaymentMethod = "upi";
+            updatePaymentMethodStyles();
+        });
+        
+        cardPayCash.setOnClickListener(v -> {
+            selectedPaymentMethod = "cash";
+            updatePaymentMethodStyles();
+        });
+    }
+    
+    private void updatePaymentMethodStyles() {
+        int mutedColor = ContextCompat.getColor(this, R.color.divider_subtle);
+        int primaryColor = ContextCompat.getColor(this, R.color.sapphire_primary);
+        int textMutedColor = ContextCompat.getColor(this, R.color.text_muted);
+        
+        cardPayUPI.setStrokeColor(mutedColor);
+        tvUpiLabel.setTextColor(textMutedColor);
+        cardPayCash.setStrokeColor(mutedColor);
+        tvCashLabel.setTextColor(textMutedColor);
+        
+        if ("upi".equals(selectedPaymentMethod)) {
+            cardPayUPI.setStrokeColor(primaryColor);
+            tvUpiLabel.setTextColor(primaryColor);
+        } else if ("cash".equals(selectedPaymentMethod)) {
+            cardPayCash.setStrokeColor(primaryColor);
+            tvCashLabel.setTextColor(primaryColor);
+        }
+    }
 
     private void submitStatusUpdate() {
         if (selectedStatus.equals(currentStatus)) {
@@ -133,12 +177,46 @@ public class UpdateStatusActivity extends AppCompatActivity {
             return;
         }
 
+        if ("cancelled".equals(selectedStatus)) {
+            String reason = etCancellationReason.getText().toString().trim();
+            if (reason.isEmpty()) {
+                Toast.makeText(this, "Please provide a cancellation reason", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         // Persist in-memory state
         BookingStateManager.getInstance().setStatus(bookingId, selectedStatus);
 
-        // If completed, navigate to payment flow
+        // If completed, show rating dialog before payment
         if ("completed".equals(selectedStatus)) {
-            navigateToPaymentFlow("");
+            if (selectedPaymentMethod.isEmpty()) {
+                Toast.makeText(this, "Please select Cash or UPI to proceed", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            CompleteBookingDialogFragment dialog = CompleteBookingDialogFragment.newInstance(
+                    bookingId != null ? bookingId : "",
+                    bookingTitle != null ? bookingTitle : "Service",
+                    "Provider Name",
+                    500.0 // Mock amount for demo
+            );
+            dialog.setOnPaymentClickListener((bId, rating, notes) -> {
+                if ("cash".equals(selectedPaymentMethod)) {
+                    // Navigate to intermediate processing screen for Cash
+                    Intent intent = new Intent(this, ProcessingPaymentActivity.class);
+                    intent.putExtra("booking_id", bookingId);
+                    intent.putExtra("service_name", bookingTitle);
+                    intent.putExtra("service_amount", 500.0);
+                    intent.putExtra("is_cash", true);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // Navigate to Razorpay payment flow for UPI
+                    navigateToPaymentFlow(notes);
+                }
+            });
+            dialog.show(getSupportFragmentManager(), "CompleteBooking");
             return;
         }
 
@@ -158,7 +236,7 @@ public class UpdateStatusActivity extends AppCompatActivity {
         intent.putExtra("booking_id", bookingId != null ? bookingId : "");
         intent.putExtra("service_name", bookingTitle != null ? bookingTitle : "Service");
         intent.putExtra("provider_name", "Provider Name");
-        intent.putExtra("service_amount", 500.0); // Default amount, can be customized
+        intent.putExtra("service_amount", 500.0); // Mock amount for demo
         intent.putExtra("completion_notes", completionNotes);
         startActivity(intent);
         finish();

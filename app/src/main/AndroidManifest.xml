@@ -16,6 +16,17 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Required for Razorpay to detect installed UPI apps on Android 11+ -->
+    <queries>
+        <package android:name="com.google.android.apps.nbu.paisa.user" />
+        <package android:name="com.phonepe.app" />
+        <package android:name="net.one97.paytm" />
+        <package android:name="in.org.npci.upiapp" />
+        <package android:name="in.amazon.mShop.android.shopping" />
+        <package android:name="com.mobikwik_new" />
+    </queries>
+
     <application
         android:name=".NearNeedApp"
         android:allowBackup="true"
@@ -116,6 +127,10 @@
 
         <activity
             android:name=".PaymentFlowActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProcessingPaymentActivity"
             android:exported="false" />
 
         <activity

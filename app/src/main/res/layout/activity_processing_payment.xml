@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@color/white"
+    android:padding="24dp">
+
+    <!-- Animation Container -->
+    <FrameLayout
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="32dp">
+
+        <!-- Outer Decorative Circle (faint) -->
+        <View
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_circle_light_green"
+            android:alpha="0.1" />
+
+        <!-- Loading Spinner -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/sapphire_primary" />
+
+        <!-- Success Checkmark (Hidden initially) -->
+        <ImageView
+            android:id="@+id/ivSuccessCheck"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_check_circle_green"
+            android:visibility="gone"
+            app:tint="@color/brand_success_vibrant" />
+            
+    </FrameLayout>
+
+    <!-- Status Text -->
+    <TextView
+        android:id="@+id/tvStatusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Processing Payment..."
+        android:textColor="@color/text_header"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/tvSubStatusText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please do not close this screen or press back."
+        android:textColor="@color/text_subheadline"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp" />
+
+    <!-- Security Badge -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="48dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@drawable/bg_chip_blue_soft">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_shield_check"
+            app:tint="@color/sapphire_primary"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Secured by NearNeed"
+            android:textColor="@color/sapphire_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+</LinearLayout>

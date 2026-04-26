@@ -49,7 +49,6 @@
                     app:tint="@color/text_muted" />
             </LinearLayout>
 
-            <!-- Status Options -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,12 +58,12 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Status Buttons -->
+            <!-- Status Buttons Group -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="32dp">
+                android:layout_marginBottom="16dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStatusCompleted"
@@ -76,6 +75,10 @@
                     android:gravity="start|center_vertical"
                     android:paddingStart="16dp"
                     android:layout_marginBottom="12dp"
+                    app:icon="@drawable/ic_check_circle_green"
+                    app:iconTint="@color/text_muted"
+                    app:iconPadding="12dp"
+                    app:iconGravity="textStart"
                     app:strokeColor="@color/divider_subtle"
                     app:strokeWidth="1dp"
                     app:cornerRadius="10dp" />
@@ -90,6 +93,10 @@
                     android:gravity="start|center_vertical"
                     android:paddingStart="16dp"
                     android:layout_marginBottom="12dp"
+                    app:icon="@drawable/ic_clock"
+                    app:iconTint="@color/text_muted"
+                    app:iconPadding="12dp"
+                    app:iconGravity="textStart"
                     app:strokeColor="@color/divider_subtle"
                     app:strokeWidth="1dp"
                     app:cornerRadius="10dp" />
@@ -104,6 +111,10 @@
                     android:gravity="start|center_vertical"
                     android:paddingStart="16dp"
                     android:layout_marginBottom="12dp"
+                    app:icon="@drawable/ic_calendar_nav"
+                    app:iconTint="@color/text_muted"
+                    app:iconPadding="12dp"
+                    app:iconGravity="textStart"
                     app:strokeColor="@color/divider_subtle"
                     app:strokeWidth="1dp"
                     app:cornerRadius="10dp" />
@@ -117,9 +128,154 @@
                     android:textColor="@color/text_muted"
                     android:gravity="start|center_vertical"
                     android:paddingStart="16dp"
+                    app:icon="@drawable/ic_close"
+                    app:iconTint="@color/text_muted"
+                    app:iconPadding="12dp"
+                    app:iconGravity="textStart"
                     app:strokeColor="@color/divider_subtle"
                     app:strokeWidth="1dp"
                     app:cornerRadius="10dp" />
+            </LinearLayout>
+
+            <!-- Cancellation Reason (Hidden by default) -->
+            <LinearLayout
+                android:id="@+id/layoutCancellationReason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp">
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Reason for Cancellation"
+                    android:textColor="@color/text_header"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxStrokeColor="@color/sapphire_primary"
+                    app:hintEnabled="false"
+                    app:boxBackgroundColor="#F9FAFB">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCancellationReason"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Tell us what happened..."
+                        android:textColor="@color/text_header"
+                        android:minLines="3"
+                        android:gravity="top|start" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <!-- Payment Options (Hidden by default) -->
+            <LinearLayout
+                android:id="@+id/layoutPaymentMethod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp">
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Payment Method"
+                    android:textColor="@color/text_header"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- UPI Option -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPayUPI"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/divider_subtle"
+                        app:strokeWidth="1dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="16dp">
+                            
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_payment_wallet_blue"
+                                app:tint="@color/text_muted"
+                                android:layout_marginBottom="8dp"/>
+                                
+                            <TextView
+                                android:id="@+id/tvUpiLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Online / UPI"
+                                android:textColor="@color/text_muted"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Cash Option -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardPayCash"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/divider_subtle"
+                        app:strokeWidth="1dp">
+                        
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="16dp">
+                            
+                            <ImageView
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:src="@drawable/ic_cash_icon"
+                                app:tint="@color/text_muted"
+                                android:layout_marginBottom="8dp"/>
+                                
+                            <TextView
+                                android:id="@+id/tvCashLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Cash on Site"
+                                android:textColor="@color/text_muted"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Submit Button -->

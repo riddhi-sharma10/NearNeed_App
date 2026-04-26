@@ -24,6 +24,9 @@ android {
         val mapTilerKey = properties.getProperty("MAPTILER_API_KEY") ?: ""
         buildConfigField("String", "MAPTILER_API_KEY", "\"$mapTilerKey\"")
 
+        val geminiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -57,20 +57,11 @@ public class HelpSupportActivity extends AppCompatActivity {
                 R.id.faqReportAnswer,
                 R.id.faqReportArrow
         );
-        setupFaq(
-                R.id.faqPasswordHeader,
-                R.id.faqPasswordAnswer,
-                R.id.faqPasswordArrow
-        );
+
         setupFaq(
                 R.id.faqNotificationsHeader,
                 R.id.faqNotificationsAnswer,
                 R.id.faqNotificationsArrow
-        );
-        setupFaq(
-                R.id.faqVisibilityHeader,
-                R.id.faqVisibilityAnswer,
-                R.id.faqVisibilityArrow
         );
         setupFaq(
                 R.id.faqChatHeader,
@@ -92,12 +83,14 @@ public class HelpSupportActivity extends AppCompatActivity {
 
         view.findViewById(R.id.btnContinueChat).setOnClickListener(v -> {
             dialog.dismiss();
-            android.widget.Toast.makeText(this, "Starting support chat...", android.widget.Toast.LENGTH_SHORT).show();
+            startActivity(new android.content.Intent(this, AiChatActivity.class));
         });
 
         view.findViewById(R.id.btnCallAgent).setOnClickListener(v -> {
             dialog.dismiss();
-            android.widget.Toast.makeText(this, "Connecting to support line...", android.widget.Toast.LENGTH_SHORT).show();
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_DIAL);
+            intent.setData(android.net.Uri.parse("tel:18001234567"));
+            startActivity(intent);
         });
 
         view.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
@@ -107,28 +100,28 @@ public class HelpSupportActivity extends AppCompatActivity {
 
     private void updateProviderFaqs() {
         updateFaqText(R.id.faqPostGigHeader, R.id.faqPostGigAnswer,
-                "How do I accept a job?",
-                "Open your jobs feed, review the applicant's request, and tap 'Accept' to start. Communicate via chat for details.");
+                "How do I find and accept jobs?",
+                "Browse the map or your Home feed for nearby Gigs. Tap 'Apply' to express interest. Once the Seeker accepts, the booking is confirmed!");
 
         updateFaqText(R.id.faqIdVerifyHeader, R.id.faqIdVerifyAnswer,
-                "Does verification help my earnings?",
-                "Yes! Verified providers are 3x more likely to be chosen by seekers. It builds trust in the community.");
+                "Does ID Verification help me?",
+                "Absolutely! Providers with a Verified ID badge get up to 3x more bookings because Seekers trust them more.");
 
         updateFaqText(R.id.faqFeeHeader, R.id.faqFeeAnswer,
-                "What is the service fee for providers?",
-                "NearNeed typically takes a small platform fee from completed bookings to keep the platform running securely.");
+                "How do I get paid?",
+                "Seekers pay you directly via Cash or UPI after you complete the work. Make sure to agree on the payment method in the chat beforehand.");
 
         updateFaqText(R.id.faqLocationHeader, R.id.faqLocationAnswer,
                 "How do I set my service area?",
-                "Go to Profile > Edit Profile to set your service radius. You will only see jobs within this distance.");
+                "Go to Profile > Edit Profile and adjust your location. You will only see and be notified of jobs within this specific area.");
 
         updateFaqText(R.id.faqScoreHeader, R.id.faqScoreAnswer,
-                "How do I improve my rating?",
-                "Respond quickly to messages, complete jobs on time, and provide high-quality service to earn 5-star reviews.");
+                "How do I improve my ratings?",
+                "Be punctual, communicate clearly in the chat, and complete the work professionally. 5-star ratings push you to the top of the list!");
 
         updateFaqText(R.id.faqChatHeader, R.id.faqChatAnswer,
-                "How do I communicate with seekers?",
-                "Once you accept a job or express interest, a chat thread is created. Keep all communication on-app for safety.");
+                "Can I cancel a job I accepted?",
+                "Yes, from the 'My Bookings' tab. However, frequent cancellations negatively impact your profile score, so only cancel if absolutely necessary.");
     }
 
     private void updateFaqText(@IdRes int headerId, @IdRes int answerId, String question, String answer) {

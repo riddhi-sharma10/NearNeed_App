@@ -127,6 +127,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".AiChatActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
+        <activity
             android:name=".PersonProfileActivity"
             android:exported="false" />
 

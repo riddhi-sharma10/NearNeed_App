@@ -107,7 +107,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="How do I post a gig?"
+                                android:text="How do I post a request?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -127,7 +127,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Open the Home screen, tap the + button, fill in the gig details, then publish it. You can add photos and set the location before posting."
+                            android:text="Tap the '+' button on the Home screen. You can choose to post a paid 'Gig' or a free 'Community' request, set the location, and wait for nearby Providers."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -183,7 +183,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Go to Profile, open ID Verification, and upload the required document and selfie. Review usually completes after the details are checked."
+                            android:text="Go to your Profile and tap 'ID Verification'. Upload your Aadhaar or PAN card along with a selfie. Verified users get a badge and receive more responses."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -219,7 +219,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Is there a fee for NearNeed?"
+                                android:text="How does payment work?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -239,7 +239,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Creating an account and browsing is free. Some service actions or future premium features may include fees depending on the feature and region."
+                            android:text="Currently, you pay the Provider directly via UPI or Cash once the job is completed to your satisfaction. NearNeed does not hold your money."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -275,7 +275,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="How do I change my location?"
+                                android:text="How does the Map work?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -295,7 +295,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Open Profile, go to your location settings, and update your service area or city. Your feed and recommendations will refresh after saving."
+                            android:text="NearNeed uses location services to find skilled workers near you. You can update your service area in your Profile to see gigs closer to home."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -331,7 +331,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="What is a 'Neighbour Score'?"
+                                android:text="How do ratings work?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -351,7 +351,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Neighbour Score helps summarize trust and activity on the platform. It may be based on profile completeness, responsiveness, and positive interactions."
+                            android:text="After a gig is completed, both the Seeker and the Provider can rate each other from 1 to 5 stars. High ratings build your community reputation!"
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -387,7 +387,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="How do I report a user?"
+                                android:text="How do I report an issue?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -407,67 +407,12 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Open the chat or profile for that user, tap the menu options, and choose Report. Please add details so the support team can review it quickly."
+                            android:text="Open the chat or profile of the user, tap the menu, and select 'Report'. Our team reviews all reports within 24 hours to ensure platform safety."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/faqPasswordCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="@color/surface_card"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="1dp"
-                    app:strokeColor="@color/border_standard"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/faqPasswordHeader"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="15dp">
-
-                            <TextView
-                                style="@style/AppFormText"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="How do I reset my password?"
-                                android:textColor="@color/text_header"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/faqPasswordArrow"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@android:drawable/arrow_down_float"
-                                app:tint="@color/text_muted" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/faqPasswordAnswer"
-                            style="@style/AppDescription"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="16dp"
-                            android:paddingBottom="16dp"
-                            android:text="Use the login screen's Forgot Password option or contact support if you no longer have access to your phone number."
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/faqNotificationsCard"
@@ -499,7 +444,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="How do I manage notifications?"
+                                android:text="How do I cancel a booking?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -519,67 +464,12 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Open Settings to choose which alerts you want to receive, including messages, bookings, and updates."
+                            android:text="Go to the 'My Bookings' tab, select your Ongoing or Upcoming booking, and tap 'Cancel Booking'. Please message the Provider beforehand."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/faqVisibilityCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="@color/surface_card"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="1dp"
-                    app:strokeColor="@color/border_standard"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/faqVisibilityHeader"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="15dp">
-
-                            <TextView
-                                style="@style/AppFormText"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="How do I control post visibility?"
-                                android:textColor="@color/text_header"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <ImageView
-                                android:id="@+id/faqVisibilityArrow"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@android:drawable/arrow_down_float"
-                                app:tint="@color/text_muted" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/faqVisibilityAnswer"
-                            style="@style/AppDescription"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="16dp"
-                            android:paddingBottom="16dp"
-                            android:text="When creating a post, choose the audience and service area carefully. You can edit your post later from the post details screen."
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/faqChatCard"
@@ -611,7 +501,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="How do I start a chat?"
+                                android:text="How do I communicate safely?"
                                 android:textColor="@color/text_header"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -631,7 +521,7 @@
                             android:layout_height="wrap_content"
                             android:paddingHorizontal="16dp"
                             android:paddingBottom="16dp"
-                            android:text="Open any profile or request card and tap Message to start a conversation. You can also reply directly from the Messages tab."
+                            android:text="Once a booking is confirmed, an in-app chat is created automatically. We recommend keeping all conversations inside NearNeed for your safety."
                             android:textSize="14sp"
                             android:visibility="gone" />
                     </LinearLayout>
@@ -653,3 +543,4 @@
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+

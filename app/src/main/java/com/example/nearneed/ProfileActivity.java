@@ -124,16 +124,16 @@ public class ProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         Map<String, Object> map = new HashMap<>();
-        map.put("name", name == null ? "NearNeed User" : name);
-        map.put("profileImage", profileImage == null ? "" : profileImage);
-        map.put("address", address == null ? "" : address);
+        map.put("fullName", name == null ? "NearNeed User" : name);
+        map.put("photoUrl", profileImage == null ? "" : profileImage);
+        map.put("location", address == null ? "" : address);
         map.put("isVerified", isVerified);
         if (user.getEmail() != null) {
             map.put("email", user.getEmail());
         }
 
         FirebaseFirestore.getInstance()
-                .collection("users")
+                .collection("Users")
                 .document(user.getUid())
                 .set(map, SetOptions.merge());
     }

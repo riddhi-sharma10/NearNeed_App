@@ -80,9 +80,11 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
             tvTitle.setText(booking.postTitle);
             tvType.setText(booking.postType);
             
-            // In a real app, we'd fetch the other user's profile. 
-            // For now, show the ID or a placeholder name if available in Booking object
-            String otherPartyName = RoleManager.ROLE_SEEKER.equals(userRole) ? "Provider" : "Seeker";
+            // Show the other party's name
+            String otherPartyName = RoleManager.ROLE_SEEKER.equals(userRole) ? booking.providerName : booking.seekerName;
+            if (otherPartyName == null || otherPartyName.isEmpty()) {
+                otherPartyName = RoleManager.ROLE_SEEKER.equals(userRole) ? "Provider" : "Seeker";
+            }
             tvName.setText(otherPartyName);
             
             updateStatusUI(booking.status);

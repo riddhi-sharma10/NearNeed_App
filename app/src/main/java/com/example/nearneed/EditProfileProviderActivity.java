@@ -73,6 +73,8 @@ public class EditProfileProviderActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
+        preloadData();
+
         // Photo Upload setup
         View photoContainer = findViewById(R.id.layoutProfilePhoto);
         if (photoContainer != null) {
@@ -90,6 +92,9 @@ public class EditProfileProviderActivity extends AppCompatActivity {
 
         if(btnSaveChanges != null) {
             btnSaveChanges.setOnClickListener(v -> {
+                String newName = etName.getText().toString().trim();
+                String newPhone = etPhone.getText().toString().trim();
+                
                 android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
                 android.content.SharedPreferences.Editor editor = prefs.edit();
                 
@@ -111,8 +116,8 @@ public class EditProfileProviderActivity extends AppCompatActivity {
                 
                 editor.apply();
 
-                Toast.makeText(this, "Profile Features Updated Successfully", Toast.LENGTH_SHORT).show();
-                finish();
+                // Save to Firestore and UserPrefs
+                saveToFirestore(newName, newPhone);
             });
         }
         
@@ -121,6 +126,48 @@ public class EditProfileProviderActivity extends AppCompatActivity {
         setupDays();
         setupTimeSlots();
         setupTimePickers();
+    }
+
+    private void preloadData() {
+        // Preload from UserPrefs
+        String cachedName = UserPrefs.getName(this);
+        if (etName != null && !cachedName.isEmpty()) etName.setText(cachedName);
+
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        if (etEmail != null && user.getEmail() != null) etEmail.setText(user.getEmail());
+
+        // Preload from Firestore
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("Users").document(user.getUid())
+            .get()
+            .addOnSuccessListener(snapshot -> {
+                if (snapshot.exists()) {
+                    String fullName = snapshot.getString("fullName");
+                    String phone = snapshot.getString("phone");
+                    if (fullName != null && etName != null) etName.setText(fullName);
+                    if (phone != null && etPhone != null) etPhone.setText(phone);
+                }
+            });
+    }
+
+    private void saveToFirestore(String name, String phone) {
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        if (!name.isEmpty()) data.put("fullName", name);
+        if (!phone.isEmpty()) data.put("phone", phone);
+
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+            .collection("Users").document(user.getUid())
+            .set(data, com.google.firebase.firestore.SetOptions.merge())
+            .addOnSuccessListener(unused -> {
+                if (!name.isEmpty()) UserPrefs.saveName(this, name);
+                Toast.makeText(this, "Profile Updated Successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            })
+            .addOnFailureListener(e -> Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void openImagePicker() {

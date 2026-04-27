@@ -192,6 +192,8 @@ public class PostRepository {
             Post post = doc.toObject(Post.class);
             if (post != null) {
                 post.postId = doc.getId();
+                if (post.latitude == null && doc.contains("lat")) post.latitude = doc.getDouble("lat");
+                if (post.longitude == null && doc.contains("lng")) post.longitude = doc.getDouble("lng");
             }
             return post;
         } catch (Exception e) {

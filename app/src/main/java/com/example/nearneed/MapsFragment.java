@@ -117,6 +117,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         String type;
         String postId;
         String creatorId;
+        String category;
+        String photoUrl;
+
         MarkerData(int icon, int col, String title, String snippet, String budget, String type, String postId, String creatorId) { 
             this.iconResId = icon; 
             this.color = col;
@@ -219,36 +222,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         View bottomSheet = view.findViewById(R.id.provider_bottom_sheet);
         if (bottomSheet != null) bottomSheet.setVisibility(View.GONE);
 
-        // Search Implementation
-        searchEditText = view.findViewById(R.id.provider_search_edit_text);
-        rvSearchPredictions = view.findViewById(R.id.rv_search_predictions);
-        
-        if (rvSearchPredictions != null && getContext() != null) {
-            rvSearchPredictions.setLayoutManager(new LinearLayoutManager(getContext()));
-            searchAdapter = new SearchPredictionsAdapter(searchResults, address -> {
-                moveCameraToAddress(address);
-                if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
-                if (searchEditText != null) searchEditText.setText(address.getAddressLine(0));
-            });
-            rvSearchPredictions.setAdapter(searchAdapter);
-        }
-
-        if (searchEditText != null) {
-            searchEditText.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    scheduleSearch(s.toString());
-                }
-                @Override public void afterTextChanged(Editable s) {}
-            });
-            searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    performSearch(v.getText().toString());
-                    return true;
-                }
-                return false;
-            });
-        }
+        initSearchLogic(view, R.id.provider_search_edit_text, R.id.rv_search_predictions);
 
         MaterialButton btnViewJob = view.findViewById(R.id.btn_accept_job);
         if (btnViewJob != null) {
@@ -280,17 +254,49 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    private void initSearchLogic(View view, int searchEditId, int rvPredictionsId) {
+        searchEditText = view.findViewById(searchEditId);
+        rvSearchPredictions = view.findViewById(rvPredictionsId);
+        
+        if (rvSearchPredictions != null && getContext() != null) {
+            rvSearchPredictions.setLayoutManager(new LinearLayoutManager(getContext()));
+            searchAdapter = new SearchPredictionsAdapter(searchResults, address -> {
+                moveCameraToAddress(address);
+                if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
+                if (searchEditText != null) searchEditText.setText(address.getAddressLine(0));
+            });
+            rvSearchPredictions.setAdapter(searchAdapter);
+        }
+
+        if (searchEditText != null) {
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    scheduleSearch(s.toString());
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+            searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    performSearch(v.getText().toString(), true);
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
     private void scheduleSearch(String query) {
         if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
         if (query.length() < 3) {
             if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
             return;
         }
-        searchRunnable = () -> performSearch(query);
+        searchRunnable = () -> performSearch(query, false);
         searchHandler.postDelayed(searchRunnable, 600);
     }
 
-    private void performSearch(String query) {
+    private void performSearch(String query, boolean moveToFirst) {
         if (query == null || query.isEmpty() || getContext() == null) return;
         
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
@@ -304,8 +310,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                             searchResults.addAll(addresses);
                             if (searchAdapter != null) searchAdapter.notifyDataSetChanged();
                             if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.VISIBLE);
+                            
+                            if (moveToFirst) {
+                                moveCameraToAddress(addresses.get(0));
+                                if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
+                                if (searchEditText != null) searchEditText.setText(addresses.get(0).getAddressLine(0));
+                            }
                         } else {
                             if (rvSearchPredictions != null) rvSearchPredictions.setVisibility(View.GONE);
+                            if (moveToFirst && getContext() != null) {
+                                Toast.makeText(getContext(), "Location not found", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                 }
@@ -324,12 +339,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private void initSeekerUI(View view) {
         infoCard = view.findViewById(R.id.seeker_info_card);
+        initSearchLogic(view, R.id.search_edit_text, R.id.rv_search_predictions);
+        
         MaterialButton btnBook = view.findViewById(R.id.btn_book_now);
         if (btnBook != null) {
             btnBook.setOnClickListener(v -> {
                 Context context = getContext();
                 if (context != null) {
                     Toast.makeText(context, "Booking system coming soon", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        View recenterBtn = view.findViewById(R.id.ic_compass);
+        if (recenterBtn != null) {
+            recenterBtn.setOnClickListener(v -> {
+                if (mMap != null && mMap.getStyle() != null) {
+                    enableLocationComponent(mMap.getStyle());
                 }
             });
         }
@@ -394,9 +420,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         
         if (titleTv != null) titleTv.setText(data.title != null ? data.title : "Untitled");
         if (descTv != null) {
-            String type = data.type != null ? data.type : "";
-            String budgetStr = (data.budget != null && !data.budget.isEmpty() && !"N/A".equals(data.budget)) ? " • ₹" + data.budget : "";
-            descTv.setText(type + budgetStr);
+            if ("PROVIDER".equals(data.type)) {
+                String cat = (data.category != null && !data.category.isEmpty()) ? data.category : "Service Provider";
+                descTv.setText(cat + " • " + (data.snippet != null ? data.snippet : ""));
+            } else {
+                String type = data.type != null ? data.type : "";
+                String budgetStr = (data.budget != null && !data.budget.isEmpty() && !"N/A".equals(data.budget)) ? " • ₹" + data.budget : "";
+                descTv.setText(type + budgetStr);
+            }
+        }
+
+        if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+             ImageView profileIv = infoCard.findViewById(R.id.provider_image);
+             if (profileIv != null && data.photoUrl != null && !data.photoUrl.isEmpty()) {
+                 // Using Glide or similar would be better, but for now we can use a helper or simple image loading if available
+                 // Assuming we might have a simple way or just use a placeholder for now
+                 // In a real app we'd use: Glide.with(this).load(data.photoUrl).into(profileIv);
+             }
         }
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
@@ -479,11 +519,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         int green = ContextCompat.getColor(context, R.color.brand_success);
 
         for (UserProfile p : latestProviders) {
-            if (p != null && p.latitude != null && p.longitude != null) {
-                LatLng pos = new LatLng(p.latitude, p.longitude);
-                String name = p.name != null ? p.name : "Provider";
-                Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(getMarkerBitmapDescriptor(name, R.drawable.ic_toolbox_seeker, blue, false)));
-                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId));
+            Double pLat = (p.lat != null) ? p.lat : p.latitude;
+            Double pLng = (p.lng != null) ? p.lng : p.longitude;
+            
+            if (p != null && pLat != null && pLng != null) {
+                LatLng pos = new LatLng(pLat, pLng);
+                String name = p.fullName != null ? p.fullName : (p.name != null ? p.name : "Provider");
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(pos)
+                    .title(name)
+                    .icon(getMarkerBitmapDescriptor(name, R.drawable.ic_toolbox_seeker, blue, false)));
+                
+                MarkerData data = new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId);
+                data.category = p.category;
+                data.photoUrl = p.photoUrl != null ? p.photoUrl : p.profileImageUrl;
+                markerDataMap.put(marker, data);
             }
         }
 

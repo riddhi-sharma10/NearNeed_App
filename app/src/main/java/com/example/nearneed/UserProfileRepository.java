@@ -122,8 +122,8 @@ public final class UserProfileRepository {
         profile.email = snapshot.getString("email");
         profile.phone = snapshot.getString("phone");
         profile.isVerified = snapshot.getBoolean("isVerified");
-        profile.lat = snapshot.getDouble("lat");
-        profile.lng = snapshot.getDouble("lng");
+        profile.lat = snapshot.contains("lat") ? snapshot.getDouble("lat") : snapshot.getDouble("latitude");
+        profile.lng = snapshot.contains("lng") ? snapshot.getDouble("lng") : snapshot.getDouble("longitude");
         profile.role = snapshot.getString("role");
         return profile;
     }

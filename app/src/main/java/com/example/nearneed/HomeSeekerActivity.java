@@ -256,9 +256,15 @@ public class HomeSeekerActivity extends AppCompatActivity {
             holder.tvBadge.setText(post.status != null ? post.status.toUpperCase() : "ACTIVE");
             
             holder.itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(v.getContext(), ResponsesActivity.class);
+                Intent intent = new Intent(v.getContext(), GigPostDetailActivity.class);
                 intent.putExtra("post_id", post.postId);
-                intent.putExtra("post_title", post.title);
+                intent.putExtra("title", post.title);
+                intent.putExtra("category", post.category);
+                intent.putExtra("budget", post.budget);
+                intent.putExtra("description", post.description);
+                intent.putExtra("distance", post.distance);
+                intent.putExtra("duration", post.duration);
+                intent.putExtra("address", post.location);
                 v.getContext().startActivity(intent);
             });
         }

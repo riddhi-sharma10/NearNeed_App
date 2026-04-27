@@ -53,6 +53,7 @@ public class CommunityVolunteerDetailActivity extends AppCompatActivity {
      */
     private void openVolunteersList(int maxSlots, String postTitle) {
         Intent intent = new Intent(this, VolunteersActivity.class);
+        intent.putExtra("post_id", getIntent().getStringExtra("post_id"));
         intent.putExtra("max_slots", maxSlots);
         intent.putExtra("post_title", postTitle);
         intent.putExtra("is_seeker", true); // Flag to show accept/reject buttons

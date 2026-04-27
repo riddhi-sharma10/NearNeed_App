@@ -13,6 +13,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration, tvAddress;
     private MaterialButton btnViewApplicants;
+    private String postId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
 
         // Get data from intent
         Intent intent = getIntent();
+        postId = intent.getStringExtra("post_id");
         String title = intent.getStringExtra("title");
         String category = intent.getStringExtra("category");
         String budget = intent.getStringExtra("budget");
@@ -55,9 +57,13 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvAddress.setText(address != null ? address : "Sector 15, Community Hub, Near Park");
 
         btnViewApplicants.setOnClickListener(v -> {
-            String postTitle = tvTitle.getText().toString();
+            if (postId == null || postId.trim().isEmpty()) {
+                return;
+            }
+
             Intent applicantsIntent = new Intent(GigPostDetailActivity.this, ResponsesActivity.class);
-            applicantsIntent.putExtra("post_title", postTitle);
+            applicantsIntent.putExtra("post_id", postId);
+            applicantsIntent.putExtra("post_title", tvTitle.getText().toString());
             applicantsIntent.putExtra("is_gig", true);
             startActivity(applicantsIntent);
         });

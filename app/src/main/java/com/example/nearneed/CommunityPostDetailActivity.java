@@ -34,6 +34,7 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         MaterialButton btnVolunteer = findViewById(R.id.btn_volunteer);
 
         Intent intent = getIntent();
+        String postId = intent.getStringExtra("post_id");
         String title = intent.getStringExtra("title");
         String description = intent.getStringExtra("description");
         String postedBy = intent.getStringExtra("postedBy");
@@ -51,7 +52,7 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         tvLocation.setText(location != null ? location : "Location unknown");
         tvSlotsAvailable.setText(slots != null ? slots : "Volunteers needed");
 
-        btnVolunteer.setText(isProvider ? "Volunteer" : "View Applicants");
+        btnVolunteer.setText(isProvider ? "Apply" : "View Applicants");
 
         btnVolunteer.setOnClickListener(v -> {
             if (isProvider) {
@@ -64,6 +65,7 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
             int maxSlots = parseMaxSlots(tvSlotsAvailable.getText().toString());
 
             Intent volunteersIntent = new Intent(CommunityPostDetailActivity.this, VolunteersActivity.class);
+            volunteersIntent.putExtra("post_id", postId);
             volunteersIntent.putExtra("post_title", postTitle);
             volunteersIntent.putExtra("max_slots", maxSlots);
             volunteersIntent.putExtra("is_seeker", true);

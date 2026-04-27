@@ -40,6 +40,8 @@ public class IdVerificationActivity extends AppCompatActivity {
     private boolean frontUploaded = false;
     private boolean backUploaded = false;
     private boolean isFullyVerified = false;
+    private String extractedFrontText = "";
+    private String extractedBackText  = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,23 +119,47 @@ public class IdVerificationActivity extends AppCompatActivity {
 
         btnSubmit.setOnClickListener(v -> {
             btnSubmit.setEnabled(false);
-            btnSubmit.setText("Verifying Authenticity...");
-            btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
+            btnSubmit.setText("Verifying...");
 
+            String combinedText = extractedFrontText + "\n" + extractedBackText;
+
+            // Check 1: Does the OCR text look like a real government ID?
+            boolean hasGovKeywords = checkGovKeywords(combinedText);
+            boolean hasIdPatterns  = checkIdPatterns(combinedText);
+            if (!hasGovKeywords && !hasIdPatterns) {
+                Toast.makeText(this,
+                    "Could not confirm a valid government ID. Please upload a clearer photo.",
+                    Toast.LENGTH_LONG).show();
+                resetSubmitButton();
+                return;
+            }
+
+            // Check 2: Does the name on the ID match the profile name?
+            String extractedName = extractNameFromText(extractedFrontText);
+            if (extractedName.isEmpty()) {
+                extractedName = extractNameFromText(extractedBackText);
+            }
+            if (!extractedName.isEmpty() && !nameMatchesProfile(extractedName)) {
+                Toast.makeText(this,
+                    "Name on your ID does not match your profile name. " +
+                    "Please update your profile name or use a matching ID.",
+                    Toast.LENGTH_LONG).show();
+                resetSubmitButton();
+                return;
+            }
+
+            // All checks passed — mark verified
+            isFullyVerified = true;
+            btnSubmit.setText("ID Verified Successfully");
+            btnSubmit.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
+
+            final String finalExtractedName = extractedName;
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                isFullyVerified = true;
-                btnSubmit.setText("ID Verified Successfully");
-                btnSubmit.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
-
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    if (isFullyVerified) {
-                        UserPrefs.saveVerified(this, true);
-                        saveVerifiedToFirestore();
-                        Intent intent = new Intent(this, IdVerifiedActivity.class);
-                        startActivity(intent);
-                    }
-                }, 1000);
-            }, 2500);
+                UserPrefs.saveVerified(this, true);
+                saveVerifiedToFirestore(finalExtractedName);
+                startActivity(new Intent(this, IdVerifiedActivity.class));
+            }, 800);
         });
 
         btnSkip.setOnClickListener(v -> {
@@ -189,6 +215,8 @@ public class IdVerificationActivity extends AppCompatActivity {
                             boolean looksLikeId = hasIdPatterns || (hasGovKeywords && resultText.length() > 50);
                             
                             if (looksLikeId) {
+                                if (side.contains("Front")) extractedFrontText = resultText;
+                                else                        extractedBackText  = resultText;
                                 finalizeOcrResult(card, icon, title, desc, tick, side, true);
                             } else {
                                 Toast.makeText(this, "Document not recognized as a valid ID. Please try again.", Toast.LENGTH_LONG).show();
@@ -228,15 +256,89 @@ public class IdVerificationActivity extends AppCompatActivity {
         }
     }
 
-    private void saveVerifiedToFirestore() {
+    private void saveVerifiedToFirestore(String idExtractedName) {
         com.google.firebase.auth.FirebaseUser user =
                 com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("isVerified", true);
+        data.put("verifiedAt", System.currentTimeMillis());
+        if (!idExtractedName.isEmpty()) {
+            data.put("idNameExtracted", idExtractedName);
+        }
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 .collection("users").document(user.getUid())
                 .set(data, com.google.firebase.firestore.SetOptions.merge());
+    }
+
+    private void resetSubmitButton() {
+        btnSubmit.setEnabled(true);
+        btnSubmit.setText("Submit Verification");
+        btnSubmit.setBackgroundTintList(
+            android.content.res.ColorStateList.valueOf(0xFF1E3A8A));
+    }
+
+    /**
+     * Tries to extract the person's name from raw OCR text.
+     * Handles Aadhaar ("Name: Reia Baid"), PAN (all-caps name line), and Voter ID formats.
+     */
+    private String extractNameFromText(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+        String[] lines = text.split("\n");
+
+        // Pass 1: look for "Name:" or "NAME:" label (Aadhaar, Voter ID)
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.toLowerCase().startsWith("name:") || trimmed.toLowerCase().startsWith("name ")) {
+                String name = trimmed.replaceFirst("(?i)name[:\\s]+", "").trim();
+                if (name.length() > 2) return name;
+            }
+        }
+
+        // Pass 2: look for an all-letters line with ≥2 words that isn't a known header phrase
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.matches("[A-Za-z .'-]{5,50}") && trimmed.split("\\s+").length >= 2) {
+                String upper = trimmed.toUpperCase();
+                if (!upper.contains("INDIA") && !upper.contains("GOVERNMENT")
+                        && !upper.contains("INCOME") && !upper.contains("DEPARTMENT")
+                        && !upper.contains("ELECTION") && !upper.contains("AADHAAR")
+                        && !upper.contains("COMMISSION") && !upper.contains("PERMANENT")
+                        && !upper.contains("ACCOUNT") && !upper.contains("NUMBER")) {
+                    return trimmed;
+                }
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Fuzzy-matches the name found on the ID against the profile name the user entered.
+     * Passes if at least the majority of name words overlap.
+     */
+    private boolean nameMatchesProfile(String idName) {
+        String profileName = UserPrefs.getName(this);
+        if (profileName.isEmpty()) return true; // No profile name set — can't check, let through
+        if (idName.isEmpty()) return true;       // OCR couldn't extract a name — let through
+
+        String normId      = idName.toLowerCase().replaceAll("[^a-z ]", "").replaceAll("\\s+", " ").trim();
+        String normProfile = profileName.toLowerCase().replaceAll("[^a-z ]", "").replaceAll("\\s+", " ").trim();
+
+        if (normId.equals(normProfile)) return true;
+        if (normId.contains(normProfile) || normProfile.contains(normId)) return true;
+
+        // Word-level overlap — require at least half the profile name words to appear in the ID name
+        String[] profileWords = normProfile.split(" ");
+        String[] idWords      = normId.split(" ");
+        int matched = 0;
+        for (String pw : profileWords) {
+            if (pw.length() < 2) continue;
+            for (String iw : idWords) {
+                if (iw.equals(pw)) { matched++; break; }
+            }
+        }
+        int required = (int) Math.ceil(profileWords.length / 2.0);
+        return matched >= required;
     }
 
     private boolean checkGovKeywords(String text) {

@@ -105,4 +105,47 @@ public class GeocodingHelper {
             new Handler(Looper.getMainLooper()).post(() -> listener.onResults(finalList));
         }).start();
     }
+
+    public interface OnAddressResolvedListener {
+        void onAddressResolved(String address);
+        void onFailure();
+    }
+
+    public static void reverseGeocode(android.content.Context context, double lat, double lng, OnAddressResolvedListener listener) {
+        new Thread(() -> {
+            String detected = null;
+            try {
+                android.location.Geocoder geocoder = new android.location.Geocoder(context, java.util.Locale.getDefault());
+                List<android.location.Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    detected = addresses.get(0).getAddressLine(0);
+                }
+            } catch (Exception ignored) {}
+
+            if (detected == null || detected.isEmpty()) {
+                try {
+                    String url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=16";
+                    Request req = new Request.Builder()
+                            .url(url)
+                            .addHeader("Accept-Language", "en")
+                            .addHeader("User-Agent", "NearNeed-AndroidApp")
+                            .build();
+                    Response response = httpClient.newCall(req).execute();
+                    if (response.isSuccessful() && response.body() != null) {
+                        JSONObject obj = new JSONObject(response.body().string());
+                        detected = obj.optString("display_name", null);
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            final String finalDetected = detected;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (finalDetected != null && !finalDetected.isEmpty()) {
+                    listener.onAddressResolved(finalDetected);
+                } else {
+                    listener.onFailure();
+                }
+            });
+        }).start();
+    }
 }

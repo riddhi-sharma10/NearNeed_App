@@ -93,6 +93,57 @@ public class HomeProviderActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CalendarProviderActivity.class));
             });
         }
+
+        checkAndFetchLocation();
+    }
+
+    private static final int LOCATION_PERMISSION_REQ = 101;
+    
+    private void checkAndFetchLocation() {
+        String cachedLocation = UserPrefs.getLocation(this);
+        if (cachedLocation == null || cachedLocation.isEmpty() || cachedLocation.contains("Loading")) {
+            if (LocationHelper.hasLocationPermissions(this)) {
+                fetchLocationSilently();
+            } else {
+                androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQ);
+            }
+        }
+    }
+
+    private void fetchLocationSilently() {
+        tvDeliveryLocation.setText("DELIVER TO: FETCHING...");
+        LocationHelper.getCurrentLocation(this, new LocationHelper.LocationCallback() {
+            @Override
+            public void onLocationReceived(double lat, double lng) {
+                GeocodingHelper.reverseGeocode(HomeProviderActivity.this, lat, lng, new GeocodingHelper.OnAddressResolvedListener() {
+                    @Override
+                    public void onAddressResolved(String address) {
+                        userViewModel.saveLocation(address, lat, lng);
+                        tvDeliveryLocation.setText("DELIVER TO: " + address.toUpperCase());
+                    }
+                    @Override
+                    public void onFailure() {
+                        tvDeliveryLocation.setText("DELIVER TO: UNKNOWN");
+                    }
+                });
+            }
+            @Override
+            public void onFailure(String error) {
+                tvDeliveryLocation.setText("DELIVER TO: UNKNOWN");
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions, @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQ) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                fetchLocationSilently();
+            } else {
+                tvDeliveryLocation.setText("DELIVER TO: UNKNOWN");
+            }
+        }
     }
 
     private void setupHeader() {

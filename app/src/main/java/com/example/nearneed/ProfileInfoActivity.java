@@ -178,6 +178,20 @@ public class ProfileInfoActivity extends AppCompatActivity {
             data.put("name", name);
             data.put("bio", etBio.getText().toString().trim());
             data.put("dob", etDob.getText().toString().trim());
+            
+            String gender = "Other";
+            if (cgGender != null) {
+                int checkedId = cgGender.getCheckedChipId();
+                if (checkedId == R.id.chipMale) gender = "Male";
+                else if (checkedId == R.id.chipFemale) gender = "Female";
+            }
+            data.put("gender", gender);
+            
+            String phone = user.getPhoneNumber();
+            if (phone != null && !phone.isEmpty()) {
+                data.put("phone", phone);
+            }
+
             if (uploadedPhotoUrl != null) {
                 data.put("profileImageUrl", uploadedPhotoUrl);
             }

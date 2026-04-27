@@ -54,7 +54,7 @@ public class AiChatActivity extends AppCompatActivity {
 
     private static final String TAG = "NearNeedChatbot";
     private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
     // UI
     private RecyclerView     rvChat;

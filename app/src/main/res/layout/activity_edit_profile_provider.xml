@@ -164,11 +164,7 @@
                     android:id="@+id/etName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="Julian Vance"
+                    android:inputType="textPersonName"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />
@@ -193,11 +189,7 @@
                     android:id="@+id/etGender"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="Male"
+                    android:inputType="text"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />
@@ -222,86 +214,15 @@
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="phone"
                     android:focusable="false"
-                    android:focusableInTouchMode="false"
                     android:cursorVisible="false"
-                    android:text="(555) 019-2831"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Email (EDITABLE with pen icon) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="Email Address"
-                app:hintTextColor="@color/text_muted"
-                app:boxStrokeColor="@color/brand_primary"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:startIconDrawable="@drawable/ic_email"
-                app:startIconTint="@color/text_muted"
-                app:endIconMode="custom"
-                app:endIconDrawable="@drawable/ic_edit_pencil"
-                app:endIconTint="@color/brand_primary"
-                android:layout_marginBottom="14dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:text="julian.vance@example.com"
-                    android:textColor="@color/text_header"
-                    android:textSize="15sp"
-                    android:paddingVertical="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Password (READ-ONLY) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="Password"
-                app:hintTextColor="@color/text_muted"
-                app:boxStrokeColor="@color/border_standard"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/text_muted"
-                android:layout_marginBottom="4dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="abc12345"
-                    android:textColor="@color/text_header"
-                    android:textSize="15sp"
-                    android:paddingVertical="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/tvForgotPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:text="Forgot Password?"
-                android:textColor="@color/brand_primary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="32dp"
-                android:background="?attr/selectableItemBackground"
-                android:padding="4dp" />
 
             <!-- Service Header Divider inside same block if possible, or just append -->
             <TextView
@@ -515,7 +436,6 @@
                 android:background="@drawable/bg_input_field"
                 android:gravity="top|start"
                 android:hint="Tell us about the specific services you offer..."
-                android:text="I specialize in high-quality professional services, delivering top-tier solutions with great attention to detail. Let me know what you need!"
                 android:textColorHint="@color/text_muted"
                 android:inputType="textMultiLine"
                 android:maxLines="5"
@@ -675,10 +595,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_selected_uniform"
+                    android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Mon"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -688,10 +608,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_selected_uniform"
+                    android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Tue"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -701,10 +621,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_selected_uniform"
+                    android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Wed"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
                 
@@ -714,10 +634,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_selected_uniform"
+                    android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Thu"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 
@@ -727,10 +647,10 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="6dp"
-                    android:background="@drawable/bg_circle_selected_uniform"
+                    android:background="@drawable/bg_circle_unselected_uniform"
                     android:gravity="center"
                     android:text="Fri"
-                    android:textColor="@color/white"
+                    android:textColor="#000000"
                     android:textSize="11sp"
                     android:textStyle="bold" />
 

@@ -149,11 +149,7 @@
                     android:id="@+id/etFullName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="Abhinav Oberoi"
+                    android:inputType="textPersonName"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />
@@ -180,86 +176,15 @@
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="phone"
                     android:focusable="false"
-                    android:focusableInTouchMode="false"
                     android:cursorVisible="false"
-                    android:text="+91 98765 43210"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Email (EDITABLE – pen icon) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="Email Address"
-                app:hintTextColor="@color/text_muted"
-                app:boxStrokeColor="@color/brand_primary"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:startIconDrawable="@drawable/ic_email"
-                app:startIconTint="@color/text_muted"
-                app:endIconMode="custom"
-                app:endIconDrawable="@drawable/ic_edit_pencil"
-                app:endIconTint="@color/brand_primary"
-                android:layout_marginBottom="14dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:text="abhinav.oberoi@example.com"
-                    android:textColor="@color/sapphire_dark"
-                    android:textSize="15sp"
-                    android:paddingVertical="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Password (READ-ONLY – use Forgot Password to change) -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:hint="Password"
-                app:hintTextColor="@color/text_muted"
-                app:boxStrokeColor="@color/border_standard"
-                app:boxCornerRadiusTopStart="16dp"
-                app:boxCornerRadiusTopEnd="16dp"
-                app:boxCornerRadiusBottomStart="16dp"
-                app:boxCornerRadiusBottomEnd="16dp"
-                app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/text_muted"
-                android:layout_marginBottom="4dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="abc12345"
-                    android:textColor="@color/text_header"
-                    android:textSize="15sp"
-                    android:paddingVertical="16dp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/tvForgotPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:text="Forgot Password?"
-                android:textColor="@color/brand_primary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="24dp"
-                android:background="?attr/selectableItemBackground"
-                android:padding="4dp" />
 
             <!-- ══════════════════════════════ -->
             <!-- SECTION: ABOUT YOU             -->
@@ -298,8 +223,8 @@
                     android:layout_height="wrap_content"
                     android:text="Male"
                     android:checked="true"
-                    android:clickable="false"
-                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:chipBackgroundColor="@color/sel_gender_chip_bg"
                     android:textColor="@color/sel_gender_chip_text"
                     app:chipStrokeColor="@color/border_standard"
@@ -313,8 +238,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Female"
-                    android:clickable="false"
-                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:chipBackgroundColor="@color/sel_gender_chip_bg"
                     android:textColor="@color/sel_gender_chip_text"
                     app:chipStrokeColor="@color/border_standard"
@@ -328,8 +253,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Other"
-                    android:clickable="false"
-                    android:focusable="false"
+                    android:clickable="true"
+                    android:focusable="true"
                     app:chipBackgroundColor="@color/sel_gender_chip_bg"
                     android:textColor="@color/sel_gender_chip_text"
                     app:chipStrokeColor="@color/border_standard"
@@ -357,11 +282,9 @@
                     android:id="@+id/etDob"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="date"
                     android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
-                    android:text="15/08/1995"
+                    android:clickable="true"
                     android:textColor="@color/text_header"
                     android:textSize="15sp"
                     android:paddingVertical="16dp" />

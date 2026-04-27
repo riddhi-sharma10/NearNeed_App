@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -92,37 +93,49 @@ public class EditProfileActivity extends AppCompatActivity {
             tvChangePhoto.setOnClickListener(v -> openImagePicker());
         }
 
-        // ── Gender chips (read-only) ──
-        Chip chipMale = findViewById(R.id.chipMale);
-        if (chipMale != null) chipMale.setChecked(true);
-
-        // ── Bio character counter ──
-        if (etBio != null && tvBioCount != null) {
-            updateBioCount(etBio.getText() != null ? etBio.getText().toString().length() : 0);
-            etBio.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-                @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
-                @Override
-                public void afterTextChanged(Editable s) {
-                    int len = s.length();
-                    if (len > 150) {
-                        etBio.setText(s.subSequence(0, 150));
-                        etBio.setSelection(150);
-                    } else {
-                        updateBioCount(len);
-                    }
-                }
+        // ── Gender selection listener ──
+        ChipGroup cgGender = findViewById(R.id.cgGender);
+        if (cgGender != null) {
+            cgGender.setOnCheckedChangeListener((group, checkedId) -> {
+                // Ensure at least one chip is checked, or keep track of selection
             });
         }
-
-        // ── Forgot Password ──
-        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        if (tvForgotPassword != null) {
-            tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
+        
+        TextInputEditText etDob = findViewById(R.id.etDob);
+        if (etDob != null) {
+            etDob.setOnClickListener(v -> showDatePicker());
         }
 
         // ── Save Changes ──
         findViewById(R.id.btnSaveChanges).setOnClickListener(v -> saveChanges());
+    }
+    
+    private void showDatePicker() {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        android.app.DatePickerDialog dialog = new android.app.DatePickerDialog(this, (view, year, month, day) -> {
+            java.util.Calendar selected = java.util.Calendar.getInstance();
+            selected.set(year, month, day);
+            
+            java.util.Calendar eighteenYearsAgo = java.util.Calendar.getInstance();
+            eighteenYearsAgo.add(java.util.Calendar.YEAR, -18);
+
+            TextInputEditText etDob = findViewById(R.id.etDob);
+            if (selected.after(eighteenYearsAgo)) {
+                Toast.makeText(this, "You must be at least 18 years old to use NearNeed.", Toast.LENGTH_LONG).show();
+                if (etDob != null) etDob.setText("");
+            } else {
+                if (etDob != null) {
+                    etDob.setText(String.format(java.util.Locale.getDefault(), "%02d/%02d/%04d", day, month + 1, year));
+                }
+            }
+        }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH));
+
+        // Disable dates less than 18 years ago in the picker UI
+        java.util.Calendar maxDate = java.util.Calendar.getInstance();
+        maxDate.add(java.util.Calendar.YEAR, -18);
+        dialog.getDatePicker().setMaxDate(maxDate.getTimeInMillis());
+
+        dialog.show();
     }
 
     private void preloadLocalData() {
@@ -138,12 +151,6 @@ public class EditProfileActivity extends AppCompatActivity {
         if (etFullName != null && cachedName != null && !cachedName.isEmpty()) {
             etFullName.setText(cachedName);
         }
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        TextInputEditText etEmail = findViewById(R.id.etEmail);
-        if (etEmail != null && user != null && user.getEmail() != null) {
-            etEmail.setText(user.getEmail());
-        }
     }
 
     private void loadFromFirestore() {
@@ -155,6 +162,42 @@ public class EditProfileActivity extends AppCompatActivity {
             .get()
             .addOnSuccessListener(snapshot -> {
                 if (!snapshot.exists()) return;
+
+                String name = snapshot.getString("fullName");
+                TextInputEditText etFullName = findViewById(R.id.etFullName);
+                if (name == null || name.isEmpty()) { name = snapshot.getString("name"); }
+                if (name != null && etFullName != null) {
+                    etFullName.setText(name);
+                }
+
+                String phone = snapshot.getString("phone");
+                if (phone == null || phone.isEmpty()) {
+                    phone = user.getPhoneNumber();
+                }
+                TextInputEditText etPhone = findViewById(R.id.etPhone);
+                if (phone != null && etPhone != null) {
+                    etPhone.setText(phone);
+                }
+
+                String dob = snapshot.getString("dob");
+                TextInputEditText etDob = findViewById(R.id.etDob);
+                if (dob != null && etDob != null) {
+                    etDob.setText(dob);
+                }
+
+                String gender = snapshot.getString("gender");
+                if (gender != null) {
+                    if (gender.equalsIgnoreCase("Male")) {
+                        Chip c = findViewById(R.id.chipMale);
+                        if (c != null) c.setChecked(true);
+                    } else if (gender.equalsIgnoreCase("Female")) {
+                        Chip c = findViewById(R.id.chipFemale);
+                        if (c != null) c.setChecked(true);
+                    } else {
+                        Chip c = findViewById(R.id.chipOther);
+                        if (c != null) c.setChecked(true);
+                    }
+                }
 
                 String bio = snapshot.getString("bio");
                 if (bio != null && etBio != null) {
@@ -183,17 +226,32 @@ public class EditProfileActivity extends AppCompatActivity {
         TextInputEditText etFullName = findViewById(R.id.etFullName);
         String name = etFullName != null && etFullName.getText() != null
             ? etFullName.getText().toString().trim() : "";
+            
+        TextInputEditText etPhone = findViewById(R.id.etPhone);
+        String phone = etPhone != null && etPhone.getText() != null
+            ? etPhone.getText().toString().trim() : "";
+
+        TextInputEditText etDob = findViewById(R.id.etDob);
+        String dob = etDob != null && etDob.getText() != null
+            ? etDob.getText().toString().trim() : "";
+
+        String gender = "Other";
+        Chip chipMale = findViewById(R.id.chipMale);
+        Chip chipFemale = findViewById(R.id.chipFemale);
+        if (chipMale != null && chipMale.isChecked()) gender = "Male";
+        else if (chipFemale != null && chipFemale.isChecked()) gender = "Female";
+
         String bio = etBio != null && etBio.getText() != null
             ? etBio.getText().toString().trim() : "";
 
         if (pendingPhotoUri != null) {
-            uploadPhotoThenSave(user.getUid(), name, bio);
+            uploadPhotoThenSave(user.getUid(), name, phone, dob, gender, bio);
         } else {
-            persistToFirestore(user.getUid(), name, bio, null);
+            persistToFirestore(user.getUid(), name, phone, dob, gender, bio, null);
         }
     }
 
-    private void uploadPhotoThenSave(String uid, String name, String bio) {
+    private void uploadPhotoThenSave(String uid, String name, String phone, String dob, String gender, String bio) {
         StorageReference ref = FirebaseStorage.getInstance()
             .getReference("profiles/" + uid + "/profile.jpg");
 
@@ -202,7 +260,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 ref.getDownloadUrl().addOnSuccessListener(downloadUri -> {
                     String url = downloadUri.toString();
                     UserPrefs.savePhotoUri(this, url);
-                    persistToFirestore(uid, name, bio, url);
+                    persistToFirestore(uid, name, phone, dob, gender, bio, url);
                 })
                 .addOnFailureListener(e ->
                     Toast.makeText(this, "Failed to get photo URL", Toast.LENGTH_SHORT).show()))
@@ -210,12 +268,15 @@ public class EditProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    private void persistToFirestore(String uid, String name, String bio, String photoUrl) {
+    private void persistToFirestore(String uid, String name, String phone, String dob, String gender, String bio, String photoUrl) {
         Map<String, Object> data = new HashMap<>();
         if (!name.isEmpty()) {
-            data.put("name", name);
+            data.put("fullName", name);
             UserPrefs.saveName(this, name);
         }
+        data.put("phone", phone);
+        data.put("dob", dob);
+        data.put("gender", gender);
         data.put("bio", bio);
         if (photoUrl != null) {
             data.put("profileImageUrl", photoUrl);
@@ -242,100 +303,5 @@ public class EditProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
         imagePickerLauncher.launch(intent);
-    }
-
-    private void showForgotPasswordDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_forgot_password);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-
-        ViewFlipper vf = dialog.findViewById(R.id.vfForgotPassword);
-        TextInputLayout tilEmail = dialog.findViewById(R.id.tilForgotEmail);
-        TextInputEditText etEmail = dialog.findViewById(R.id.etForgotEmail);
-
-        EditText[] otpBoxes = {
-            dialog.findViewById(R.id.fpOtpBox1),
-            dialog.findViewById(R.id.fpOtpBox2),
-            dialog.findViewById(R.id.fpOtpBox3),
-            dialog.findViewById(R.id.fpOtpBox4),
-            dialog.findViewById(R.id.fpOtpBox5),
-            dialog.findViewById(R.id.fpOtpBox6)
-        };
-
-        for (int i = 0; i < otpBoxes.length; i++) {
-            final int idx = i;
-            if (otpBoxes[i] == null) continue;
-            otpBoxes[i].addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-                @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (s.length() == 1 && idx < otpBoxes.length - 1 && otpBoxes[idx + 1] != null) {
-                        otpBoxes[idx + 1].requestFocus();
-                    } else if (s.length() == 0 && idx > 0 && otpBoxes[idx - 1] != null) {
-                        otpBoxes[idx - 1].requestFocus();
-                    }
-                }
-            });
-        }
-
-        dialog.findViewById(R.id.btnSendOtp).setOnClickListener(v -> {
-            String email = etEmail != null && etEmail.getText() != null
-                    ? etEmail.getText().toString().trim() : "";
-            if (TextUtils.isEmpty(email)) {
-                if (tilEmail != null) tilEmail.setError("Email is required");
-                return;
-            }
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                if (tilEmail != null) tilEmail.setError("Enter a valid email address");
-                return;
-            }
-            if (tilEmail != null) tilEmail.setError(null);
-
-            TextView tvSentTo = dialog.findViewById(R.id.tvOtpSentTo);
-            if (tvSentTo != null) tvSentTo.setText("OTP sent to " + email);
-
-            Toast.makeText(this, "OTP sent to " + email, Toast.LENGTH_SHORT).show();
-            vf.showNext();
-            if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
-        });
-
-        dialog.findViewById(R.id.btnVerifyOtp).setOnClickListener(v -> {
-            StringBuilder otp = new StringBuilder();
-            for (EditText box : otpBoxes) {
-                if (box != null && box.getText() != null) {
-                    otp.append(box.getText().toString().trim());
-                }
-            }
-            if (otp.length() < 6) {
-                Toast.makeText(this, "Please enter all 6 digits", Toast.LENGTH_SHORT).show();
-                for (EditText box : otpBoxes) {
-                    if (box != null && (box.getText() == null || box.getText().toString().isEmpty())) {
-                        box.requestFocus();
-                        break;
-                    }
-                }
-                return;
-            }
-            dialog.dismiss();
-            Intent intent = new Intent(this, CreateNewPasswordActivity.class);
-            startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        });
-
-        TextView tvResend = dialog.findViewById(R.id.tvResendOtp);
-        if (tvResend != null) {
-            tvResend.setOnClickListener(v -> {
-                for (EditText box : otpBoxes) { if (box != null) box.setText(""); }
-                if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
-                Toast.makeText(this, "OTP resent!", Toast.LENGTH_SHORT).show();
-            });
-        }
-
-        dialog.show();
     }
 }

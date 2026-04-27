@@ -33,7 +33,7 @@ import java.util.Set;
 
 public class EditProfileProviderActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etPhone, etEmail, etPassword;
+    private TextInputEditText etName, etPhone, etGender;
     private MaterialButton btnSaveChanges;
 
     private final Set<TextView> selectedCategories = new HashSet<>();
@@ -42,6 +42,7 @@ public class EditProfileProviderActivity extends AppCompatActivity {
     private final Set<TextView> selectedTimeSlots = new HashSet<>();
     
     private TextView tvStartTime, tvEndTime;
+    private EditText etServiceDescription;
 
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
         registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -69,8 +70,8 @@ public class EditProfileProviderActivity extends AppCompatActivity {
 
         etName = findViewById(R.id.etName);
         etPhone = findViewById(R.id.etPhone);
-        etEmail = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
+        etGender = findViewById(R.id.etGender);
+        etServiceDescription = findViewById(R.id.etServiceDescription);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
 
         preloadData();
@@ -85,39 +86,16 @@ public class EditProfileProviderActivity extends AppCompatActivity {
             tvChangePhoto.setOnClickListener(v -> openImagePicker());
         }
 
-        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
-        if (tvForgotPassword != null) {
-            tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
-        }
+
 
         if(btnSaveChanges != null) {
             btnSaveChanges.setOnClickListener(v -> {
-                String newName = etName.getText().toString().trim();
-                String newPhone = etPhone.getText().toString().trim();
+                String newName = etName != null && etName.getText() != null ? etName.getText().toString().trim() : "";
+                String newPhone = etPhone != null && etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
+                String newGender = etGender != null && etGender.getText() != null ? etGender.getText().toString().trim() : "";
                 
-                android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
-                android.content.SharedPreferences.Editor editor = prefs.edit();
-                
-                Set<String> catIds = new HashSet<>();
-                for (TextView tv : selectedCategories) catIds.add(String.valueOf(tv.getId()));
-                editor.putStringSet("categories", catIds);
-                
-                if (selectedExperience != null) {
-                    editor.putInt("experience", selectedExperience.getId());
-                }
-                
-                Set<String> dayIds = new HashSet<>();
-                for (TextView tv : selectedDays) dayIds.add(String.valueOf(tv.getId()));
-                editor.putStringSet("days", dayIds);
-                
-                Set<String> slotIds = new HashSet<>();
-                for (TextView tv : selectedTimeSlots) slotIds.add(String.valueOf(tv.getId()));
-                editor.putStringSet("timeSlots", slotIds);
-                
-                editor.apply();
-
                 // Save to Firestore and UserPrefs
-                saveToFirestore(newName, newPhone);
+                saveToFirestore(newName, newPhone, newGender);
             });
         }
         
@@ -126,6 +104,8 @@ public class EditProfileProviderActivity extends AppCompatActivity {
         setupDays();
         setupTimeSlots();
         setupTimePickers();
+        
+        preloadData();
     }
 
     private void preloadData() {
@@ -135,7 +115,6 @@ public class EditProfileProviderActivity extends AppCompatActivity {
 
         com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
-        if (etEmail != null && user.getEmail() != null) etEmail.setText(user.getEmail());
 
         // Preload from Firestore
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
@@ -143,21 +122,102 @@ public class EditProfileProviderActivity extends AppCompatActivity {
             .get()
             .addOnSuccessListener(snapshot -> {
                 if (snapshot.exists()) {
-                    String fullName = snapshot.getString("name");
+                    String fullName = snapshot.getString("fullName");
+                    if (fullName == null || fullName.isEmpty()) fullName = snapshot.getString("name");
                     String phone = snapshot.getString("phone");
+                    if (phone == null || phone.isEmpty()) {
+                        phone = user.getPhoneNumber();
+                    }
+                    String gender = snapshot.getString("gender");
                     if (fullName != null && etName != null) etName.setText(fullName);
                     if (phone != null && etPhone != null) etPhone.setText(phone);
+                    if (gender != null && etGender != null) etGender.setText(gender);
+
+                    java.util.List<String> cats = (java.util.List<String>) snapshot.get("categories");
+                    if (cats != null) {
+                        for (String cat : cats) {
+                            int resId = getResources().getIdentifier(cat, "id", getPackageName());
+                            if (resId != 0) {
+                                TextView chip = findViewById(resId);
+                                if (chip != null && !selectedCategories.contains(chip)) toggleCategory(chip);
+                            }
+                        }
+                    }
+
+                    String exp = snapshot.getString("experience");
+                    if (exp != null) {
+                        int resId = getResources().getIdentifier(exp, "id", getPackageName());
+                        if (resId != 0) {
+                            TextView chip = findViewById(resId);
+                            if (chip != null) chip.performClick();
+                        }
+                    }
+
+                    java.util.List<String> days = (java.util.List<String>) snapshot.get("days");
+                    if (days != null) {
+                        for (String day : days) {
+                            int resId = getResources().getIdentifier(day, "id", getPackageName());
+                            if (resId != 0) {
+                                TextView chip = findViewById(resId);
+                                if (chip != null && !selectedDays.contains(chip)) toggleDay(chip);
+                            }
+                        }
+                    }
+
+                    java.util.List<String> slots = (java.util.List<String>) snapshot.get("timeSlots");
+                    if (slots != null) {
+                        for (String slot : slots) {
+                            int resId = getResources().getIdentifier(slot, "id", getPackageName());
+                            if (resId != 0) {
+                                TextView chip = findViewById(resId);
+                                if (chip != null && !selectedTimeSlots.contains(chip)) {
+                                    selectedTimeSlots.add(chip);
+                                    chip.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
+                                    chip.setTextColor(ContextCompat.getColor(this, R.color.white));
+                                }
+                            }
+                        }
+                    }
+
+                    String startTime = snapshot.getString("startTime");
+                    if (startTime != null && tvStartTime != null) tvStartTime.setText(startTime);
+                    String endTime = snapshot.getString("endTime");
+                    if (endTime != null && tvEndTime != null) tvEndTime.setText(endTime);
+
+                    String bio = snapshot.getString("bio");
+                    if (bio != null && etServiceDescription != null) etServiceDescription.setText(bio);
                 }
             });
     }
 
-    private void saveToFirestore(String name, String phone) {
+    private void saveToFirestore(String name, String phone, String gender) {
         com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
-        if (!name.isEmpty()) data.put("name", name);
+        if (!name.isEmpty()) data.put("fullName", name);
         if (!phone.isEmpty()) data.put("phone", phone);
+        if (!gender.isEmpty()) data.put("gender", gender);
+
+        java.util.List<String> catNames = new java.util.ArrayList<>();
+        for (TextView tv : selectedCategories) catNames.add(getResources().getResourceEntryName(tv.getId()));
+        data.put("categories", catNames);
+
+        if (selectedExperience != null) {
+            data.put("experience", getResources().getResourceEntryName(selectedExperience.getId()));
+        }
+
+        java.util.List<String> dayNames = new java.util.ArrayList<>();
+        for (TextView tv : selectedDays) dayNames.add(getResources().getResourceEntryName(tv.getId()));
+        data.put("days", dayNames);
+
+        java.util.List<String> slotNames = new java.util.ArrayList<>();
+        for (TextView tv : selectedTimeSlots) slotNames.add(getResources().getResourceEntryName(tv.getId()));
+        data.put("timeSlots", slotNames);
+
+        if (tvStartTime != null) data.put("startTime", tvStartTime.getText().toString());
+        if (tvEndTime != null) data.put("endTime", tvEndTime.getText().toString());
+        if (etServiceDescription != null) data.put("bio", etServiceDescription.getText().toString().trim());
 
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
             .collection("users").document(user.getUid())
@@ -176,107 +236,7 @@ public class EditProfileProviderActivity extends AppCompatActivity {
         imagePickerLauncher.launch(intent);
     }
 
-    private void showForgotPasswordDialog() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_forgot_password);
 
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-
-        ViewFlipper vf = dialog.findViewById(R.id.vfForgotPassword);
-        TextInputLayout tilEmail = dialog.findViewById(R.id.tilForgotEmail);
-        TextInputEditText etForgotEmail = dialog.findViewById(R.id.etForgotEmail);
-
-        EditText[] otpBoxes = {
-            dialog.findViewById(R.id.fpOtpBox1),
-            dialog.findViewById(R.id.fpOtpBox2),
-            dialog.findViewById(R.id.fpOtpBox3),
-            dialog.findViewById(R.id.fpOtpBox4),
-            dialog.findViewById(R.id.fpOtpBox5),
-            dialog.findViewById(R.id.fpOtpBox6)
-        };
-
-        // Auto-advance OTP boxes AND Auto-Verify on 6th digit
-        for (int i = 0; i < otpBoxes.length; i++) {
-            final int idx = i;
-            if (otpBoxes[i] == null) continue;
-            otpBoxes[i].addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-                @Override public void onTextChanged(CharSequence s, int st, int b, int c) {}
-                @Override
-                public void afterTextChanged(Editable s) {
-                    if (s.length() == 1) {
-                        if (idx < otpBoxes.length - 1 && otpBoxes[idx + 1] != null) {
-                            otpBoxes[idx + 1].requestFocus();
-                        } else if (idx == otpBoxes.length - 1) {
-                            // Automatically submit on 6th digit
-                            verifyAndLaunchPasswordReset(dialog, otpBoxes);
-                        }
-                    } else if (s.length() == 0 && idx > 0 && otpBoxes[idx - 1] != null) {
-                        otpBoxes[idx - 1].requestFocus();
-                    }
-                }
-            });
-        }
-
-        // Step 1 – Send OTP (validate email format)
-        dialog.findViewById(R.id.btnSendOtp).setOnClickListener(v -> {
-            String email = etForgotEmail != null && etForgotEmail.getText() != null
-                    ? etForgotEmail.getText().toString().trim() : "";
-            if (TextUtils.isEmpty(email)) {
-                if (tilEmail != null) tilEmail.setError("Email is required");
-                return;
-            }
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                if (tilEmail != null) tilEmail.setError("Enter a valid formatted email address");
-                return;
-            }
-            if (tilEmail != null) tilEmail.setError(null);
-
-            TextView tvSentTo = dialog.findViewById(R.id.tvOtpSentTo);
-            if (tvSentTo != null) tvSentTo.setText("OTP sent to " + email);
-
-            Toast.makeText(this, "OTP sent to " + email, Toast.LENGTH_SHORT).show();
-            vf.showNext();
-            if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
-        });
-
-        // Step 2 – Manual Verify Button Fallback
-        dialog.findViewById(R.id.btnVerifyOtp).setOnClickListener(v -> {
-            verifyAndLaunchPasswordReset(dialog, otpBoxes);
-        });
-
-        // Resend OTP
-        TextView tvResend = dialog.findViewById(R.id.tvResendOtp);
-        if (tvResend != null) {
-            tvResend.setOnClickListener(v -> {
-                for (EditText box : otpBoxes) { if (box != null) box.setText(""); }
-                if (otpBoxes[0] != null) otpBoxes[0].requestFocus();
-                Toast.makeText(this, "OTP resent!", Toast.LENGTH_SHORT).show();
-            });
-        }
-
-        dialog.show();
-    }
-
-    private void verifyAndLaunchPasswordReset(Dialog dialog, EditText[] otpBoxes) {
-        StringBuilder otp = new StringBuilder();
-        for (EditText box : otpBoxes) {
-            if (box != null && box.getText() != null) {
-                otp.append(box.getText().toString().trim());
-            }
-        }
-        if (otp.length() < 6) {
-            Toast.makeText(this, "Please enter all 6 digits", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        dialog.dismiss();
-        Intent intent = new Intent(this, CreateNewPasswordActivity.class);
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
     
     // --- Detailed Setup Methods ---
     
@@ -287,18 +247,9 @@ public class EditProfileProviderActivity extends AppCompatActivity {
             R.id.chipGardening, R.id.chipAssembly, R.id.chipOther
         };
 
-        android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
-        Set<String> savedCategories = prefs.getStringSet("categories", new HashSet<>());
-
         for (int id : chipIds) {
             TextView chip = findViewById(id);
             if(chip != null) {
-                // Pre-populate if logically saved
-                if (savedCategories.contains(String.valueOf(id))) {
-                    selectedCategories.add(chip);
-                    chip.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
-                    chip.setTextColor(ContextCompat.getColor(this, R.color.white));
-                }
                 chip.setOnClickListener(v -> toggleCategory((TextView) v));
             }
         }
@@ -319,17 +270,9 @@ public class EditProfileProviderActivity extends AppCompatActivity {
     private void setupExperience() {
         int[] expIds = { R.id.expLow, R.id.expMid, R.id.expHigh, R.id.expMax };
 
-        android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
-        int savedExperience = prefs.getInt("experience", -1);
-
         for (int id : expIds) {
             TextView exp = findViewById(id);
             if(exp != null) {
-                if (id == savedExperience) {
-                    selectedExperience = exp;
-                    exp.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
-                    exp.setTextColor(ContextCompat.getColor(this, R.color.white));
-                }
                 exp.setOnClickListener(v -> {
                     if (selectedExperience != null) {
                         selectedExperience.setBackgroundResource(R.drawable.bg_chip_unselected_uniform);
@@ -349,17 +292,9 @@ public class EditProfileProviderActivity extends AppCompatActivity {
             R.id.dayThu, R.id.dayFri, R.id.daySat
         };
 
-        android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
-        Set<String> savedDays = prefs.getStringSet("days", new HashSet<>());
-
         for (int id : dayIds) {
             TextView day = findViewById(id);
             if(day != null) {
-                if (savedDays.contains(String.valueOf(id))) {
-                    selectedDays.add(day);
-                    day.setBackgroundResource(R.drawable.bg_circle_selected_uniform);
-                    day.setTextColor(ContextCompat.getColor(this, R.color.white));
-                }
                 day.setOnClickListener(v -> toggleDay((TextView) v));
             }
         }
@@ -379,17 +314,10 @@ public class EditProfileProviderActivity extends AppCompatActivity {
 
     private void setupTimeSlots() {
         int[] slotIds = {R.id.slotMorning, R.id.slotAfternoon, R.id.slotEvening};
-        android.content.SharedPreferences prefs = getSharedPreferences("ProviderProfile", MODE_PRIVATE);
-        Set<String> savedTimeSlots = prefs.getStringSet("timeSlots", new HashSet<>());
 
         for (int id : slotIds) {
             TextView slot = findViewById(id);
             if(slot != null) {
-                if (savedTimeSlots.contains(String.valueOf(id))) {
-                    selectedTimeSlots.add(slot);
-                    slot.setBackgroundResource(R.drawable.bg_chip_selected_uniform);
-                    slot.setTextColor(ContextCompat.getColor(this, R.color.white));
-                }
                 slot.setOnClickListener(v -> {
                     TextView tv = (TextView) v;
                     if (selectedTimeSlots.contains(tv)) {

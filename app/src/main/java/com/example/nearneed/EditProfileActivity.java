@@ -195,7 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void uploadPhotoThenSave(String uid, String name, String bio) {
         StorageReference ref = FirebaseStorage.getInstance()
-            .getReference("profile_images/" + uid + ".jpg");
+            .getReference("profiles/" + uid + "/profile.jpg");
 
         ref.putFile(pendingPhotoUri)
             .addOnSuccessListener(task ->

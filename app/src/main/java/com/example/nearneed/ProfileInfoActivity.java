@@ -98,7 +98,7 @@ public class ProfileInfoActivity extends AppCompatActivity {
         btnContinue.setText("Uploading photo...");
 
         StorageReference ref = FirebaseStorage.getInstance()
-                .getReference("profile_images/" + user.getUid() + ".jpg");
+                .getReference("profiles/" + user.getUid() + "/profile.jpg");
 
         ref.putFile(uri)
                 .addOnSuccessListener(taskSnapshot ->
@@ -120,7 +120,6 @@ public class ProfileInfoActivity extends AppCompatActivity {
                     isUploading = false;
                     btnContinue.setEnabled(true);
                     btnContinue.setText("Continue");
-                    Toast.makeText(this, "Photo upload failed. Check your connection and try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 

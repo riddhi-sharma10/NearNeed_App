@@ -2,6 +2,7 @@ package com.example.nearneed;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -261,7 +262,22 @@ public class HomeSeekerActivity extends AppCompatActivity {
             Post post = posts.get(position);
             holder.tvTitle.setText(post.title);
             holder.tvDetail.setText(post.budget != null ? "Budget: " + post.budget : "Gig");
-            holder.tvBadge.setText(post.status != null ? post.status.toUpperCase() : "ACTIVE");
+            
+            String status = post.status != null ? post.status.toUpperCase() : "ACTIVE";
+            holder.tvBadge.setText(status);
+            
+            // Status-based coloring
+            if ("COMPLETED".equals(status)) {
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_pill_completed_soft);
+                holder.tvBadge.setTextColor(Color.parseColor("#059669"));
+            } else if ("CANCELLED".equals(status)) {
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_pill_cancelled_soft);
+                holder.tvBadge.setTextColor(Color.parseColor("#DC2626"));
+            } else {
+                // Active/Urgent style
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_urgent_badge);
+                holder.tvBadge.setTextColor(Color.parseColor("#DC2626"));
+            }
             
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(v.getContext(), GigPostDetailActivity.class);

@@ -6,119 +6,115 @@
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <!-- App Bar -->
+    <!-- Collapsible App Bar -->
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:elevation="2dp">
+        app:elevation="0dp">
 
-        <RelativeLayout
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:paddingHorizontal="20dp">
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="-12dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/back_description"
-                android:src="@drawable/ic_back_arrow"
-                android:scaleType="centerInside"
-                app:tint="@color/black" />
-
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
-                android:fontFamily="sans-serif-black"
-                android:text="Responses"
-                android:textColor="@color/text_header"
-                android:textSize="20sp" />
+                android:orientation="vertical"
+                app:layout_collapseMode="parallax">
 
-        </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:paddingHorizontal="20dp">
+
+                    <ImageButton
+                        android:id="@+id/btnBack"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="-12dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/back_description"
+                        android:src="@drawable/ic_back_arrow"
+                        android:scaleType="centerInside"
+                        app:tint="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_centerHorizontal="true"
+                        android:fontFamily="sans-serif-black"
+                        android:text="Applicants"
+                        android:textColor="@color/text_header"
+                        android:textSize="20sp" />
+                </RelativeLayout>
+
+                <!-- Hero Image -->
+                <ImageView
+                    android:id="@+id/ivResponsesHero"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="12dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="Responses header image"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/welcome_bg_1"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize10Percent" />
+
+            </LinearLayout>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Main Content -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvResponses"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:listitem="@layout/item_response_card" />
+
+    <!-- Empty State (Overlay) -->
     <LinearLayout
+        android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/border_light" />
-
-        <!-- Header Placeholder Image -->
         <ImageView
-            android:id="@+id/ivResponsesHero"
-            android:layout_width="match_parent"
-            android:layout_height="148dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="6dp"
-            android:adjustViewBounds="true"
-            android:background="@drawable/bg_rounded_rect_placeholder"
-            android:contentDescription="Responses header image"
-            android:scaleType="centerCrop"
-            tools:src="@drawable/welcome_bg_1" />
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/img_empty_posts"
+            android:layout_marginBottom="16dp" />
 
-        <!-- Responses RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvResponses"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            android:clipToPadding="false"
-            tools:listitem="@layout/item_response_card" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No responses yet"
+            android:textColor="@color/text_header"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <!-- Empty State -->
-        <LinearLayout
-            android:id="@+id/emptyStateLayout"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_nav_profile"
-                app:tint="@color/text_muted"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:id="@+id/emptyStateTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No responses yet"
-                android:textColor="@color/text_header"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:id="@+id/emptyStateSubtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Check back soon for applicants!"
-                android:textColor="@color/text_muted"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Check back soon for applicants!"
+            android:textColor="@color/text_muted"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

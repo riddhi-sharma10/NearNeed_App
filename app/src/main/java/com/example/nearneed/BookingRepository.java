@@ -108,16 +108,37 @@ public class BookingRepository {
     public static void updateBookingStatus(String bookingId, String status, SaveCallback callback) {
         if (bookingId == null || callback == null) return;
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", status);
-        updates.put("timestamp", System.currentTimeMillis());
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
-                .addOnFailureListener(callback::onFailure);
+        
+        // 1. Fetch booking to get postId
+        db.collection(BOOKINGS_COLLECTION).document(bookingId).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        String postId = snapshot.getString("postId");
+                        
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("status", status);
+                        updates.put("timestamp", System.currentTimeMillis());
+
+                        // 2. Update booking status
+                        db.collection(BOOKINGS_COLLECTION).document(bookingId).update(updates)
+                                .addOnSuccessListener(aVoid -> {
+                                    // 3. Sync status to the linked post if status is completed/cancelled
+                                    if (postId != null && ("completed".equalsIgnoreCase(status) || "cancelled".equalsIgnoreCase(status))) {
+                                        Map<String, Object> postUpdates = new HashMap<>();
+                                        postUpdates.put("status", status);
+                                        db.collection("posts").document(postId).update(postUpdates);
+                                    }
+                                    callback.onSuccess(bookingId);
+                                })
+                                .addOnFailureListener(callback::onFailure);
+                    } else {
+                        if (callback != null) callback.onFailure(new Exception("Booking not found"));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
     }
 
     /**

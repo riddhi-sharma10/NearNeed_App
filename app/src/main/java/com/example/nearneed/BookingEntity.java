@@ -17,7 +17,7 @@ public class BookingEntity {
     public String providerName;
     public String status;
     public long createdAt;
-    public String price;
+    public double amount;
 
     public BookingEntity() {}
 
@@ -31,8 +31,8 @@ public class BookingEntity {
         entity.providerId = booking.providerId;
         entity.providerName = booking.providerName;
         entity.status = booking.status;
-        entity.createdAt = booking.createdAt != null ? booking.createdAt : 0L;
-        entity.price = booking.amount != null ? String.valueOf(booking.amount) : "0.0";
+        entity.createdAt = booking.createdAt;
+        entity.amount = (booking.amount != null) ? booking.amount : 0.0;
         return entity;
     }
 
@@ -47,11 +47,7 @@ public class BookingEntity {
         b.providerName = this.providerName;
         b.status = this.status;
         b.createdAt = this.createdAt;
-        try {
-            b.amount = Double.parseDouble(this.price);
-        } catch (NumberFormatException e) {
-            b.amount = 0.0;
-        }
+        b.amount = this.amount;
         return b;
     }
 }

@@ -18,6 +18,10 @@ public class UserViewModel extends ViewModel {
         return userRepository.getLocation();
     }
 
+    public void saveLocation(double lat, double lng) {
+        userRepository.saveLocation(lat, lng);
+    }
+
     public LiveData<Integer> getPostsCount() {
         return userRepository.getPostsCount();
     }
@@ -32,10 +36,6 @@ public class UserViewModel extends ViewModel {
 
     public LiveData<String> getMtdEarnings() {
         return userRepository.getMtdEarnings();
-    }
-
-    public void saveLocation(double lat, double lng) {
-        userRepository.saveLocation(lat, lng);
     }
 
     @Override

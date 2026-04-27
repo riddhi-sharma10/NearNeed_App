@@ -82,8 +82,13 @@ public class BookingViewModel extends AndroidViewModel {
             userBookingsListener.remove();
         }
 
-        // Offline First: Load from Room first
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.google.firebase.auth.FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            userBookings.setValue(new ArrayList<>());
+            return;
+        }
+
+        String uid = currentUser.getUid();
         BookingRepository.loadBookingsFromRoom(getApplication(), uid, new BookingRepository.BookingListener() {
             @Override
             public void onBookingsLoaded(List<Booking> bookings) {

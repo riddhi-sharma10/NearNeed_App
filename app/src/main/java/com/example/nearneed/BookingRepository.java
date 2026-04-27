@@ -37,25 +37,69 @@ public class BookingRepository {
     }
 
     /**
-     * Create a new booking (full form).
+     * Create a new booking (full form) — fetches seeker & provider names before saving.
      */
     public static void createBooking(String postId, String postTitle, String postType,
                                      String seekerId, String providerId, String applicationId,
                                      Long scheduledDate, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
-        Booking booking = new Booking(postId, seekerId, providerId);
-        booking.postTitle = postTitle;
-        booking.postType = postType;
-        booking.applicationId = applicationId;
-        booking.createdAt = System.currentTimeMillis();
-        booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .add(booking)
-                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
-                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+        final String[] seekerName   = {""};
+        final String[] providerName = {""};
+        final int[]    done         = {0};
+
+        Runnable saveBooking = () -> {
+            done[0]++;
+            if (done[0] < 2) return;
+
+            Booking booking = new Booking(postId, seekerId, providerId);
+            booking.postTitle     = postTitle;
+            booking.postType      = postType;
+            booking.applicationId = applicationId;
+            booking.createdAt     = System.currentTimeMillis();
+            booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
+            booking.seekerName    = seekerName[0];
+            booking.providerName  = providerName[0];
+            booking.status        = "upcoming";
+
+            db.collection(BOOKINGS_COLLECTION)
+                    .add(booking)
+                    .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
+                    .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+        };
+
+        if (seekerId != null && !seekerId.isEmpty()) {
+            db.collection("users").document(seekerId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc != null && doc.exists()) {
+                            String n = doc.getString("name");
+                            if (n == null || n.isEmpty()) n = doc.getString("fullName");
+                            if (n != null && !n.isEmpty()) seekerName[0] = n;
+                        }
+                        saveBooking.run();
+                    })
+                    .addOnFailureListener(e -> saveBooking.run());
+        } else {
+            done[0]++;
+            saveBooking.run();
+        }
+
+        if (providerId != null && !providerId.isEmpty()) {
+            db.collection("users").document(providerId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc != null && doc.exists()) {
+                            String n = doc.getString("name");
+                            if (n == null || n.isEmpty()) n = doc.getString("fullName");
+                            if (n != null && !n.isEmpty()) providerName[0] = n;
+                        }
+                        saveBooking.run();
+                    })
+                    .addOnFailureListener(e -> saveBooking.run());
+        } else {
+            done[0]++;
+            saveBooking.run();
+        }
     }
 
     /**
@@ -195,14 +239,16 @@ public class BookingRepository {
 
     private static ListenerRegistration observeAllUserBookings(String userId, BookingListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final List<Booking>[] seekerResult = new List[]{new ArrayList<>()};
+        final List<Booking>[] seekerResult   = new List[]{new ArrayList<>()};
         final List<Booking>[] providerResult = new List[]{new ArrayList<>()};
 
         Runnable combiner = () -> {
-            List<Booking> combined = new ArrayList<>();
-            combined.addAll(seekerResult[0]);
-            combined.addAll(providerResult[0]);
-            // Sort by timestamp desc
+            // Merge both lists, deduplicating by bookingId (a booking should never appear twice)
+            java.util.LinkedHashMap<String, Booking> byId = new java.util.LinkedHashMap<>();
+            for (Booking b : seekerResult[0])   { if (b.bookingId != null) byId.put(b.bookingId, b); }
+            for (Booking b : providerResult[0]) { if (b.bookingId != null) byId.putIfAbsent(b.bookingId, b); }
+
+            List<Booking> combined = new ArrayList<>(byId.values());
             java.util.Collections.sort(combined, (b1, b2) -> {
                 Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
                 Long t2 = b2.timestamp != null ? b2.timestamp : 0L;

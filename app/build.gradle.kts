@@ -27,8 +27,8 @@ android {
         val geminiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
 
-        val rzpKey = properties.getProperty("RAZORPAY_KEY_ID") ?: ""
-        buildConfigField("String", "RAZORPAY_KEY_ID", "\"$rzpKey\"")
+        val razorpayKey = properties.getProperty("RAZORPAY_KEY_ID") ?: ""
+        buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -82,8 +82,8 @@ dependencies {
     implementation(libs.gson)
     // ML Kit
     implementation("com.google.mlkit:text-recognition:16.0.1")
-    // Razorpay
-    implementation("com.razorpay:checkout:1.6.39")
+    // Razorpay Payment Gateway
+    implementation("com.razorpay:checkout:1.6.30")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

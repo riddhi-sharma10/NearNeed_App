@@ -97,17 +97,18 @@
             android:background="@color/border_light" />
 
         <!-- Volunteers RecyclerView -->
+
+        <!-- Empty State -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvVolunteers"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:clipToPadding="false"
             android:paddingHorizontal="16dp"
             android:paddingVertical="12dp"
-            android:clipToPadding="false"
             tools:listitem="@layout/item_volunteer_card" />
 
-        <!-- Empty State -->
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"

@@ -185,10 +185,10 @@ public class UpdateStatusActivity extends AppCompatActivity {
             }
         }
 
-        // Persist in-memory state
+        // Persist in-memory state (for UI compat)
         BookingStateManager.getInstance().setStatus(bookingId, selectedStatus);
 
-        // If completed, show rating dialog before payment
+        // If completed, show payment/rating dialog first
         if ("completed".equals(selectedStatus)) {
             if (selectedPaymentMethod.isEmpty()) {
                 Toast.makeText(this, "Please select Cash or UPI to proceed", Toast.LENGTH_SHORT).show();
@@ -199,11 +199,17 @@ public class UpdateStatusActivity extends AppCompatActivity {
                     bookingId != null ? bookingId : "",
                     bookingTitle != null ? bookingTitle : "Service",
                     "Provider Name",
-                    500.0 // Mock amount for demo
+                    500.0
             );
             dialog.setOnPaymentClickListener((bId, rating, notes) -> {
+                // Write to Firestore for real-time sync
+                if (bookingId != null && !bookingId.isEmpty()) {
+                    BookingRepository.updateBookingStatus(bookingId, "completed", new BookingRepository.SaveCallback() {
+                        @Override public void onSuccess(String id) {}
+                        @Override public void onFailure(Exception e) {}
+                    });
+                }
                 if ("cash".equals(selectedPaymentMethod)) {
-                    // Navigate to intermediate processing screen for Cash
                     Intent intent = new Intent(this, ProcessingPaymentActivity.class);
                     intent.putExtra("booking_id", bookingId);
                     intent.putExtra("service_name", bookingTitle);
@@ -212,7 +218,6 @@ public class UpdateStatusActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    // Navigate to Razorpay payment flow for UPI
                     navigateToPaymentFlow(notes);
                 }
             });
@@ -220,7 +225,14 @@ public class UpdateStatusActivity extends AppCompatActivity {
             return;
         }
 
-        // For cancelled / other statuses: send result back to caller
+        // For ongoing / cancelled: write to Firestore for real-time sync across both users
+        if (bookingId != null && !bookingId.isEmpty()) {
+            BookingRepository.updateBookingStatus(bookingId, selectedStatus, new BookingRepository.SaveCallback() {
+                @Override public void onSuccess(String id) {}
+                @Override public void onFailure(Exception e) {}
+            });
+        }
+
         Intent result = new Intent();
         result.putExtra("booking_id", bookingId);
         result.putExtra("new_status", selectedStatus);

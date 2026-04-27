@@ -186,6 +186,7 @@
                 app:iconPadding="8dp"
                 app:iconTint="@color/white" />
 
+            <!-- Seeker-only: Update Status -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnUpdateStatus"
                 android:layout_width="0dp"
@@ -197,12 +198,34 @@
                 android:textSize="13sp"
                 android:textAllCaps="false"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:backgroundTint="@color/brand_success"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_edit"
                 app:iconGravity="textStart"
                 app:iconPadding="6dp"
                 app:iconSize="16dp" />
+
+            <!-- Provider-only: View Details -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewDetails"
+                android:layout_width="0dp"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="View Details"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:backgroundTint="#6366F1"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_menu_info_details"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconSize="16dp" />
+
         </LinearLayout>
 
     </LinearLayout>

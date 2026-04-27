@@ -65,7 +65,8 @@ public class MessagesFragment extends Fragment {
         rvMessages = view.findViewById(R.id.rvMessages);
         rvMessages.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
+        emptyStateContainer = view.findViewById(R.id
+                .emptyStateContainer);
 
         adapter = new MessagesAdapter(displayedChats);
         rvMessages.setAdapter(adapter);
@@ -182,7 +183,7 @@ public class MessagesFragment extends Fragment {
     }
 
     private void hydrateUserInfo(ChatEntry entry) {
-        firestore.collection("users").document(entry.userId).get()
+        firestore.collection("Users").document(entry.userId).get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot != null && snapshot.exists()) {
                         applyUserSnapshot(entry, snapshot, true);

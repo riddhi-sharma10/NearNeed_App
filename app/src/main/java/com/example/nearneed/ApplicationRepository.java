@@ -40,6 +40,8 @@ public class ApplicationRepository {
 
     /**
      * Submit an application to a post (full form).
+     * Fetches the applicant's profile from Firestore before saving so seekers
+     * see real name, rating, location and photo in the applicants list.
      */
     public static void submitApplication(String postId, String postTitle, String postType,
                                          String creatorId, String message, String budget,
@@ -47,23 +49,67 @@ public class ApplicationRepository {
         if (postId == null || callback == null) return;
 
         String applicantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Application app = new Application(postId, applicantId, message);
-        app.postTitle = postTitle;
-        app.postType = postType;
-        app.creatorId = creatorId;
-        app.appliedAt = System.currentTimeMillis();
+
+        final Double[] budgetValue = {null};
         if (budget != null) {
-            try {
-                app.proposedBudget = Double.parseDouble(budget.replace("₹", "").trim());
-            } catch (NumberFormatException ignored) {}
+            try { budgetValue[0] = Double.parseDouble(budget.replace("\u20b9", "").trim()); }
+            catch (NumberFormatException ignored) {}
         }
-        app.paymentMethod = paymentMethod;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .add(app)
-                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
-                .addOnFailureListener(callback::onFailure);
+
+        // Fetch applicant profile first, then save application with real details
+        db.collection("users").document(applicantId).get()
+                .addOnSuccessListener(doc -> {
+                    Application app = buildApp(postId, applicantId, message, postTitle, postType,
+                            creatorId, budgetValue[0], paymentMethod);
+                    if (doc != null && doc.exists()) {
+                        String name = doc.getString("name");
+                        if (name == null || name.isEmpty()) name = doc.getString("fullName");
+                        app.applicantName     = name != null ? name : "";
+
+                        String photo = doc.getString("photoUrl");
+                        if (photo == null) photo = doc.getString("profileImageUrl");
+                        app.applicantPhotoUrl = photo;
+
+                        Object ratingObj = doc.get("rating");
+                        if (ratingObj instanceof Number)
+                            app.applicantRating = ((Number) ratingObj).doubleValue();
+
+                        String loc = doc.getString("city");
+                        if (loc == null) loc = doc.getString("address");
+                        app.applicantLocation = loc;
+
+                        String phone = doc.getString("phone");
+                        if (phone == null) phone = doc.getString("phoneNumber");
+                        app.applicantPhone = phone;
+                    }
+                    db.collection(APPLICATIONS_COLLECTION).add(app)
+                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnFailureListener(callback::onFailure);
+                })
+                .addOnFailureListener(e -> {
+                    // Profile fetch failed — save with blank fields (graceful degradation)
+                    Application app = buildApp(postId, applicantId, message, postTitle, postType,
+                            creatorId, budgetValue[0], paymentMethod);
+                    db.collection(APPLICATIONS_COLLECTION).add(app)
+                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnFailureListener(callback::onFailure);
+                });
+    }
+
+    /** Helper to build an Application object with shared fields. */
+    private static Application buildApp(String postId, String applicantId, String message,
+                                        String postTitle, String postType, String creatorId,
+                                        Double budget, String paymentMethod) {
+        Application app  = new Application(postId, applicantId, message);
+        app.postTitle    = postTitle;
+        app.postType     = postType;
+        app.creatorId    = creatorId;
+        app.appliedAt    = System.currentTimeMillis();
+        app.proposedBudget = budget;
+        app.paymentMethod  = paymentMethod;
+        return app;
     }
 
     /**

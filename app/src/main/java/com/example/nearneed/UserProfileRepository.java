@@ -153,10 +153,10 @@ public final class UserProfileRepository {
             new Thread(() -> {
                 UserEntity entity = new UserEntity();
                 entity.userId = user.getUid();
-                entity.name = profile.fullName;
+                entity.fullName = profile.fullName;
                 entity.phone = profile.phone;
-                entity.address = profile.location;
-                entity.profileImageUrl = profile.photoUrl;
+                entity.location = profile.location;
+                entity.photoUrl = profile.photoUrl;
                 entity.bio = profile.bio;
                 // Add more fields if needed
                 AppDatabase.getDatabase(context).userDao().insert(entity);
@@ -173,9 +173,9 @@ public final class UserProfileRepository {
             if (entity != null) {
                 UserProfile profile = entity.toProfile();
                 // Map back fields if names differ
-                profile.fullName = entity.name;
-                profile.photoUrl = entity.profileImageUrl;
-                profile.location = entity.address;
+                profile.fullName = entity.fullName;
+                profile.photoUrl = entity.photoUrl;
+                profile.location = entity.location;
                 
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
                     listener.onProfileChanged(profile);

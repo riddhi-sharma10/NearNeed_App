@@ -80,6 +80,7 @@ public class ChatRepository {
                 .add(messageMap)
                 .addOnSuccessListener(doc -> {
                     updateChatMetadata(chatId, senderId, receiverId, text.trim());
+                    FcmNotifier.sendToUser(receiverId, "New Message", text.trim());
                     if (callback != null) callback.onSuccess();
                 })
                 .addOnFailureListener(e -> {
@@ -106,7 +107,9 @@ public class ChatRepository {
                 .collection("messages")
                 .add(messageMap)
                 .addOnSuccessListener(doc -> {
-                    updateChatMetadata(chatId, senderId, receiverId, isVoice ? "🎤 Voice message" : "📷 Image");
+                    String preview = isVoice ? "🎤 Voice message" : "📷 Image";
+                    updateChatMetadata(chatId, senderId, receiverId, preview);
+                    FcmNotifier.sendToUser(receiverId, "New Message", preview);
                     if (callback != null) callback.onSuccess();
                 })
                 .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });

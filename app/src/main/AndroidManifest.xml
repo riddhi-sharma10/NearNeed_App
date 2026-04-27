@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Required for Razorpay to detect installed UPI apps on Android 11+ -->
     <queries>
@@ -61,10 +62,12 @@
 
         <activity
             android:name=".OtpEnterActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".OtpVerifyActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -73,10 +76,12 @@
 
         <activity
             android:name=".EditProfileActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".EditProfileProviderActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -94,10 +99,12 @@
 
         <activity
             android:name=".ProfileInfoActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".ProfileSetupActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -168,11 +175,12 @@
 
         <activity
             android:name=".CreatePostActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
-
 
         <activity
             android:name=".CreatePostStep2Activity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity

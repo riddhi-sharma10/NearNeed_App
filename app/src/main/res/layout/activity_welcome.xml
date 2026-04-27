@@ -323,7 +323,7 @@
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cvSlideshow"
         android:layout_width="match_parent"
-        android:layout_height="315dp"
+        android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         app:cardBackgroundColor="#E6FFFFFF"

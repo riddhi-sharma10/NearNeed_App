@@ -95,6 +95,7 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
             btnView.setOnClickListener(v -> {
                 Intent intent = new Intent(itemView.getContext(), CommunityPostDetailActivity.class);
                 intent.putExtra("post_id", post.postId);
+                intent.putExtra("creator_id", post.createdBy);
                 intent.putExtra("title", post.title);
                 intent.putExtra("description", post.description);
                 intent.putExtra("postedBy", post.postedBy);

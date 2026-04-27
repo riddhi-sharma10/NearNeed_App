@@ -168,15 +168,17 @@ public class PersonProfileActivity extends AppCompatActivity {
                 .placeholder(R.drawable.avatar_alex)
                 .error(R.drawable.avatar_alex)
                 .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
-                .circleCrop()
+                .centerCrop()
                 .into(ivProfile);
         }
     }
 
     private void openChatWithPerson() {
         if (personUserId == null || personUserId.isEmpty()) return;
-        ChatBottomSheet.newInstance(personUserId, personName)
-                .show(getSupportFragmentManager(), "ChatBottomSheet");
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra("CHAT_USER_ID", personUserId);
+        intent.putExtra("CHAT_NAME", personName != null ? personName : "User");
+        startActivity(intent);
     }
 
     // ── Helpers ──

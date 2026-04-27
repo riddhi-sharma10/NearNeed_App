@@ -43,129 +43,179 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.google.android.material.card.MaterialCardView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="3dp"
-                app:strokeColor="@color/border_light"
-                app:strokeWidth="1dp">
+                android:paddingBottom="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/headerBanner"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="@color/sapphire_primary"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Grey Halo Circle -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/avatarHalo"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    app:cardBackgroundColor="@color/surface_background"
+                    app:cardCornerRadius="60dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp"
+                    app:layout_constraintTop_toBottomOf="@id/headerBanner"
+                    app:layout_constraintBottom_toBottomOf="@id/headerBanner"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Inner Avatar (Rounded Square) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/avatarContainer"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:cardBackgroundColor="@color/surface_card"
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="4dp"
+                    app:strokeWidth="0dp"
+                    app:layout_constraintTop_toTopOf="@id/avatarHalo"
+                    app:layout_constraintBottom_toBottomOf="@id/avatarHalo"
+                    app:layout_constraintStart_toStartOf="@id/avatarHalo"
+                    app:layout_constraintEnd_toEndOf="@id/avatarHalo">
+
+                    <ImageView
+                        android:id="@+id/ivProfile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/avatar_sarah"
+                        android:scaleType="centerCrop" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Details -->
+                <TextView
+                    android:id="@+id/tvName"
+                    style="@style/AppHeading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text=""
+                    android:textColor="@color/text_header"
+                    android:textSize="30sp"
+                    app:layout_constraintTop_toBottomOf="@id/avatarHalo"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/llLocation"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:paddingBottom="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="6dp"
+                    app:layout_constraintTop_toBottomOf="@id/tvName"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:background="@drawable/bg_profile_hero_header" />
-
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivProfile"
-                        android:layout_width="92dp"
-                        android:layout_height="92dp"
-                        android:layout_marginTop="-20dp"
-                        android:src="@drawable/avatar_sarah"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.Circle"
-                        app:strokeColor="@color/black"
-                        app:strokeWidth="2dp" />
-
-                    <TextView
-                        android:id="@+id/tvName"
-                        style="@style/AppHeading"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text=""
-                        android:textColor="@color/brand_primary"
-                        android:textSize="34sp" />
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_loc_pin_small"
+                        app:tint="@color/text_muted" />
 
                     <TextView
                         android:id="@+id/tvLocation"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginStart="4dp"
                         android:text="Location loading..."
-                        android:textColor="@color/text_subheadline"
-                        android:textSize="12sp" />
+                        android:textColor="@color/text_muted"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
-                    <!-- Rating Row Removed -->
+                <LinearLayout
+                    android:id="@+id/llVerifiedBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_chip_blue_soft"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="5dp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/llLocation"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
 
-                    <LinearLayout
-                        android:id="@+id/llVerifiedBadge"
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_success_check"
+                        app:tint="@color/brand_primary" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:background="@drawable/bg_chip_blue_soft"
-                        android:gravity="center"
-                        android:orientation="horizontal"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingBottom="5dp"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
-                            android:src="@drawable/ic_success_check"
-                            app:tint="@color/brand_primary" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="5dp"
-                            android:text="Verified"
-                            android:textColor="@color/brand_primary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnReviewsPerson"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="10dp"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            android:text="Reviews"
-                            android:textColor="@color/sapphire_primary"
-                            android:textSize="14sp"
-                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                            app:cornerRadius="20dp"
-                            app:icon="@drawable/ic_star_yellow"
-                            app:iconTint="@color/sapphire_primary"
-                            app:strokeColor="@color/sapphire_primary" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnMessagePerson"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            android:text="Message"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:visibility="gone"
-                            app:backgroundTint="@color/sapphire_primary"
-                            app:cornerRadius="20dp"
-                            app:icon="@drawable/ic_chat_outline"
-                            app:iconTint="@color/white" />
-                    </LinearLayout>
-
+                        android:layout_marginStart="5dp"
+                        android:text="Verified"
+                        android:textColor="@color/brand_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:id="@+id/llButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/llVerifiedBadge"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnReviewsPerson"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="10dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="Reviews"
+                        android:textColor="@color/sapphire_primary"
+                        android:textSize="14sp"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:cornerRadius="20dp"
+                        app:icon="@drawable/ic_star_yellow"
+                        app:iconTint="@color/sapphire_primary"
+                        app:strokeColor="@color/sapphire_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMessagePerson"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:text="Message"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/sapphire_primary"
+                        app:cornerRadius="20dp"
+                        app:icon="@drawable/ic_chat_outline"
+                        app:iconTint="@color/white" />
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -196,11 +246,11 @@
                         style="@style/AppDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:lineSpacingExtra="2dp"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="6dp"
                         android:text=""
-                        android:textColor="@color/text_subheadline"
-                        android:textSize="14sp" />
+                        android:textColor="@color/text_body_dark"
+                        android:textSize="16sp" />
 
                     <LinearLayout
                         android:id="@+id/llPhoneRow"
@@ -239,7 +289,7 @@
                                 android:layout_height="wrap_content"
                                 android:text=""
                                 android:textColor="@color/text_header"
-                                android:textSize="15sp"
+                                android:textSize="16sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -288,6 +338,32 @@
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Decorative Empty Space Filler -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="40dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:alpha="0.4">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_hand_holding_heart"
+                    app:tint="@color/text_muted" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="NearNeed Community Member"
+                    android:textColor="@color/text_muted"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -30,6 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
             setupProviderStats();
         } else {
             setContentView(R.layout.layout_profile_seeker);
+            setupSeekerStats();
         }
 
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_PROFILE);
@@ -63,6 +64,31 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void setupSeekerStats() {
+        UserViewModel userViewModel = new androidx.lifecycle.ViewModelProvider(this).get(UserViewModel.class);
+
+        userViewModel.getPostsCount().observe(this, count -> {
+            TextView tvPosts = findViewById(R.id.tv_profile_posts_value);
+            if (tvPosts != null) tvPosts.setText(String.valueOf(count));
+        });
+
+        userViewModel.getBookingsCount().observe(this, count -> {
+            TextView tvBookings = findViewById(R.id.tv_profile_bookings_value);
+            if (tvBookings != null) tvBookings.setText(String.valueOf(count));
+        });
+
+        userViewModel.getRating().observe(this, rating -> {
+            TextView tvRating = findViewById(R.id.tv_profile_rating_value);
+            if (tvRating != null) {
+                if (rating != null && rating > 0) {
+                    tvRating.setText(String.format("%.1f", rating));
+                } else {
+                    tvRating.setText("--");
+                }
+            }
+        });
+    }
+
     private void setupProviderStats() {
         UserViewModel userViewModel = new androidx.lifecycle.ViewModelProvider(this).get(UserViewModel.class);
 
@@ -81,7 +107,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         userViewModel.getRating().observe(this, rating -> {
             TextView tvRating = findViewById(R.id.tv_provider_rating_value);
-            if (tvRating != null) tvRating.setText(String.format("%.1f", rating));
+            if (tvRating != null) {
+                if (rating != null && rating > 0) {
+                    tvRating.setText(String.format("%.1f", rating));
+                } else {
+                    tvRating.setText("--");
+                }
+            }
         });
 
         userViewModel.getWeeklyJobsCount().observe(this, count -> {

@@ -169,7 +169,6 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
@@ -178,6 +177,14 @@ public class BookingRepository {
                             Booking b = fromSnapshot(doc);
                             if (b != null) bookings.add(b);
                         }
+                        
+                        // Client-side sort by timestamp descending
+                        java.util.Collections.sort(bookings, (b1, b2) -> {
+                            Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
+                            Long t2 = b2.timestamp != null ? b2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onBookingsLoaded(bookings);
                     }
                 });
@@ -224,11 +231,6 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         
         if ("all".equalsIgnoreCase(role)) {
-            // Complex case: Listen to both. 
-            // For simplicity in a single ListenerRegistration return, we can use two queries 
-            // but we need a way to combine them. 
-            // Alternatively, the ViewModel can manage two listeners.
-            // For now, let's implement a merged listener if role is "all".
             return observeAllUserBookings(userId, listener);
         }
 
@@ -239,7 +241,6 @@ public class BookingRepository {
 
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo(field, userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -253,6 +254,14 @@ public class BookingRepository {
                                 bookings.add(booking);
                             }
                         }
+                        
+                        // Client-side sort by timestamp descending
+                        java.util.Collections.sort(bookings, (b1, b2) -> {
+                            Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
+                            Long t2 = b2.timestamp != null ? b2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onBookingsLoaded(bookings);
                     }
                 });

@@ -176,14 +176,19 @@
                 android:layout_marginEnd="8dp"
                 android:text="Message"
                 android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 android:textAllCaps="false"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
                 app:backgroundTint="#1E3A8A"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_send"
                 app:iconGravity="textStart"
-                app:iconPadding="8dp"
+                app:iconPadding="2dp"
+                app:iconSize="14dp"
                 app:iconTint="@color/white" />
 
             <!-- Seeker-only: Update Status -->
@@ -195,16 +200,20 @@
                 android:layout_marginStart="8dp"
                 android:text="Update Status"
                 android:textColor="@color/white"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textAllCaps="false"
                 android:textStyle="bold"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
                 android:visibility="gone"
                 app:backgroundTint="@color/brand_success"
                 app:cornerRadius="12dp"
                 app:icon="@android:drawable/ic_menu_edit"
                 app:iconGravity="textStart"
-                app:iconPadding="6dp"
-                app:iconSize="16dp" />
+                app:iconPadding="2dp"
+                app:iconSize="14dp" />
 
             <!-- Provider-only: View Details -->
             <com.google.android.material.button.MaterialButton

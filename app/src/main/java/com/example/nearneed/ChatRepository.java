@@ -41,7 +41,6 @@ public class ChatRepository {
         return db.collection(MESSAGES_COLLECTION)
                 .document(chatId)
                 .collection("messages")
-                .orderBy("timestamp", Query.Direction.ASCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -49,6 +48,14 @@ public class ChatRepository {
                     }
                     if (snapshot != null) {
                         List<ChatMessage> messages = snapshot.toObjects(ChatMessage.class);
+                        
+                        // Client-side sort by timestamp ascending (oldest first for chat history)
+                        java.util.Collections.sort(messages, (m1, m2) -> {
+                            Long t1 = m1.timestamp != null ? m1.timestamp : 0L;
+                            Long t2 = m2.timestamp != null ? m2.timestamp : 0L;
+                            return t1.compareTo(t2);
+                        });
+                        
                         listener.onMessagesLoaded(messages);
                     }
                 });

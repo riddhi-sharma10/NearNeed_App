@@ -155,7 +155,6 @@ public class ApplicationRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
@@ -164,6 +163,14 @@ public class ApplicationRepository {
                             Application app = fromSnapshot(doc);
                             if (app != null) applications.add(app);
                         }
+                        
+                        // Client-side sort by timestamp descending (newest first)
+                        java.util.Collections.sort(applications, (a1, a2) -> {
+                            Long t1 = a1.timestamp != null ? a1.timestamp : 0L;
+                            Long t2 = a2.timestamp != null ? a2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onApplicationsLoaded(applications);
                     }
                 });

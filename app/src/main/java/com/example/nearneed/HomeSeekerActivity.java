@@ -109,9 +109,43 @@ public class HomeSeekerActivity extends AppCompatActivity {
         View fabAiChat = findViewById(R.id.fab_ai_chat);
         if (fabAiChat != null) {
             fabAiChat.setOnClickListener(v -> {
-                startActivity(new Intent(this, AiChatActivity.class));
+                openAcceptedProviderChat();
             });
         }
+    }
+
+    private void openAcceptedProviderChat() {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null) return;
+
+        // Query for the most recent active booking (upcoming or in_progress)
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("bookings")
+                .whereEqualTo("seekerId", currentUid)
+                .whereIn("status", java.util.Arrays.asList("upcoming", "in_progress", "confirmed"))
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        com.google.firebase.firestore.DocumentSnapshot doc = snapshots.getDocuments().get(0);
+                        String providerId = doc.getString("providerId");
+                        String providerName = doc.getString("providerName");
+                        
+                        if (providerId != null) {
+                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider")
+                                    .show(getSupportFragmentManager(), "ChatBottomSheet");
+                        } else {
+                            startActivity(new Intent(this, AiChatActivity.class));
+                        }
+                    } else {
+                        // Fallback to AI Chat if no accepted provider found
+                        startActivity(new Intent(this, AiChatActivity.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    startActivity(new Intent(this, AiChatActivity.class));
+                });
     }
 
     private void setupRecyclerViews() {

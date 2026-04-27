@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_bottom_sheet_rounded"
+    android:orientation="vertical"
+    android:paddingTop="12dp">
+
+    <!-- HANDLE BAR -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#E2E8F0" />
+
+    <!-- HEADER -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvChatTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="Chat with Provider"
+                android:textColor="@color/text_header"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvChatSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active Service Discussion"
+                android:textColor="@color/text_subheadline"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_muted" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F1F5F9" />
+
+    <!-- CHAT AREA -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_chat_bubble_left" />
+
+    <!-- INPUT AREA -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
+
+        <EditText
+            android:id="@+id/etMessageInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/bg_chat_input_pill"
+            android:hint="Type a message..."
+            android:maxLines="4"
+            android:minHeight="48dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp"
+            android:textColor="@color/text_header"
+            android:textColorHint="@color/text_muted"
+            android:textSize="14sp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:backgroundTint="@color/brand_primary"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_send"
+            app:tint="@color/white" />
+    </LinearLayout>
+
+</LinearLayout>

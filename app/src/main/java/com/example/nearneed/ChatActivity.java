@@ -169,6 +169,10 @@ public class ChatActivity extends AppCompatActivity {
             if (!messageList.isEmpty()) {
                 rvMessages.scrollToPosition(messageList.size() - 1);
             }
+            // Auto-mark as read if we are actively viewing the chat
+            if (chatId != null) {
+                chatViewModel.markAsRead(chatId);
+            }
         });
 
         if (chatId != null) {

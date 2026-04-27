@@ -119,6 +119,7 @@ public class ChatRepository {
         if (chatId == null) return;
         Map<String, Object> update = new HashMap<>();
         update.put("unreadCount", 0);
+        update.put("isRead", true);
         FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
                 .document(chatId)
                 .update(update);

@@ -58,7 +58,16 @@ public class PostViewModel extends ViewModel {
         userPostsListener = PostRepository.observeUserPosts(context, userId, new PostRepository.PostListener() {
             @Override
             public void onPostsLoaded(List<Post> posts) {
-                userPosts.setValue(posts);
+                List<Post> activeOrInProgressPosts = new ArrayList<>();
+                if (posts != null) {
+                    for (Post p : posts) {
+                        String status = p.status != null ? p.status.toLowerCase() : "active";
+                        if (!status.equals("completed") && !status.equals("cancelled") && !status.equals("canceled")) {
+                            activeOrInProgressPosts.add(p);
+                        }
+                    }
+                }
+                userPosts.setValue(activeOrInProgressPosts);
                 isLoading.setValue(false);
                 errorMessage.setValue(null);
             }

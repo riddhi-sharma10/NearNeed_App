@@ -159,35 +159,33 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingHorizontal="40dp"
-            android:paddingBottom="48dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:padding="32dp">
 
             <ImageView
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
                 android:src="@drawable/ic_chat_outline"
-                android:layout_marginBottom="20dp"
-                app:tint="#D1D5DB" />
+                android:alpha="0.35"
+                android:layout_marginBottom="16dp" />
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No messages yet"
-                android:textSize="20sp"
+                android:text="No conversations yet"
+                android:textSize="18sp"
+                android:textColor="#374151"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="#111827"
-                android:gravity="center"
                 android:layout_marginBottom="8dp" />
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="When you connect with a provider or seeker, your conversations will appear here."
+                android:text="Start a conversation by connecting with a provider or seeker."
                 android:textSize="14sp"
                 android:textColor="#9CA3AF"
                 android:gravity="center"
-                android:lineSpacingExtra="3dp" />
+                android:lineSpacingMultiplier="1.4" />
 
         </LinearLayout>
 

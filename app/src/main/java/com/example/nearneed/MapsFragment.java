@@ -460,10 +460,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 refreshSeekerMap();
             }
         });
-        Context context = getContext();
-        if (context != null) {
-            postViewModel.observeNearbyPosts(context, 28.4595, 77.0266, 10.0);
-        }
+        postViewModel.observeAllActivePosts();
     }
 
     private void refreshSeekerMap() {
@@ -478,6 +475,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         int orange = ContextCompat.getColor(context, R.color.brand_warning);
         int green = ContextCompat.getColor(context, R.color.brand_success);
 
+        // Providers are hidden from Seeker map as per "ONLY green pins for community" request
+        /*
         for (UserProfile p : latestProviders) {
             if (p != null && p.latitude != null && p.longitude != null) {
                 LatLng pos = new LatLng(p.latitude, p.longitude);
@@ -486,9 +485,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId));
             }
         }
+        */
 
         for (Post p : latestPosts) {
             if (p == null) continue;
+            // Only show COMMUNITY posts on Seeker map
+            if (!"COMMUNITY".equalsIgnoreCase(p.type)) continue;
+
             LatLng pos = new LatLng(p.latitude != null ? p.latitude : 28.4595, p.longitude != null ? p.longitude : 77.0266);
             int color = "COMMUNITY".equalsIgnoreCase(p.type) ? green : orange;
             int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;

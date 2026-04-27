@@ -71,6 +71,6 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
     }
 
     private void showLocationPicker() {
-        LocationPickerHelper.show(this, (location, lat, lng) -> userViewModel.saveLocation(lat, lng));
+        LocationPickerHelper.show(this, (location, lat, lng) -> userViewModel.saveLocation(location, lat, lng));
     }
 }

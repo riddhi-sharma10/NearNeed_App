@@ -100,17 +100,55 @@ public class ResponsesActivity extends AppCompatActivity {
     }
 
     private void confirmAcceptance(Application app) {
-        new MaterialAlertDialogBuilder(this)
+        String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+
+        // ── Self-booking guard ──────────────────────────────────────────────
+        // Block the seeker from accepting themselves (same account acting as both roles)
+        if (currentUserId != null && currentUserId.equals(app.applicantId)) {
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                    .setTitle("Not Allowed")
+                    .setMessage("You cannot accept your own application. A different account must apply as the provider.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            return;
+        }
+
+        // ── Ensure applicant name is populated before showing dialog ────────
+        if (app.applicantName == null || app.applicantName.trim().isEmpty()) {
+            // Fetch name from Firestore, then show dialog
+            com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(app.applicantId)
+                    .get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc != null && doc.exists()) {
+                            String name = doc.getString("name");
+                            if (name == null || name.isEmpty()) name = doc.getString("fullName");
+                            if (name != null && !name.isEmpty()) app.applicantName = name;
+                        }
+                        showAcceptDialog(app);
+                    })
+                    .addOnFailureListener(e -> showAcceptDialog(app));
+        } else {
+            showAcceptDialog(app);
+        }
+    }
+
+    private void showAcceptDialog(Application app) {
+        String displayName = (app.applicantName != null && !app.applicantName.isEmpty())
+                ? app.applicantName : "this applicant";
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Accept Applicant")
-                .setMessage("Accept " + app.applicantName + " for this task?")
+                .setMessage("Accept " + displayName + " for this task?")
                 .setPositiveButton("Accept", (dialog, which) -> {
                     // 1. Update Application Status
                     appViewModel.updateApplicationStatus(app.applicationId, "accepted");
-                    
+
                     // 2. Create Real Booking
                     bookingViewModel.createBookingFromApplication(app);
-                    
-                    Toast.makeText(this, "Applicant Accepted!", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(this, displayName + " accepted!", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

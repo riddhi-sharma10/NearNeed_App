@@ -139,44 +139,29 @@ public class BookingsRealtimeFragment extends Fragment {
         return true;
     }
 
+    /**
+     * Routes bookings to tabs purely by Firestore status field for real-time sync.
+     * Status mapping:
+     *   "upcoming" / "pending"                        -> Upcoming tab
+     *   "ongoing" / "in_progress" / "confirmed"       -> Ongoing tab
+     *   "completed" / "cancelled" / "canceled"        -> Past tab
+     */
     private boolean matchesTab(Booking booking) {
         String status = booking.status != null ? booking.status.trim().toLowerCase(Locale.ROOT) : "upcoming";
-        boolean isPastStatus = "completed".equals(status) || "cancelled".equals(status) || "canceled".equals(status);
-        
-        long scheduledTime = booking.scheduledDate != null ? booking.scheduledDate : 0L;
-        
-        // Handle cases with no date (default to upcoming if not status-past)
-        if (scheduledTime == 0) {
-            if ("past".equals(tab)) return isPastStatus;
-            if (isPastStatus) return false;
-            return "upcoming".equals(tab);
+
+        switch (tab) {
+            case "upcoming":
+                return "upcoming".equals(status) || "pending".equals(status);
+            case "ongoing":
+                return "ongoing".equals(status)
+                        || "in_progress".equals(status)
+                        || "confirmed".equals(status);
+            case "past":
+                return "completed".equals(status)
+                        || "cancelled".equals(status)
+                        || "canceled".equals(status);
+            default:
+                return true;
         }
-
-        java.util.Calendar now = java.util.Calendar.getInstance();
-        java.util.Calendar scheduled = java.util.Calendar.getInstance();
-        scheduled.setTimeInMillis(scheduledTime);
-
-        boolean isToday = now.get(java.util.Calendar.YEAR) == scheduled.get(java.util.Calendar.YEAR) &&
-                          now.get(java.util.Calendar.DAY_OF_YEAR) == scheduled.get(java.util.Calendar.DAY_OF_YEAR);
-        
-        boolean isFuture = scheduled.after(now) && !isToday;
-        boolean isBeforeToday = scheduled.before(now) && !isToday;
-
-        if ("past".equals(tab)) {
-            return isPastStatus || isBeforeToday;
-        }
-        
-        // For Ongoing and Upcoming, status must NOT be past
-        if (isPastStatus) return false;
-
-        if ("ongoing".equals(tab)) {
-            return isToday;
-        }
-        
-        if ("upcoming".equals(tab)) {
-            return isFuture;
-        }
-
-        return true;
     }
 }

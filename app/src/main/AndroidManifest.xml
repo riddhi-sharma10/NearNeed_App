@@ -53,6 +53,10 @@
         </activity>
 
         <activity
+            android:name=".RouterActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".WelcomeActivity"
             android:exported="false" />
 
@@ -150,11 +154,6 @@
 
         <activity
             android:name=".HelpSupportActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AiChatActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
@@ -276,17 +275,21 @@
             android:name=".CancellationDetailsActivity"
             android:exported="false" />
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY_HERE" />
+        <activity
+            android:name=".AiChatActivity"
+            android:exported="false" />
 
         <service
-            android:name=".NearNeedMessagingService"
+            android:name=".FirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_API_KEY_HERE" />
     </application>
 
 </manifest>

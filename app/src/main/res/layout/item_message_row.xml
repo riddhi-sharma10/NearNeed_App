@@ -82,8 +82,7 @@
                 android:textColor="@color/text_subheadline"
                 android:textSize="14sp"
                 android:maxLines="1"
-                android:ellipsize="end"
-                android:textStyle="bold" />
+                android:ellipsize="end" />
         </LinearLayout>
 
         <View

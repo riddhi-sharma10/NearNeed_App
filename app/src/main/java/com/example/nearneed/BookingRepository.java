@@ -32,30 +32,75 @@ public class BookingRepository {
     /**
      * Create a new booking (simple form).
      */
-    public static void createBooking(String postId, String seekerId, String providerId, SaveCallback callback) {
-        createBooking(postId, null, null, seekerId, providerId, null, null, callback);
+    public static void createBooking(String postId, String seekerId, String providerId, Double amount, SaveCallback callback) {
+        createBooking(postId, null, null, seekerId, providerId, null, amount, null, callback);
     }
 
     /**
-     * Create a new booking (full form).
+     * Create a new booking (full form) — fetches seeker & provider names before saving.
      */
     public static void createBooking(String postId, String postTitle, String postType,
                                      String seekerId, String providerId, String applicationId,
-                                     Long scheduledDate, SaveCallback callback) {
+                                     Double amount, Long scheduledDate, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
-        Booking booking = new Booking(postId, seekerId, providerId);
-        booking.postTitle = postTitle;
-        booking.postType = postType;
-        booking.applicationId = applicationId;
-        booking.createdAt = System.currentTimeMillis();
-        booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .add(booking)
-                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
-                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+        final String[] seekerName   = {""};
+        final String[] providerName = {""};
+        final int[]    done         = {0};
+
+        Runnable saveBooking = () -> {
+            done[0]++;
+            if (done[0] < 2) return;
+
+            Booking booking = new Booking(postId, seekerId, providerId);
+            booking.postTitle     = postTitle;
+            booking.postType      = postType;
+            booking.applicationId = applicationId;
+            booking.createdAt     = System.currentTimeMillis();
+            booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
+            booking.seekerName    = seekerName[0];
+            booking.providerName  = providerName[0];
+            booking.amount        = amount;
+            booking.status        = "upcoming";
+
+            db.collection(BOOKINGS_COLLECTION)
+                    .add(booking)
+                    .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
+                    .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+        };
+
+        if (seekerId != null && !seekerId.isEmpty()) {
+            db.collection("users").document(seekerId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc != null && doc.exists()) {
+                            String n = doc.getString("name");
+                            if (n == null || n.isEmpty()) n = doc.getString("fullName");
+                            if (n != null && !n.isEmpty()) seekerName[0] = n;
+                        }
+                        saveBooking.run();
+                    })
+                    .addOnFailureListener(e -> saveBooking.run());
+        } else {
+            done[0]++;
+            saveBooking.run();
+        }
+
+        if (providerId != null && !providerId.isEmpty()) {
+            db.collection("users").document(providerId).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc != null && doc.exists()) {
+                            String n = doc.getString("name");
+                            if (n == null || n.isEmpty()) n = doc.getString("fullName");
+                            if (n != null && !n.isEmpty()) providerName[0] = n;
+                        }
+                        saveBooking.run();
+                    })
+                    .addOnFailureListener(e -> saveBooking.run());
+        } else {
+            done[0]++;
+            saveBooking.run();
+        }
     }
 
     /**
@@ -64,41 +109,37 @@ public class BookingRepository {
     public static void updateBookingStatus(String bookingId, String status, SaveCallback callback) {
         if (bookingId == null || callback == null) return;
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", status);
-        updates.put("timestamp", System.currentTimeMillis());
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    callback.onSuccess(bookingId);
-                    // Notify the other party about the status change
-                    db.collection(BOOKINGS_COLLECTION).document(bookingId)
-                            .get()
-                            .addOnSuccessListener(doc -> {
-                                if (doc == null || !doc.exists()) return;
-                                String seekerId   = doc.getString("seekerId");
-                                String providerId = doc.getString("providerId");
-                                String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
-                                        ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-                                // Notify whoever is NOT the current user
-                                String recipientId = currentUid.equals(seekerId) ? providerId : seekerId;
-                                if (recipientId == null || recipientId.isEmpty()) return;
+        
+        // 1. Fetch booking to get postId
+        db.collection(BOOKINGS_COLLECTION).document(bookingId).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot.exists()) {
+                        String postId = snapshot.getString("postId");
+                        
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("status", status);
+                        updates.put("timestamp", System.currentTimeMillis());
 
-                                String title = "Booking Update";
-                                String body;
-                                switch (status) {
-                                    case "ongoing":   body = "Your booking has started."; break;
-                                    case "completed": body = "Your booking is marked complete. Please leave a review!"; break;
-                                    case "cancelled": body = "A booking was cancelled."; break;
-                                    default:          body = "Your booking status changed to: " + status; break;
-                                }
-                                FcmNotifier.sendToUser(recipientId, title, body);
-                            });
+                        // 2. Update booking status
+                        db.collection(BOOKINGS_COLLECTION).document(bookingId).update(updates)
+                                .addOnSuccessListener(aVoid -> {
+                                    // 3. Sync status to the linked post if status is completed/cancelled
+                                    if (postId != null && ("completed".equalsIgnoreCase(status) || "cancelled".equalsIgnoreCase(status))) {
+                                        Map<String, Object> postUpdates = new HashMap<>();
+                                        postUpdates.put("status", status);
+                                        db.collection("posts").document(postId).update(postUpdates);
+                                    }
+                                    callback.onSuccess(bookingId);
+                                })
+                                .addOnFailureListener(callback::onFailure);
+                    } else {
+                        if (callback != null) callback.onFailure(new Exception("Booking not found"));
+                    }
                 })
-                .addOnFailureListener(callback::onFailure);
+                .addOnFailureListener(e -> {
+                    if (callback != null) callback.onFailure(e);
+                });
     }
 
     /**
@@ -129,7 +170,6 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
@@ -138,6 +178,14 @@ public class BookingRepository {
                             Booking b = fromSnapshot(doc);
                             if (b != null) bookings.add(b);
                         }
+                        
+                        // Client-side sort by timestamp descending
+                        java.util.Collections.sort(bookings, (b1, b2) -> {
+                            Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
+                            Long t2 = b2.timestamp != null ? b2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onBookingsLoaded(bookings);
                     }
                 });
@@ -171,7 +219,23 @@ public class BookingRepository {
         FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
                 .update(updates)
-                .addOnSuccessListener(v -> callback.onSuccess(bookingId))
+                .addOnSuccessListener(v -> {
+                    // Sync to User Profile if seeker is rating provider
+                    if (!"provider".equalsIgnoreCase(raterRole)) {
+                        FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
+                                .document(bookingId).get().addOnSuccessListener(doc -> {
+                                    if (doc != null && doc.exists()) {
+                                        String providerId = doc.getString("providerId");
+                                        Double amt = doc.getDouble("amount");
+                                        if (providerId != null) {
+                                            UserProfileRepository.incrementProviderStats(providerId, 
+                                                amt != null ? amt : 0.0, rating);
+                                        }
+                                    }
+                                });
+                    }
+                    callback.onSuccess(bookingId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -184,11 +248,6 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         
         if ("all".equalsIgnoreCase(role)) {
-            // Complex case: Listen to both. 
-            // For simplicity in a single ListenerRegistration return, we can use two queries 
-            // but we need a way to combine them. 
-            // Alternatively, the ViewModel can manage two listeners.
-            // For now, let's implement a merged listener if role is "all".
             return observeAllUserBookings(userId, listener);
         }
 
@@ -199,7 +258,6 @@ public class BookingRepository {
 
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo(field, userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -213,6 +271,14 @@ public class BookingRepository {
                                 bookings.add(booking);
                             }
                         }
+                        
+                        // Client-side sort by timestamp descending
+                        java.util.Collections.sort(bookings, (b1, b2) -> {
+                            Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
+                            Long t2 = b2.timestamp != null ? b2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onBookingsLoaded(bookings);
                     }
                 });
@@ -220,14 +286,16 @@ public class BookingRepository {
 
     private static ListenerRegistration observeAllUserBookings(String userId, BookingListener listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final List<Booking>[] seekerResult = new List[]{new ArrayList<>()};
+        final List<Booking>[] seekerResult   = new List[]{new ArrayList<>()};
         final List<Booking>[] providerResult = new List[]{new ArrayList<>()};
 
         Runnable combiner = () -> {
-            List<Booking> combined = new ArrayList<>();
-            combined.addAll(seekerResult[0]);
-            combined.addAll(providerResult[0]);
-            // Sort by timestamp desc
+            // Merge both lists, deduplicating by bookingId (a booking should never appear twice)
+            java.util.LinkedHashMap<String, Booking> byId = new java.util.LinkedHashMap<>();
+            for (Booking b : seekerResult[0])   { if (b.bookingId != null) byId.put(b.bookingId, b); }
+            for (Booking b : providerResult[0]) { if (b.bookingId != null) byId.putIfAbsent(b.bookingId, b); }
+
+            List<Booking> combined = new ArrayList<>(byId.values());
             java.util.Collections.sort(combined, (b1, b2) -> {
                 Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
                 Long t2 = b2.timestamp != null ? b2.timestamp : 0L;

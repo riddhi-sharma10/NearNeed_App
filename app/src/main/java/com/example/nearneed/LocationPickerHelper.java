@@ -14,6 +14,8 @@ import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import android.Manifest;
+import android.widget.TextView;
+import org.json.JSONObject;
 import java.util.List;
 import java.util.Locale;
 import java.io.IOException;
@@ -93,7 +95,8 @@ public class LocationPickerHelper {
         if (rowCurrentLocation != null) {
             rowCurrentLocation.setOnClickListener(v -> {
                 ProgressBar progressBar = view.findViewById(R.id.progressCurrentLocation);
-                getCurrentLocation(activity, dialog, progressBar);
+                TextView tvSubtitle = view.findViewById(R.id.tvCurrentLocationSubtitle);
+                getCurrentLocation(activity, dialog, progressBar, tvSubtitle);
             });
         }
 
@@ -146,7 +149,7 @@ public class LocationPickerHelper {
         }
     }
 
-    private static void getCurrentLocation(Activity activity, BottomSheetDialog dialog, ProgressBar progressBar) {
+    private static void getCurrentLocation(Activity activity, BottomSheetDialog dialog, ProgressBar progressBar, TextView tvSubtitle) {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
 
         // Check permission
@@ -162,6 +165,9 @@ public class LocationPickerHelper {
         if (progressBar != null) {
             progressBar.setVisibility(View.VISIBLE);
         }
+        if (tvSubtitle != null) {
+            tvSubtitle.setText("Fetching...");
+        }
 
         // Get current location directly instead of relying on last known location cache
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(location -> {
@@ -171,27 +177,59 @@ public class LocationPickerHelper {
 
             if (location != null) {
                 // Reverse geocode to get address
-                Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
-                try {
-                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    if (addresses != null && !addresses.isEmpty()) {
-                        Address address = addresses.get(0);
-                        String addressText = address.getAddressLine(0);
-                        String displayText = "DELIVER TO: " + addressText;
-                        selectLocation(displayText, location.getLatitude(), location.getLongitude());
-                        dialog.dismiss();
-                    } else {
-                        Toast.makeText(activity, "Unable to get address", Toast.LENGTH_SHORT).show();
+                new Thread(() -> {
+                    String addressText = null;
+                    
+                    // Try Geocoder first
+                    try {
+                        Geocoder geocoder = new Geocoder(activity, Locale.getDefault());
+                        List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        if (addresses != null && !addresses.isEmpty()) {
+                            addressText = addresses.get(0).getAddressLine(0);
+                        }
+                    } catch (Exception ignored) {}
+
+                    // Fallback to Nominatim
+                    if (addressText == null) {
+                        try {
+                            okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
+                            String url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + location.getLatitude() + "&lon=" + location.getLongitude() + "&zoom=18";
+                            okhttp3.Request req = new okhttp3.Request.Builder()
+                                    .url(url)
+                                    .header("User-Agent", "NearNeedApp")
+                                    .build();
+                            okhttp3.Response response = client.newCall(req).execute();
+                            if (response.isSuccessful() && response.body() != null) {
+                                JSONObject json = new JSONObject(response.body().string());
+                                addressText = json.optString("display_name", null);
+                            }
+                        } catch (Exception ignored) {}
                     }
-                } catch (IOException e) {
-                    Toast.makeText(activity, "Error getting address", Toast.LENGTH_SHORT).show();
-                }
+
+                    final String finalAddress = addressText;
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (progressBar != null) progressBar.setVisibility(View.GONE);
+                        if (finalAddress != null) {
+                            String displayText = "DELIVER TO: " + finalAddress;
+                            selectLocation(displayText, location.getLatitude(), location.getLongitude());
+                            dialog.dismiss();
+                        } else {
+                            if (tvSubtitle != null) tvSubtitle.setText("Tap to detect");
+                            Toast.makeText(activity, "Unable to get address", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }).start();
             } else {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                if (tvSubtitle != null) tvSubtitle.setText("Tap to detect");
                 Toast.makeText(activity, "Unable to get current location", Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(e -> {
             if (progressBar != null) {
                 progressBar.setVisibility(View.GONE);
+            }
+            if (tvSubtitle != null) {
+                tvSubtitle.setText("Tap to detect");
             }
             Toast.makeText(activity, "Location error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });

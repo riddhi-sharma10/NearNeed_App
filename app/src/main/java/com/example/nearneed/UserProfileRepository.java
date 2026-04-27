@@ -114,17 +114,25 @@ public final class UserProfileRepository {
     @Nullable
     public static UserProfile fromSnapshot(@NonNull DocumentSnapshot snapshot) {
         UserProfile profile = new UserProfile();
-        profile.fullName = snapshot.getString("fullName");
-        profile.location = snapshot.getString("location");
-        profile.photoUrl = snapshot.getString("photoUrl");
+        profile.userId = snapshot.getId();
+        profile.fullName = snapshot.contains("fullName") ? snapshot.getString("fullName") : snapshot.getString("name");
+        profile.name = profile.fullName;
+        profile.location = snapshot.contains("location") ? snapshot.getString("location") : snapshot.getString("address");
+        profile.photoUrl = snapshot.contains("photoUrl") ? snapshot.getString("photoUrl") : snapshot.getString("profileImageUrl");
+        profile.profileImageUrl = profile.photoUrl;
         profile.bio = snapshot.getString("bio");
         profile.dob = snapshot.getString("dob");
         profile.email = snapshot.getString("email");
         profile.phone = snapshot.getString("phone");
         profile.isVerified = snapshot.getBoolean("isVerified");
-        profile.lat = snapshot.getDouble("lat");
-        profile.lng = snapshot.getDouble("lng");
+        profile.lat = snapshot.contains("lat") ? snapshot.getDouble("lat") : snapshot.getDouble("latitude");
+        profile.lng = snapshot.contains("lng") ? snapshot.getDouble("lng") : snapshot.getDouble("longitude");
         profile.role = snapshot.getString("role");
+        
+        profile.jobsCompleted = snapshot.contains("jobsCompleted") ? snapshot.getLong("jobsCompleted").intValue() : 0;
+        profile.earnings = snapshot.contains("earnings") ? snapshot.getDouble("earnings") : 0.0;
+        profile.rating = snapshot.contains("rating") ? snapshot.getDouble("rating") : 0.0;
+        
         return profile;
     }
 
@@ -153,10 +161,10 @@ public final class UserProfileRepository {
             new Thread(() -> {
                 UserEntity entity = new UserEntity();
                 entity.userId = user.getUid();
-                entity.name = profile.fullName;
+                entity.fullName = profile.fullName;
                 entity.phone = profile.phone;
-                entity.address = profile.location;
-                entity.profileImageUrl = profile.photoUrl;
+                entity.location = profile.location;
+                entity.photoUrl = profile.photoUrl;
                 entity.bio = profile.bio;
                 // Add more fields if needed
                 AppDatabase.getDatabase(context).userDao().insert(entity);
@@ -173,9 +181,9 @@ public final class UserProfileRepository {
             if (entity != null) {
                 UserProfile profile = entity.toProfile();
                 // Map back fields if names differ
-                profile.fullName = entity.name;
-                profile.photoUrl = entity.profileImageUrl;
-                profile.location = entity.address;
+                profile.fullName = entity.fullName;
+                profile.photoUrl = entity.photoUrl;
+                profile.location = entity.location;
                 
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
                     listener.onProfileChanged(profile);
@@ -208,7 +216,7 @@ public final class UserProfileRepository {
      */
     public static ListenerRegistration observeAllProviders(java.util.List<UserProfile> providerList, Runnable onComplete) {
         return FirebaseFirestore.getInstance().collection(USERS_COLLECTION)
-                .whereEqualTo("role", RoleManager.ROLE_PROVIDER)
+                .whereIn("role", java.util.Arrays.asList("PROVIDER", "provider"))
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null) return;
                     providerList.clear();
@@ -220,5 +228,40 @@ public final class UserProfileRepository {
                     }
                     if (onComplete != null) onComplete.run();
                 });
+    }
+
+    /**
+     * Increment provider statistics after a job is completed.
+     */
+    public static void incrementProviderStats(String providerId, double addEarnings, int newRating) {
+        if (providerId == null || providerId.isEmpty()) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(providerId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(docRef);
+            
+            long jobs = snapshot.contains("jobsCompleted") ? snapshot.getLong("jobsCompleted") : 0;
+            double currentRating = snapshot.contains("rating") ? snapshot.getDouble("rating") : 0.0;
+            double totalEarnings = snapshot.contains("earnings") ? snapshot.getDouble("earnings") : 0.0;
+
+            // Simple weighted average for rating: (old_avg * old_count + new_val) / (old_count + 1)
+            double updatedRating = (currentRating * jobs + newRating) / (jobs + 1.0);
+            
+            transaction.update(docRef, 
+                "jobsCompleted", com.google.firebase.firestore.FieldValue.increment(1),
+                "earnings", com.google.firebase.firestore.FieldValue.increment(addEarnings),
+                "rating", updatedRating
+            );
+
+            return null;
+        }).addOnFailureListener(e -> {
+            // Fallback for simple increment if transaction fails
+            java.util.Map<String, Object> simple = new java.util.HashMap<>();
+            simple.put("jobsCompleted", com.google.firebase.firestore.FieldValue.increment(1));
+            simple.put("earnings", com.google.firebase.firestore.FieldValue.increment(addEarnings));
+            docRef.update(simple);
+        });
     }
 }

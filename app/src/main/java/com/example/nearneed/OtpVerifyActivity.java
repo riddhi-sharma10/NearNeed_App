@@ -103,7 +103,12 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-                        checkIfUserExistsAndRoute(isSignup);
+                        if (isSignup) {
+                            checkIfUserExistsAndRoute();
+                        } else {
+                            startActivity(new Intent(this, AccountTypeActivity.class));
+                            finish();
+                        }
                     } else {
                         Toast.makeText(this, "Verification failed or Incorrect Code.", Toast.LENGTH_SHORT).show();
                         btnVerify.setEnabled(true);
@@ -112,51 +117,30 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 });
     }
 
-    private void checkIfUserExistsAndRoute(boolean isSignup) {
+    private void checkIfUserExistsAndRoute() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore.getInstance().collection("users").document(uid)
                 .get()
                 .addOnSuccessListener(doc -> {
-                    boolean userExists = doc.exists() && doc.getString("name") != null;
-                    if (isSignup) {
-                        if (userExists) {
-                            // Account already registered — send to login via WelcomeActivity
-                            FirebaseAuth.getInstance().signOut();
-                            Toast.makeText(this, "An account already exists for this number. Please log in.", Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(this, WelcomeActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            // Genuinely new user — wipe stale cache, go to profile setup
-                            UserPrefs.clear(this);
-                            startActivity(new Intent(this, ProfileInfoActivity.class));
-                            finish();
-                        }
-                    } else { // Login
-                        if (userExists) {
-                            // Valid login
-                            startActivity(new Intent(this, AccountTypeActivity.class));
-                            finish();
-                        } else {
-                            // No account exists — send to signup via WelcomeActivity
-                            FirebaseAuth.getInstance().signOut();
-                            Toast.makeText(this, "No account found for this number. Please sign up.", Toast.LENGTH_LONG).show();
-                            Intent intent = new Intent(this, WelcomeActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
-                        }
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // If the check fails, proceed as a safe fallback based on action
-                    if (isSignup) {
+                    if (doc.exists() && doc.getString("name") != null) {
+                        // Account already registered — send to login
+                        Toast.makeText(this,
+                                "An account already exists for this number. Please log in.",
+                                Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(this, AccountTypeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } else {
+                        // Genuinely new user — wipe stale cache, go to profile setup
                         UserPrefs.clear(this);
                         startActivity(new Intent(this, ProfileInfoActivity.class));
-                    } else {
-                        startActivity(new Intent(this, AccountTypeActivity.class));
                     }
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    // If the check fails, proceed to signup as a safe fallback
+                    UserPrefs.clear(this);
+                    startActivity(new Intent(this, ProfileInfoActivity.class));
                     finish();
                 });
     }

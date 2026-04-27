@@ -35,35 +35,22 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
-
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import android.net.Uri;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.SetOptions;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView rvMessages;
     private ChatAdapter adapter;
-    private ChatViewModel viewModel;
     private List<ChatMessage> messageList = new ArrayList<>();
     private EditText etMessageInput;
     private ImageView btnSend, btnAdd, btnBack;
     private TextView tvChatName;
     private TextView tvChatStatus;
-    private View emptyStateContainer;
     
     // Image Preview Views
     private View cvImagePreview;
@@ -84,13 +71,12 @@ public class ChatActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private static final Object PAYLOAD_AUDIO_STATE = "payload_audio_state";
     private int activeAudioPosition = RecyclerView.NO_POSITION;
-    private String currentUserId;
-    private String peerUserId;
+    
     private String chatId;
-    private String peerName;
-    private String peerEmail;
-    private String peerAddress;
-    private boolean peerVerified;
+    private String otherUserId;
+    private String currentUserId;
+    private ChatViewModel chatViewModel;
+    private Runnable progressUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +90,6 @@ public class ChatActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         tvChatName = findViewById(R.id.tvChatName);
         tvChatStatus = findViewById(R.id.tvChatStatus);
-        emptyStateContainer = findViewById(R.id.emptyStateContainer);
-
-        viewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
 
         // Bubble containers
         // Note: we'll find these in the ViewHolder since they are per-item
@@ -138,25 +121,13 @@ public class ChatActivity extends AppCompatActivity {
         String chatTime = getIntent().getStringExtra("CHAT_TIME");
         boolean isOnline = getIntent().getBooleanExtra("CHAT_ONLINE", false);
         String chatSnippet = getIntent().getStringExtra("CHAT_SNIPPET");
-        peerUserId = getIntent().getStringExtra("CHAT_USER_ID");
-        chatId = getIntent().getStringExtra("CHAT_ID");
-        
-        FirebaseUser authUser = FirebaseAuth.getInstance().getCurrentUser();
-        currentUserId = authUser != null ? authUser.getUid() : null;
-        
-        if (peerUserId != null && !peerUserId.trim().isEmpty()) {
-            if (chatId == null || chatId.trim().isEmpty()) {
-                chatId = buildChatId(currentUserId, peerUserId);
-            }
-        }
 
         if (chatName != null) {
-            peerName = chatName;
             tvChatName.setText(chatName);
         }
-        peerVerified = getIntent().getBooleanExtra("CHAT_VERIFIED", false);
-        VerifiedBadgeHelper.apply(this, tvChatName, peerVerified);
-
+        boolean chatVerified = getIntent().getBooleanExtra("CHAT_VERIFIED", false);
+        VerifiedBadgeHelper.apply(this, tvChatName, chatVerified);
+        
         View vOnlineDot = findViewById(R.id.vOnlineDot);
         if (isOnline) {
             tvChatStatus.setText("Online");
@@ -170,6 +141,45 @@ public class ChatActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
+        currentUserId = FirebaseAuth.getInstance().getUid();
+        otherUserId = getIntent().getStringExtra("CHAT_USER_ID");
+        chatId = getIntent().getStringExtra("CHAT_ID");
+
+        if (chatId == null && currentUserId != null && otherUserId != null) {
+            // Generate a stable chatId by sorting UIDs
+            String[] ids = {currentUserId, otherUserId};
+            Arrays.sort(ids);
+            chatId = ids[0] + "_" + ids[1];
+        }
+
+        setupViewModel();
+    }
+
+    private void setupViewModel() {
+        chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
+        
+        chatViewModel.getMessages().observe(this, messages -> {
+            messageList.clear();
+            for (ChatMessage m : messages) {
+                m.isVoice = m.audioPath != null && !m.audioPath.isEmpty();
+                if (m.isVoice) m.durationSecs = 7;
+                messageList.add(m);
+            }
+            adapter.notifyDataSetChanged();
+            if (!messageList.isEmpty()) {
+                rvMessages.scrollToPosition(messageList.size() - 1);
+            }
+            // Auto-mark as read if we are actively viewing the chat
+            if (chatId != null) {
+                chatViewModel.markAsRead(chatId);
+            }
+        });
+
+        if (chatId != null) {
+            chatViewModel.observeMessages(chatId);
+            chatViewModel.markAsRead(chatId);
+        }
+
         adapter = new ChatAdapter(messageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true); // messages start from bottom
@@ -180,46 +190,20 @@ public class ChatActivity extends AppCompatActivity {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);
         }
         // Scroll to the latest message
-        if (!messageList.isEmpty()) {
-            rvMessages.scrollToPosition(messageList.size() - 1);
-        }
-
-        if (chatId != null) {
-            setupObservers();
-        } else {
-            seedDemoConversation(chatSnippet);
-        }
+        rvMessages.scrollToPosition(messageList.size() - 1);
 
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
             String text = etMessageInput.getText().toString().trim();
-            if (!text.isEmpty()) {
-                if (chatId != null) {
-                    viewModel.sendMessage(chatId, peerUserId, text);
-                    etMessageInput.setText("");
+            if ((!text.isEmpty() || selectedImageUri != null) && chatId != null) {
+                if (selectedImageUri != null) {
+                    chatViewModel.sendMediaMessage(chatId, otherUserId, selectedImageUri.toString(), false);
                     selectedImageUri = null;
                     if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
                 } else {
-                    ChatMessage msg = new ChatMessage(text, false, true);
-                    addMessage(msg);
-                    etMessageInput.setText("");
+                    chatViewModel.sendMessage(chatId, otherUserId, text);
                 }
-            } else if (selectedImageUri != null) {
-                // Phase 4: Handle image sending via Storage
-                if (chatId != null) {
-                    StorageRepository.uploadImage(selectedImageUri, "chat_images", new StorageRepository.UploadCallback() {
-                        @Override
-                        public void onSuccess(String downloadUrl) {
-                            viewModel.sendMediaMessage(chatId, peerUserId, downloadUrl, false);
-                            selectedImageUri = null;
-                            if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
-                        }
-                        @Override
-                        public void onFailure(Exception e) {
-                            Toast.makeText(ChatActivity.this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                etMessageInput.setText("");
             }
         });
 
@@ -377,22 +361,8 @@ public class ChatActivity extends AppCompatActivity {
                             if (secs < 1) {
                                 Toast.makeText(ChatActivity.this, "🎙 Hold to record a voice message", Toast.LENGTH_SHORT).show();
                             } else {
-                                if (chatId != null && audioFilePath != null) {
-                                    StorageRepository.uploadAudio(audioFilePath, new StorageRepository.UploadCallback() {
-                                        @Override
-                                        public void onSuccess(String downloadUrl) {
-                                            viewModel.sendMediaMessage(chatId, peerUserId, downloadUrl, true);
-                                        }
-                                        @Override
-                                        public void onFailure(Exception e) {
-                                            Toast.makeText(ChatActivity.this, "Audio upload failed", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                } else {
-                                    ChatMessage msg = new ChatMessage("", true, true);
-                                    msg.durationSecs = secs;
-                                    msg.audioPath = audioFilePath;
-                                    addMessage(msg);
+                                if (chatId != null) {
+                                    chatViewModel.sendMediaMessage(chatId, otherUserId, audioFilePath, true);
                                 }
                             }
                         }
@@ -413,16 +383,14 @@ public class ChatActivity extends AppCompatActivity {
         // PROFILE / INFO area
         findViewById(R.id.topBar).setOnClickListener(v -> {
             Intent intent = new Intent(this, PersonProfileActivity.class);
-            intent.putExtra("PERSON_USER_ID", peerUserId);
-            intent.putExtra("PERSON_NAME", peerName != null ? peerName : tvChatName.getText().toString());
-            intent.putExtra("PERSON_EMAIL", peerEmail != null ? peerEmail : getIntent().getStringExtra("PERSON_EMAIL"));
+            intent.putExtra("PERSON_NAME", tvChatName.getText().toString());
+            intent.putExtra("PERSON_EMAIL", getIntent().getStringExtra("PERSON_EMAIL"));
             intent.putExtra("PERSON_PHONE", getIntent().getStringExtra("PERSON_PHONE"));
             intent.putExtra("PERSON_GENDER", getIntent().getStringExtra("PERSON_GENDER"));
             intent.putExtra("PERSON_EXPERIENCE", getIntent().getStringExtra("PERSON_EXPERIENCE"));
             intent.putExtra("PERSON_RATING", getIntent().getStringExtra("PERSON_RATING"));
             intent.putExtra("PERSON_REVIEWS", getIntent().getStringExtra("PERSON_REVIEWS"));
-            intent.putExtra("PERSON_BIO", peerAddress != null ? peerAddress : getIntent().getStringExtra("PERSON_BIO"));
-            intent.putExtra("IS_VERIFIED", peerVerified);
+            intent.putExtra("PERSON_BIO", getIntent().getStringExtra("PERSON_BIO"));
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
@@ -471,45 +439,16 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private void setupObservers() {
-        viewModel.getMessages().observe(this, messages -> {
-            messageList.clear();
-            messageList.addAll(messages);
-            adapter.notifyDataSetChanged();
-            if (!messageList.isEmpty()) {
-                rvMessages.scrollToPosition(messageList.size() - 1);
-            }
-            updateEmptyState();
-        });
-
-        viewModel.observeMessages(chatId);
-        viewModel.markAsRead(chatId);
-    }
-
-    private void seedDemoConversation(String chatSnippet) {
-        messageList.clear();
-        messageList.add(new ChatMessage("Hey! Are you available today?", false, false));
-        messageList.add(new ChatMessage("Yeah, what's up?", false, true));
-        messageList.add(new ChatMessage("I need help with the plumbing at my place.", false, false));
-        messageList.add(new ChatMessage("That would be amazing, thank you!", false, true));
-        messageList.add(new ChatMessage("I can come by around 3 PM if that works?", false, false));
-        messageList.add(new ChatMessage("3 PM works perfectly for me 👍", false, true));
-        messageList.add(new ChatMessage("Great! Do I need to get any parts?", false, false));
-        messageList.add(new ChatMessage("Just bring the wrench set, I have everything else.", false, true));
-        messageList.add(new ChatMessage("Perfect. See you then!", false, false));
-        messageList.add(new ChatMessage("See you! 🔧", false, true));
-        if (chatSnippet != null && !chatSnippet.isEmpty()) {
-            messageList.add(new ChatMessage(chatSnippet, false, false));
+    @Override
+    protected void onStop() {
+        super.onStop();
+        handler.removeCallbacks(progressUpdater);
+        activeAudioPosition = RecyclerView.NO_POSITION;
+        if (recorder != null) {
+            recorder.release();
+            recorder = null;
         }
-        adapter.notifyDataSetChanged();
-        rvMessages.scrollToPosition(Math.max(0, messageList.size() - 1));
-        updateEmptyState();
-    }
-
-    private String buildChatId(String uid1, String uid2) {
-        if (uid1 == null) uid1 = "";
-        if (uid2 == null) uid2 = "";
-        return uid1.compareTo(uid2) < 0 ? uid1 + "_" + uid2 : uid2 + "_" + uid1;
+        releaseMediaPlayer();
     }
 
     private void startRecording() {
@@ -581,6 +520,22 @@ public class ChatActivity extends AppCompatActivity {
             releaseMediaPlayer();
             Toast.makeText(this, "Playback failed", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void startProgressLoop() {
+        handler.removeCallbacks(progressUpdater);
+        progressUpdater = new Runnable() {
+            @Override
+            public void run() {
+                if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition < messageList.size()) {
+                    ChatMessage msg = messageList.get(activeAudioPosition);
+                    msg.progress = getMediaPlayerProgress();
+                    adapter.notifyItemChanged(activeAudioPosition, PAYLOAD_AUDIO_STATE);
+                    handler.postDelayed(this, 100);
+                }
+            }
+        };
+        handler.post(progressUpdater);
     }
 
     private void stopAllAudio() {
@@ -656,74 +611,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addMessage(ChatMessage message) {
-        messageList.add(message);
-        adapter.notifyItemInserted(messageList.size() - 1);
-        rvMessages.scrollToPosition(messageList.size() - 1);
-        updateEmptyState();
-    }
-
-    private Runnable progressUpdater = new Runnable() {
-        @Override
-        public void run() {
-            if (activeAudioPosition == RecyclerView.NO_POSITION || activeAudioPosition >= messageList.size()) {
-                return;
-            }
-
-            ChatMessage activeMessage = messageList.get(activeAudioPosition);
-            if (!activeMessage.isPlaying) {
-                return;
-            }
-
-            if (activeMessage.audioPath != null && isMediaPlayerActive()) {
-                activeMessage.progress = getMediaPlayerProgress();
-            } else {
-                activeMessage.progress += 2;
-                if (activeMessage.progress >= 100) {
-                    stopAudio(activeMessage, activeAudioPosition);
-                    return;
-                }
-            }
-
-            RecyclerView.ViewHolder vh = rvMessages.findViewHolderForAdapterPosition(activeAudioPosition);
-            if (vh != null) {
-                SeekBar sb = vh.itemView.findViewById(R.id.sbProgress);
-                TextView tvDur = vh.itemView.findViewById(R.id.tvDuration);
-                ImageView ivPP = vh.itemView.findViewById(R.id.ivPlayPause);
-
-                if (sb != null) sb.setProgress(activeMessage.progress);
-                if (tvDur != null) {
-                    if (activeMessage.audioPath != null) {
-                        tvDur.setText("0:" + String.format("%02d", getMediaPlayerPositionSecs()));
-                    } else {
-                        int secs = (int) (activeMessage.progress / 100f * activeMessage.durationSecs);
-                        tvDur.setText("0:" + String.format("%02d", secs));
-                    }
-                }
-                if (ivPP != null) {
-                    ivPP.setImageResource(android.R.drawable.ic_media_pause);
-                    ivPP.setAlpha(0.9f);
-                }
-            }
-
-            handler.postDelayed(this, 100);
-        }
-    };
-
-    public void startProgressLoop() {
-        handler.removeCallbacks(progressUpdater);
-        handler.post(progressUpdater);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        handler.removeCallbacks(progressUpdater);
-        activeAudioPosition = RecyclerView.NO_POSITION;
-        if (recorder != null) {
-            recorder.release();
-            recorder = null;
-        }
-        releaseMediaPlayer();
+        // Handled by ViewModel observation
     }
 
     class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
@@ -880,18 +768,6 @@ public class ChatActivity extends AppCompatActivity {
                 // Bubble containers
                 llSentBubble = itemView.findViewById(R.id.llSentMessageBubble);
                 llReceivedBubble = itemView.findViewById(R.id.llReceivedMessageBubble);
-            }
-        }
-    }
-
-    private void updateEmptyState() {
-        if (emptyStateContainer != null && rvMessages != null) {
-            if (messageList.isEmpty()) {
-                emptyStateContainer.setVisibility(View.VISIBLE);
-                rvMessages.setVisibility(View.GONE);
-            } else {
-                emptyStateContainer.setVisibility(View.GONE);
-                rvMessages.setVisibility(View.VISIBLE);
             }
         }
     }

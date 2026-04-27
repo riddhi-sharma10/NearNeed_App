@@ -9,37 +9,36 @@ public class UserEntity {
     @PrimaryKey
     @NonNull
     public String userId;
-    public String name;
+    public String fullName;
     public String phone;
-    public String address;
-    public String profileImageUrl;
+    public String location;
+    public String photoUrl;
     public String bio;
     public String role;
     public double rating;
-    public int jobsCompleted;
 
     public UserEntity() {}
 
     public static UserEntity fromProfile(UserProfile profile) {
         UserEntity entity = new UserEntity();
         entity.userId = profile.userId;
-        entity.name = profile.name;
+        entity.fullName = profile.fullName;
         entity.phone = profile.phone;
-        entity.address = ""; // Location string is deprecated in schema
-        entity.profileImageUrl = profile.profileImageUrl;
+        entity.location = profile.location;
+        entity.photoUrl = profile.photoUrl;
         entity.bio = profile.bio;
         entity.role = profile.role;
-        entity.rating = profile.rating != null ? profile.rating : 0.0;
-        entity.jobsCompleted = 0; // default
+        entity.rating = profile.rating;
         return entity;
     }
 
     public UserProfile toProfile() {
         UserProfile profile = new UserProfile();
         profile.userId = this.userId;
-        profile.name = this.name;
+        profile.fullName = this.fullName;
         profile.phone = this.phone;
-        profile.profileImageUrl = this.profileImageUrl;
+        profile.location = this.location;
+        profile.photoUrl = this.photoUrl;
         profile.bio = this.bio;
         profile.role = this.role;
         profile.rating = this.rating;

@@ -78,6 +78,13 @@ public class HomeProviderActivity extends AppCompatActivity {
                 startActivity(new Intent(this, AiChatActivity.class));
             });
         }
+
+        View btnViewCalendar = findViewById(R.id.viewCalendar);
+        if (btnViewCalendar != null) {
+            btnViewCalendar.setOnClickListener(v -> {
+                startActivity(new Intent(this, CalendarProviderActivity.class));
+            });
+        }
     }
 
     private void setupHeader() {
@@ -98,7 +105,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void showLocationPicker() {
         LocationPickerHelper.show(this, (location, lat, lng) -> {
-            userViewModel.saveLocation(lat, lng);
+            userViewModel.saveLocation(location, lat, lng);
         });
     }
 

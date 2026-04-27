@@ -36,6 +36,8 @@ public class UpdateStatusActivity extends AppCompatActivity {
 
     private String bookingId;
     private String bookingTitle;
+    private double serviceAmount = 500.0;
+    private String providerName = "Provider Name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,9 @@ public class UpdateStatusActivity extends AppCompatActivity {
         // Get data from intent
         bookingId = getIntent().getStringExtra("booking_id");
         bookingTitle = getIntent().getStringExtra("booking_title");
+        serviceAmount = getIntent().getDoubleExtra("service_amount", 500.0);
+        providerName = getIntent().getStringExtra("provider_name");
+        if (providerName == null || providerName.isEmpty()) providerName = "Provider Name";
 
         // Initialize views
         btnStatusPending = findViewById(R.id.btnStatusProgress);
@@ -185,10 +190,10 @@ public class UpdateStatusActivity extends AppCompatActivity {
             }
         }
 
-        // Persist in-memory state
+        // Persist in-memory state (for UI compat)
         BookingStateManager.getInstance().setStatus(bookingId, selectedStatus);
 
-        // If completed, show rating dialog before payment
+        // If completed, show payment/rating dialog first
         if ("completed".equals(selectedStatus)) {
             if (selectedPaymentMethod.isEmpty()) {
                 Toast.makeText(this, "Please select Cash or UPI to proceed", Toast.LENGTH_SHORT).show();
@@ -198,21 +203,33 @@ public class UpdateStatusActivity extends AppCompatActivity {
             CompleteBookingDialogFragment dialog = CompleteBookingDialogFragment.newInstance(
                     bookingId != null ? bookingId : "",
                     bookingTitle != null ? bookingTitle : "Service",
-                    "Provider Name",
-                    500.0 // Mock amount for demo
+                    providerName,
+                    serviceAmount
             );
             dialog.setOnPaymentClickListener((bId, rating, notes) -> {
+                // Write to Firestore for real-time sync
+                if (bookingId != null && !bookingId.isEmpty()) {
+                    // 1. Submit Rating (Triggers Provider Profile Stats Sync)
+                    BookingRepository.submitRating(bookingId, rating, notes, "seeker", new BookingRepository.SaveCallback() {
+                        @Override public void onSuccess(String id) {}
+                        @Override public void onFailure(Exception e) {}
+                    });
+
+                    // 2. Update Status to Completed
+                    BookingRepository.updateBookingStatus(bookingId, "completed", new BookingRepository.SaveCallback() {
+                        @Override public void onSuccess(String id) {}
+                        @Override public void onFailure(Exception e) {}
+                    });
+                }
                 if ("cash".equals(selectedPaymentMethod)) {
-                    // Navigate to intermediate processing screen for Cash
                     Intent intent = new Intent(this, ProcessingPaymentActivity.class);
                     intent.putExtra("booking_id", bookingId);
                     intent.putExtra("service_name", bookingTitle);
-                    intent.putExtra("service_amount", 500.0);
+                    intent.putExtra("service_amount", serviceAmount);
                     intent.putExtra("is_cash", true);
                     startActivity(intent);
                     finish();
                 } else {
-                    // Navigate to Razorpay payment flow for UPI
                     navigateToPaymentFlow(notes);
                 }
             });
@@ -220,7 +237,14 @@ public class UpdateStatusActivity extends AppCompatActivity {
             return;
         }
 
-        // For cancelled / other statuses: send result back to caller
+        // For ongoing / cancelled: write to Firestore for real-time sync across both users
+        if (bookingId != null && !bookingId.isEmpty()) {
+            BookingRepository.updateBookingStatus(bookingId, selectedStatus, new BookingRepository.SaveCallback() {
+                @Override public void onSuccess(String id) {}
+                @Override public void onFailure(Exception e) {}
+            });
+        }
+
         Intent result = new Intent();
         result.putExtra("booking_id", bookingId);
         result.putExtra("new_status", selectedStatus);
@@ -235,8 +259,8 @@ public class UpdateStatusActivity extends AppCompatActivity {
         Intent intent = new Intent(this, PaymentFlowActivity.class);
         intent.putExtra("booking_id", bookingId != null ? bookingId : "");
         intent.putExtra("service_name", bookingTitle != null ? bookingTitle : "Service");
-        intent.putExtra("provider_name", "Provider Name");
-        intent.putExtra("service_amount", 500.0); // Mock amount for demo
+        intent.putExtra("provider_name", providerName);
+        intent.putExtra("service_amount", serviceAmount);
         intent.putExtra("completion_notes", completionNotes);
         startActivity(intent);
         finish();

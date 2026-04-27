@@ -113,6 +113,17 @@ public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
             return;
         }
 
+        // ── Self-apply guard: same account cannot be both seeker and provider ────────────
+        String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUserId != null && currentUserId.equals(creatorId)) {
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Not Allowed")
+                    .setMessage("You cannot apply to your own post. Please use a different account.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            return;
+        }
+
         btnSubmit.setEnabled(false);
         btnSubmit.setText("Applying...");
 

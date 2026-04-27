@@ -8,7 +8,7 @@
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
     android:paddingStart="12dp"
-    android:paddingEnd="24dp"
+    android:paddingEnd="72dp"
     android:gravity="start">
 
     <!-- Received bubble sticks to the LEFT -->
@@ -18,10 +18,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_chat_incoming"
         android:orientation="vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp">
+        android:padding="4dp">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cvImageReceived"
@@ -41,12 +38,16 @@
 
         <TextView
             android:id="@+id/tvMessage"
+            style="@style/AppFormText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/text_body_dark"
             android:textSize="15sp"
             android:lineSpacingExtra="2dp"
-            android:fontFamily="sans-serif"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             tools:text="Hey! Are you available today?" />
     </LinearLayout>
 

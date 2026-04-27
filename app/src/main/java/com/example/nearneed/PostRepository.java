@@ -37,7 +37,6 @@ public class PostRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(POSTS_COLLECTION)
                 .whereEqualTo("createdBy", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -51,6 +50,14 @@ public class PostRepository {
                                 posts.add(post);
                             }
                         }
+                        
+                        // Client-side sort by timestamp descending
+                        java.util.Collections.sort(posts, (p1, p2) -> {
+                            Long t1 = p1.timestamp != null ? p1.timestamp : 0L;
+                            Long t2 = p2.timestamp != null ? p2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onPostsLoaded(posts);
                     }
                 });
@@ -192,6 +199,8 @@ public class PostRepository {
             Post post = doc.toObject(Post.class);
             if (post != null) {
                 post.postId = doc.getId();
+                if (post.latitude == null && doc.contains("lat")) post.latitude = doc.getDouble("lat");
+                if (post.longitude == null && doc.contains("lng")) post.longitude = doc.getDouble("lng");
             }
             return post;
         } catch (Exception e) {

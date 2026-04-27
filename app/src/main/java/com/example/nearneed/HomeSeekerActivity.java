@@ -2,6 +2,7 @@ package com.example.nearneed;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -108,9 +109,43 @@ public class HomeSeekerActivity extends AppCompatActivity {
         View fabAiChat = findViewById(R.id.fab_ai_chat);
         if (fabAiChat != null) {
             fabAiChat.setOnClickListener(v -> {
-                startActivity(new Intent(this, AiChatActivity.class));
+                openAcceptedProviderChat();
             });
         }
+    }
+
+    private void openAcceptedProviderChat() {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null) return;
+
+        // Query for the most recent active booking (upcoming or in_progress)
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("bookings")
+                .whereEqualTo("seekerId", currentUid)
+                .whereIn("status", java.util.Arrays.asList("upcoming", "in_progress", "confirmed"))
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        com.google.firebase.firestore.DocumentSnapshot doc = snapshots.getDocuments().get(0);
+                        String providerId = doc.getString("providerId");
+                        String providerName = doc.getString("providerName");
+                        
+                        if (providerId != null) {
+                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider")
+                                    .show(getSupportFragmentManager(), "ChatBottomSheet");
+                        } else {
+                            startActivity(new Intent(this, AiChatActivity.class));
+                        }
+                    } else {
+                        // Fallback to AI Chat if no accepted provider found
+                        startActivity(new Intent(this, AiChatActivity.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    startActivity(new Intent(this, AiChatActivity.class));
+                });
     }
 
     private void setupRecyclerViews() {
@@ -188,7 +223,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
     }
 
     private void showLocationPicker() {
-        LocationPickerHelper.show(this, (location, lat, lng) -> userViewModel.saveLocation(lat, lng));
+        LocationPickerHelper.show(this, (location, lat, lng) -> userViewModel.saveLocation(location, lat, lng));
     }
 
     private void setupDashboardNotifications() {
@@ -261,7 +296,22 @@ public class HomeSeekerActivity extends AppCompatActivity {
             Post post = posts.get(position);
             holder.tvTitle.setText(post.title);
             holder.tvDetail.setText(post.budget != null ? "Budget: " + post.budget : "Gig");
-            holder.tvBadge.setText(post.status != null ? post.status.toUpperCase() : "ACTIVE");
+            
+            String status = post.status != null ? post.status.toUpperCase() : "ACTIVE";
+            holder.tvBadge.setText(status);
+            
+            // Status-based coloring
+            if ("COMPLETED".equals(status)) {
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_pill_completed_soft);
+                holder.tvBadge.setTextColor(Color.parseColor("#059669"));
+            } else if ("CANCELLED".equals(status)) {
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_pill_cancelled_soft);
+                holder.tvBadge.setTextColor(Color.parseColor("#DC2626"));
+            } else {
+                // Active/Urgent style
+                holder.tvBadge.setBackgroundResource(R.drawable.bg_urgent_badge);
+                holder.tvBadge.setTextColor(Color.parseColor("#DC2626"));
+            }
             
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(v.getContext(), GigPostDetailActivity.class);

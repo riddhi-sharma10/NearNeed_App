@@ -12,6 +12,7 @@ import com.google.android.material.button.MaterialButton;
 public class GigPostDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration, tvAddress;
+    private android.view.View llDistanceDuration, cardBudget;
     private MaterialButton btnViewApplicants;
     private String postId;
 
@@ -34,27 +35,61 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvDistance = findViewById(R.id.tv_gig_distance);
         tvDuration = findViewById(R.id.tv_gig_duration);
         tvAddress = findViewById(R.id.tv_gig_address);
+        
+        llDistanceDuration = findViewById(R.id.ll_distance_duration);
+        cardBudget = findViewById(R.id.card_budget);
         btnViewApplicants = findViewById(R.id.btn_view_applicants);
+
+        // Initially hide distance/duration and budget as requested
+        if (llDistanceDuration != null) llDistanceDuration.setVisibility(android.view.View.GONE);
+        if (cardBudget != null) cardBudget.setVisibility(android.view.View.GONE);
 
         // Get data from intent
         Intent intent = getIntent();
         postId = intent.getStringExtra("post_id");
         String title = intent.getStringExtra("title");
         String category = intent.getStringExtra("category");
-        String budget = intent.getStringExtra("budget");
         String description = intent.getStringExtra("description");
-        String distance = intent.getStringExtra("distance");
-        String duration = intent.getStringExtra("duration");
         String address = intent.getStringExtra("address");
 
-        // Set data to views
+        // Set initial data
         tvTitle.setText(title != null ? title : "Gig Details");
         tvCategory.setText(category != null ? category : "Category");
-        tvBudget.setText(budget != null ? budget : "Budget not specified");
         tvDescription.setText(description != null ? description : "No description available");
-        tvDistance.setText(distance != null ? distance : "Distance unknown");
-        tvDuration.setText(duration != null ? duration : "Duration not specified");
-        tvAddress.setText(address != null ? address : "Sector 15, Community Hub, Near Park");
+        tvAddress.setText(address != null ? address : "Address not specified");
+
+        // Real-time observation for accepted booking/budget
+        if (postId != null) {
+            BookingRepository.observeBookingsForPost(postId, new BookingRepository.BookingListener() {
+                @Override
+                public void onBookingsLoaded(java.util.List<Booking> bookings) {
+                    if (bookings != null && !bookings.isEmpty()) {
+                        // Finding the first non-cancelled booking (the accepted one)
+                        Booking accepted = null;
+                        for (Booking b : bookings) {
+                            if (!"cancelled".equalsIgnoreCase(b.status)) {
+                                accepted = b;
+                                break;
+                            }
+                        }
+                        
+                        if (accepted != null) {
+                            // Show budget card with accepted price
+                            if (cardBudget != null) cardBudget.setVisibility(android.view.View.VISIBLE);
+                            if (tvBudget != null) {
+                                String price = (accepted.amount != null) ? "₹" + accepted.amount.intValue() : "Price agreed";
+                                tvBudget.setText(price);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    // Silent fail for background sync
+                }
+            });
+        }
 
         btnViewApplicants.setOnClickListener(v -> {
             if (postId == null || postId.trim().isEmpty()) {

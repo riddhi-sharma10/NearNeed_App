@@ -40,6 +40,8 @@ public class ApplicationRepository {
 
     /**
      * Submit an application to a post (full form).
+     * Fetches the applicant's profile from Firestore before saving so seekers
+     * see real name, rating, location and photo in the applicants list.
      */
     public static void submitApplication(String postId, String postTitle, String postType,
                                          String creatorId, String message, String budget,
@@ -47,33 +49,67 @@ public class ApplicationRepository {
         if (postId == null || callback == null) return;
 
         String applicantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Application app = new Application(postId, applicantId, message);
-        app.postTitle = postTitle;
-        app.postType = postType;
-        app.creatorId = creatorId;
-        app.appliedAt = System.currentTimeMillis();
+
+        final Double[] budgetValue = {null};
         if (budget != null) {
-            try {
-                app.proposedBudget = Double.parseDouble(budget.replace("₹", "").trim());
-            } catch (NumberFormatException ignored) {}
+            try { budgetValue[0] = Double.parseDouble(budget.replace("\u20b9", "").trim()); }
+            catch (NumberFormatException ignored) {}
         }
-        app.paymentMethod = paymentMethod;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Enrich with applicant profile before saving so the seeker sees name/phone/location
+        // Fetch applicant profile first, then save application with real details
         db.collection("users").document(applicantId).get()
-                .addOnSuccessListener(profileDoc -> {
-                    if (profileDoc != null && profileDoc.exists()) {
-                        app.applicantName     = profileDoc.getString("name");
-                        app.applicantPhone    = profileDoc.getString("phone");
-                        app.applicantLocation = profileDoc.getString("location");
-                        Double rating = profileDoc.getDouble("rating");
-                        if (rating != null) app.applicantRating = rating;
+                .addOnSuccessListener(doc -> {
+                    Application app = buildApp(postId, applicantId, message, postTitle, postType,
+                            creatorId, budgetValue[0], paymentMethod);
+                    if (doc != null && doc.exists()) {
+                        String name = doc.getString("name");
+                        if (name == null || name.isEmpty()) name = doc.getString("fullName");
+                        app.applicantName     = name != null ? name : "";
+
+                        String photo = doc.getString("photoUrl");
+                        if (photo == null) photo = doc.getString("profileImageUrl");
+                        app.applicantPhotoUrl = photo;
+
+                        Object ratingObj = doc.get("rating");
+                        if (ratingObj instanceof Number)
+                            app.applicantRating = ((Number) ratingObj).doubleValue();
+
+                        String loc = doc.getString("city");
+                        if (loc == null) loc = doc.getString("address");
+                        app.applicantLocation = loc;
+
+                        String phone = doc.getString("phone");
+                        if (phone == null) phone = doc.getString("phoneNumber");
+                        app.applicantPhone = phone;
                     }
-                    saveApplication(db, app, creatorId, postTitle, callback);
+                    db.collection(APPLICATIONS_COLLECTION).add(app)
+                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnFailureListener(callback::onFailure);
                 })
-                .addOnFailureListener(e -> saveApplication(db, app, creatorId, postTitle, callback));
+                .addOnFailureListener(e -> {
+                    // Profile fetch failed — save with blank fields (graceful degradation)
+                    Application app = buildApp(postId, applicantId, message, postTitle, postType,
+                            creatorId, budgetValue[0], paymentMethod);
+                    db.collection(APPLICATIONS_COLLECTION).add(app)
+                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnFailureListener(callback::onFailure);
+                });
+    }
+
+    /** Helper to build an Application object with shared fields. */
+    private static Application buildApp(String postId, String applicantId, String message,
+                                        String postTitle, String postType, String creatorId,
+                                        Double budget, String paymentMethod) {
+        Application app  = new Application(postId, applicantId, message);
+        app.postTitle    = postTitle;
+        app.postType     = postType;
+        app.creatorId    = creatorId;
+        app.appliedAt    = System.currentTimeMillis();
+        app.proposedBudget = budget;
+        app.paymentMethod  = paymentMethod;
+        return app;
     }
 
     /**
@@ -90,34 +126,7 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    callback.onSuccess(applicationId);
-                    // Notify the applicant when their application is accepted or rejected
-                    if ("accepted".equals(status) || "rejected".equals(status)) {
-                        db.collection(APPLICATIONS_COLLECTION).document(applicationId)
-                                .get()
-                                .addOnSuccessListener(doc -> {
-                                    if (doc == null || !doc.exists()) return;
-                                    String applicantId = doc.getString("applicantId");
-                                    String postTitle   = doc.getString("postTitle");
-                                    if (applicantId == null || applicantId.isEmpty()) return;
-
-                                    String title, body;
-                                    if ("accepted".equals(status)) {
-                                        title = "Application Accepted!";
-                                        body  = postTitle != null
-                                                ? "You were accepted for \"" + postTitle + "\". Open the app to get started."
-                                                : "Your application was accepted! Open the app to get started.";
-                                    } else {
-                                        title = "Application Update";
-                                        body  = postTitle != null
-                                                ? "Your application for \"" + postTitle + "\" was not selected."
-                                                : "Your application was not selected this time.";
-                                    }
-                                    FcmNotifier.sendToUser(applicantId, title, body);
-                                });
-                    }
-                })
+                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -146,7 +155,6 @@ public class ApplicationRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
@@ -155,6 +163,14 @@ public class ApplicationRepository {
                             Application app = fromSnapshot(doc);
                             if (app != null) applications.add(app);
                         }
+                        
+                        // Client-side sort by timestamp descending (newest first)
+                        java.util.Collections.sort(applications, (a1, a2) -> {
+                            Long t1 = a1.timestamp != null ? a1.timestamp : 0L;
+                            Long t2 = a2.timestamp != null ? a2.timestamp : 0L;
+                            return t2.compareTo(t1);
+                        });
+                        
                         listener.onApplicationsLoaded(applications);
                     }
                 });
@@ -203,24 +219,6 @@ public class ApplicationRepository {
      */
     public static void loadUserApplicationsFromRoom(Context context, String uid, ApplicationListener listener) {
         if (listener != null) listener.onApplicationsLoaded(new ArrayList<>());
-    }
-
-    private static void saveApplication(FirebaseFirestore db, Application app,
-                                        String creatorId, String postTitle, SaveCallback callback) {
-        db.collection(APPLICATIONS_COLLECTION)
-                .add(app)
-                .addOnSuccessListener(docRef -> {
-                    callback.onSuccess(docRef.getId());
-                    if (creatorId != null && !creatorId.isEmpty()) {
-                        String notifTitle = "New Application Received";
-                        String notifBody  = postTitle != null
-                                ? (app.applicantName != null ? app.applicantName : "Someone")
-                                  + " applied to \"" + postTitle + "\""
-                                : "Someone applied to your post";
-                        FcmNotifier.sendToUser(creatorId, notifTitle, notifBody);
-                    }
-                })
-                .addOnFailureListener(callback::onFailure);
     }
 
     /**

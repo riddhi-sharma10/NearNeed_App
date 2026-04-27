@@ -65,7 +65,8 @@ public class MessagesFragment extends Fragment {
         rvMessages = view.findViewById(R.id.rvMessages);
         rvMessages.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        emptyStateContainer = view.findViewById(R.id.emptyStateContainer);
+        emptyStateContainer = view.findViewById(R.id
+                .emptyStateContainer);
 
         adapter = new MessagesAdapter(displayedChats);
         rvMessages.setAdapter(adapter);
@@ -126,7 +127,6 @@ public class MessagesFragment extends Fragment {
 
         chatsListener = firestore.collection("chats")
                 .whereArrayContains("participants", currentUserId)
-                .orderBy("lastTimestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) {
                         return;
@@ -151,10 +151,13 @@ public class MessagesFragment extends Fragment {
                         }
 
                         String snippet = doc.getString("lastMessage");
+                        String lastSenderId = doc.getString("lastSenderId");
                         Timestamp ts = doc.getTimestamp("lastTimestamp");
                         String time = formatChatTime(ts);
                         Boolean isRead = doc.getBoolean("isRead");
-                        boolean unread = isRead == null || !isRead;
+                        
+                        // Unread if last message is NOT from me AND it's not marked as read
+                        boolean unread = lastSenderId != null && !lastSenderId.equals(currentUserId) && (isRead == null || !isRead);
 
                         ChatEntry entry = new ChatEntry(
                                 doc.getId(),
@@ -166,12 +169,20 @@ public class MessagesFragment extends Fragment {
                                 false,
                                 unread
                         );
+                        // Store the timestamp for client-side sorting
+                        entry.lastTimestamp = ts != null ? ts.toDate().getTime() : 0L;
                         merged.put(entry.chatId, entry);
                         hydrateUserInfo(entry);
                     }
 
                     allChats.clear();
                     allChats.addAll(merged.values());
+                    
+                    // Client-side sort by lastTimestamp descending
+                    java.util.Collections.sort(allChats, (c1, c2) -> {
+                        return Long.compare(c2.lastTimestamp, c1.lastTimestamp);
+                    });
+
                     displayedChats.clear();
                     displayedChats.addAll(allChats);
                     if (adapter != null) {
@@ -421,6 +432,7 @@ public class MessagesFragment extends Fragment {
         String email, phone, gender, experience, rating, reviews, bio, address, profileImage;
         boolean isVerified;
         boolean isOnline, isUnread;
+        long lastTimestamp;
 
         ChatEntry(String chatId, String userId, String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
             this.chatId = chatId;

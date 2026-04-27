@@ -150,6 +150,21 @@ public class MessagesFragment extends Fragment {
                             continue;
                         }
 
+                        // Role-based filtering
+                        String seekerId = doc.getString("seekerId");
+                        String providerId = doc.getString("providerId");
+                        
+                        boolean matchesRole = false;
+                        if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+                            // In Seeker Dashboard, show chats where I am the seeker
+                            matchesRole = (seekerId != null && seekerId.equals(currentUserId)) || (seekerId == null && providerId == null); // Allow legacy
+                        } else if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
+                            // In Provider Dashboard, show chats where I am the provider
+                            matchesRole = (providerId != null && providerId.equals(currentUserId)) || (seekerId == null && providerId == null); // Allow legacy
+                        }
+
+                        if (!matchesRole) continue;
+
                         String snippet = doc.getString("lastMessage");
                         String lastSenderId = doc.getString("lastSenderId");
                         
@@ -176,6 +191,10 @@ public class MessagesFragment extends Fragment {
                                 false,
                                 unread
                         );
+                        // Store role IDs for the intent
+                        entry.seekerId = seekerId;
+                        entry.providerId = providerId;
+                        
                         // Store the timestamp for client-side sorting
                         entry.lastTimestamp = ts != null ? ts.toDate().getTime() : 0L;
                         merged.put(entry.chatId, entry);
@@ -361,6 +380,8 @@ public class MessagesFragment extends Fragment {
         intent.putExtra("CHAT_ONLINE", chat.isOnline);
         intent.putExtra("CHAT_SNIPPET", chat.snippet);
         intent.putExtra("CHAT_VERIFIED", chat.isVerified);
+        intent.putExtra("SEEKER_ID", chat.seekerId);
+        intent.putExtra("PROVIDER_ID", chat.providerId);
         intent.putExtra("PERSON_USER_ID", chat.userId);
         intent.putExtra("PERSON_EMAIL", chat.email != null ? chat.email : buildEmail(chat.name));
         intent.putExtra("PERSON_PHONE", chat.phone != null ? chat.phone : buildPhone(chat.name));
@@ -437,6 +458,7 @@ public class MessagesFragment extends Fragment {
         String userId;
         String name, gig, snippet, time;
         String email, phone, gender, experience, rating, reviews, bio, address, profileImage;
+        String seekerId, providerId;
         boolean isVerified;
         boolean isOnline, isUnread;
         long lastTimestamp;

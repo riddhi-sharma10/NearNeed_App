@@ -12,7 +12,7 @@ import com.google.android.material.button.MaterialButton;
 public class GigPostDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvCategory, tvBudget, tvDescription, tvDistance, tvDuration, tvAddress;
-    private android.view.View llDistanceDuration, cardBudget;
+    private android.widget.ImageView ivGigHero;
     private MaterialButton btnViewApplicants;
     private String postId;
 
@@ -28,6 +28,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
+        ivGigHero = findViewById(R.id.iv_gig_hero);
         tvTitle = findViewById(R.id.tv_gig_title);
         tvCategory = findViewById(R.id.tv_gig_category);
         tvBudget = findViewById(R.id.tv_gig_budget);
@@ -35,14 +36,7 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvDistance = findViewById(R.id.tv_gig_distance);
         tvDuration = findViewById(R.id.tv_gig_duration);
         tvAddress = findViewById(R.id.tv_gig_address);
-        
-        llDistanceDuration = findViewById(R.id.ll_distance_duration);
-        cardBudget = findViewById(R.id.card_budget);
         btnViewApplicants = findViewById(R.id.btn_view_applicants);
-
-        // Initially hide distance/duration and budget as requested
-        if (llDistanceDuration != null) llDistanceDuration.setVisibility(android.view.View.GONE);
-        if (cardBudget != null) cardBudget.setVisibility(android.view.View.GONE);
 
         // Get data from intent
         Intent intent = getIntent();
@@ -58,13 +52,14 @@ public class GigPostDetailActivity extends AppCompatActivity {
         tvDescription.setText(description != null ? description : "No description available");
         tvAddress.setText(address != null ? address : "Address not specified");
 
+        updateHeroImage(category);
+
         // Real-time observation for accepted booking/budget
         if (postId != null) {
             BookingRepository.observeBookingsForPost(postId, new BookingRepository.BookingListener() {
                 @Override
                 public void onBookingsLoaded(java.util.List<Booking> bookings) {
                     if (bookings != null && !bookings.isEmpty()) {
-                        // Finding the first non-cancelled booking (the accepted one)
                         Booking accepted = null;
                         for (Booking b : bookings) {
                             if (!"cancelled".equalsIgnoreCase(b.status)) {
@@ -73,28 +68,20 @@ public class GigPostDetailActivity extends AppCompatActivity {
                             }
                         }
                         
-                        if (accepted != null) {
-                            // Show budget card with accepted price
-                            if (cardBudget != null) cardBudget.setVisibility(android.view.View.VISIBLE);
-                            if (tvBudget != null) {
-                                String price = (accepted.amount != null) ? "₹" + accepted.amount.intValue() : "Price agreed";
-                                tvBudget.setText(price);
-                            }
+                        if (accepted != null && tvBudget != null) {
+                            String price = (accepted.amount != null) ? "₹" + accepted.amount.intValue() : "Price agreed";
+                            tvBudget.setText(price);
                         }
                     }
                 }
 
                 @Override
-                public void onError(Exception e) {
-                    // Silent fail for background sync
-                }
+                public void onError(Exception e) {}
             });
         }
 
         btnViewApplicants.setOnClickListener(v -> {
-            if (postId == null || postId.trim().isEmpty()) {
-                return;
-            }
+            if (postId == null || postId.trim().isEmpty()) return;
 
             Intent applicantsIntent = new Intent(GigPostDetailActivity.this, ResponsesActivity.class);
             applicantsIntent.putExtra("post_id", postId);
@@ -102,5 +89,22 @@ public class GigPostDetailActivity extends AppCompatActivity {
             applicantsIntent.putExtra("is_gig", true);
             startActivity(applicantsIntent);
         });
+    }
+
+    private void updateHeroImage(String category) {
+        if (category == null || ivGigHero == null) return;
+        
+        int resId = R.drawable.welcome_bg_optimized; // Default
+        
+        String lower = category.toLowerCase();
+        if (lower.contains("plumbing")) {
+            resId = R.drawable.img_gig_hero_plumbing;
+        } else if (lower.contains("cleaning")) {
+            resId = R.drawable.img_gig_hero_cleaning;
+        } else if (lower.contains("electrical")) {
+            resId = R.drawable.img_gig_hero_electrical;
+        }
+        
+        ivGigHero.setImageResource(resId);
     }
 }

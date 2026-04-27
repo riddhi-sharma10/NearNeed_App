@@ -93,6 +93,8 @@ public class ResponsesActivity extends AppCompatActivity {
                 Intent intent = new Intent(ResponsesActivity.this, ChatActivity.class);
                 intent.putExtra("CHAT_NAME", application.applicantName);
                 intent.putExtra("CHAT_USER_ID", application.applicantId);
+                intent.putExtra("SEEKER_ID", com.google.firebase.auth.FirebaseAuth.getInstance().getUid());
+                intent.putExtra("PROVIDER_ID", application.applicantId);
                 startActivity(intent);
             }
         });

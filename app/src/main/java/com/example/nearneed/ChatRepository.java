@@ -64,7 +64,7 @@ public class ChatRepository {
     /**
      * Send a text message.
      */
-    public static void sendMessage(String chatId, String senderId, String receiverId, String text, SaveCallback callback) {
+    public static void sendMessage(String chatId, String senderId, String receiverId, String text, String seekerId, String providerId, SaveCallback callback) {
         if (chatId == null || text == null || text.trim().isEmpty()) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -79,7 +79,7 @@ public class ChatRepository {
                 .collection("messages")
                 .add(messageMap)
                 .addOnSuccessListener(doc -> {
-                    updateChatMetadata(chatId, senderId, receiverId, text.trim());
+                    updateChatMetadata(chatId, senderId, receiverId, text.trim(), seekerId, providerId);
                     FcmNotifier.sendToUser(receiverId, "New Message", text.trim());
                     if (callback != null) callback.onSuccess();
                 })
@@ -92,7 +92,7 @@ public class ChatRepository {
      * Send a media message (image or voice).
      */
     public static void sendMediaMessage(String chatId, String senderId, String receiverId,
-                                        String mediaUrl, boolean isVoice, SaveCallback callback) {
+                                        String mediaUrl, boolean isVoice, String seekerId, String providerId, SaveCallback callback) {
         if (chatId == null || mediaUrl == null) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -108,7 +108,7 @@ public class ChatRepository {
                 .add(messageMap)
                 .addOnSuccessListener(doc -> {
                     String preview = isVoice ? "🎤 Voice message" : "📷 Image";
-                    updateChatMetadata(chatId, senderId, receiverId, preview);
+                    updateChatMetadata(chatId, senderId, receiverId, preview, seekerId, providerId);
                     FcmNotifier.sendToUser(receiverId, "New Message", preview);
                     if (callback != null) callback.onSuccess();
                 })
@@ -132,7 +132,7 @@ public class ChatRepository {
      * Update chat thread metadata for the inbox view.
      * Firestore path: chats/{chatId}
      */
-    private static void updateChatMetadata(String chatId, String senderId, String receiverId, String lastMessage) {
+    private static void updateChatMetadata(String chatId, String senderId, String receiverId, String lastMessage, String seekerId, String providerId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         
         Map<String, Object> chatMeta = new HashMap<>();
@@ -141,6 +141,10 @@ public class ChatRepository {
         chatMeta.put("lastTimestamp", FieldValue.serverTimestamp());
         chatMeta.put("lastSenderId", senderId);
         chatMeta.put("isRead", false);
+
+        // Role-based filtering fields
+        if (seekerId != null) chatMeta.put("seekerId", seekerId);
+        if (providerId != null) chatMeta.put("providerId", providerId);
 
         db.collection(CHATS_COLLECTION)
                 .document(chatId)

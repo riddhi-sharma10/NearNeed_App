@@ -80,9 +80,10 @@
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium" />
             <TextView
+                android:id="@+id/tvCurrentLocationSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fetching..."
+                android:text="Tap to detect"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp"
                 android:layout_marginTop="2dp" />

@@ -37,13 +37,15 @@ public class ProviderJobDetailActivity extends AppCompatActivity {
 
         // Get data from intent
         Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        String category = intent.getStringExtra("category");
-        String budget = intent.getStringExtra("budget");
+        String postId     = intent.getStringExtra("post_id");
+        String creatorId  = intent.getStringExtra("creator_id");
+        String title      = intent.getStringExtra("title");
+        String category   = intent.getStringExtra("category");
+        String budget     = intent.getStringExtra("budget");
         String description = intent.getStringExtra("description");
-        String distance = intent.getStringExtra("distance");
-        String duration = intent.getStringExtra("duration");
-        String type = intent.getStringExtra("type");
+        String distance   = intent.getStringExtra("distance");
+        String duration   = intent.getStringExtra("duration");
+        String type       = intent.getStringExtra("type");
 
         // Set data to views
         tvTitle.setText(title != null ? title : "Job Details");
@@ -55,7 +57,8 @@ public class ProviderJobDetailActivity extends AppCompatActivity {
 
         // Apply button logic
         btnApplyGig.setOnClickListener(v -> {
-            new RequestApplyBottomSheet().show(getSupportFragmentManager(), "provider_gig_apply_sheet");
+            RequestApplyBottomSheet.newInstance(postId, title, type, creatorId)
+                    .show(getSupportFragmentManager(), "provider_gig_apply_sheet");
         });
     }
 }

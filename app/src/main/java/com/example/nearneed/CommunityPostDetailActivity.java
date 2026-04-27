@@ -44,16 +44,19 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
         btnVolunteer = findViewById(R.id.btn_volunteer);
 
         Intent intent = getIntent();
-        String postId = intent.getStringExtra("post_id");
-        String title = intent.getStringExtra("title");
+        String postId    = intent.getStringExtra("post_id");
+        String creatorId = intent.getStringExtra("creator_id");
+        String title     = intent.getStringExtra("title");
         String description = intent.getStringExtra("description");
-        String postedBy = intent.getStringExtra("postedBy");
+        String postedBy  = intent.getStringExtra("postedBy");
         String postedTime = intent.getStringExtra("postedTime");
-        String location = intent.getStringExtra("location");
-        String slots = intent.getStringExtra("slots");
+        String location  = intent.getStringExtra("location");
+        String slots     = intent.getStringExtra("slots");
         boolean posterVerified = intent.getBooleanExtra("IS_POSTER_VERIFIED", false);
         isProvider = RoleManager.isProvider(this);
         this.postId = postId;
+        final String finalCreatorId = creatorId;
+        final String finalTitle = title;
 
         tvTitle.setText(title != null ? title : "Community Need");
         tvDescription.setText(description != null ? description : "No description available");
@@ -67,7 +70,7 @@ public class CommunityPostDetailActivity extends AppCompatActivity {
 
         btnVolunteer.setOnClickListener(v -> {
             if (isProvider) {
-                new CommunityVolunteerBottomSheet()
+                CommunityVolunteerBottomSheet.newInstance(postId, finalTitle, "COMMUNITY", finalCreatorId)
                     .show(getSupportFragmentManager(), "community_volunteer_sheet");
                 return;
             }

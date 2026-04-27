@@ -60,10 +60,20 @@ public class ApplicationRepository {
         app.paymentMethod = paymentMethod;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .add(app)
-                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
-                .addOnFailureListener(callback::onFailure);
+
+        // Enrich with applicant profile before saving so the seeker sees name/phone/location
+        db.collection("users").document(applicantId).get()
+                .addOnSuccessListener(profileDoc -> {
+                    if (profileDoc != null && profileDoc.exists()) {
+                        app.applicantName     = profileDoc.getString("name");
+                        app.applicantPhone    = profileDoc.getString("phone");
+                        app.applicantLocation = profileDoc.getString("location");
+                        Double rating = profileDoc.getDouble("rating");
+                        if (rating != null) app.applicantRating = rating;
+                    }
+                    saveApplication(db, app, creatorId, postTitle, callback);
+                })
+                .addOnFailureListener(e -> saveApplication(db, app, creatorId, postTitle, callback));
     }
 
     /**
@@ -80,7 +90,34 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess(applicationId);
+                    // Notify the applicant when their application is accepted or rejected
+                    if ("accepted".equals(status) || "rejected".equals(status)) {
+                        db.collection(APPLICATIONS_COLLECTION).document(applicationId)
+                                .get()
+                                .addOnSuccessListener(doc -> {
+                                    if (doc == null || !doc.exists()) return;
+                                    String applicantId = doc.getString("applicantId");
+                                    String postTitle   = doc.getString("postTitle");
+                                    if (applicantId == null || applicantId.isEmpty()) return;
+
+                                    String title, body;
+                                    if ("accepted".equals(status)) {
+                                        title = "Application Accepted!";
+                                        body  = postTitle != null
+                                                ? "You were accepted for \"" + postTitle + "\". Open the app to get started."
+                                                : "Your application was accepted! Open the app to get started.";
+                                    } else {
+                                        title = "Application Update";
+                                        body  = postTitle != null
+                                                ? "Your application for \"" + postTitle + "\" was not selected."
+                                                : "Your application was not selected this time.";
+                                    }
+                                    FcmNotifier.sendToUser(applicantId, title, body);
+                                });
+                    }
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -166,6 +203,24 @@ public class ApplicationRepository {
      */
     public static void loadUserApplicationsFromRoom(Context context, String uid, ApplicationListener listener) {
         if (listener != null) listener.onApplicationsLoaded(new ArrayList<>());
+    }
+
+    private static void saveApplication(FirebaseFirestore db, Application app,
+                                        String creatorId, String postTitle, SaveCallback callback) {
+        db.collection(APPLICATIONS_COLLECTION)
+                .add(app)
+                .addOnSuccessListener(docRef -> {
+                    callback.onSuccess(docRef.getId());
+                    if (creatorId != null && !creatorId.isEmpty()) {
+                        String notifTitle = "New Application Received";
+                        String notifBody  = postTitle != null
+                                ? (app.applicantName != null ? app.applicantName : "Someone")
+                                  + " applied to \"" + postTitle + "\""
+                                : "Someone applied to your post";
+                        FcmNotifier.sendToUser(creatorId, notifTitle, notifBody);
+                    }
+                })
+                .addOnFailureListener(callback::onFailure);
     }
 
     /**

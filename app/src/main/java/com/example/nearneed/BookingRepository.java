@@ -72,7 +72,32 @@ public class BookingRepository {
         db.collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess(bookingId);
+                    // Notify the other party about the status change
+                    db.collection(BOOKINGS_COLLECTION).document(bookingId)
+                            .get()
+                            .addOnSuccessListener(doc -> {
+                                if (doc == null || !doc.exists()) return;
+                                String seekerId   = doc.getString("seekerId");
+                                String providerId = doc.getString("providerId");
+                                String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
+                                        ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+                                // Notify whoever is NOT the current user
+                                String recipientId = currentUid.equals(seekerId) ? providerId : seekerId;
+                                if (recipientId == null || recipientId.isEmpty()) return;
+
+                                String title = "Booking Update";
+                                String body;
+                                switch (status) {
+                                    case "ongoing":   body = "Your booking has started."; break;
+                                    case "completed": body = "Your booking is marked complete. Please leave a review!"; break;
+                                    case "cancelled": body = "A booking was cancelled."; break;
+                                    default:          body = "Your booking status changed to: " + status; break;
+                                }
+                                FcmNotifier.sendToUser(recipientId, title, body);
+                            });
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 

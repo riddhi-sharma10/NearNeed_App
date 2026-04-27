@@ -134,7 +134,9 @@ public class ChatRepository {
         Map<String, Object> chatMeta = new HashMap<>();
         chatMeta.put("participants", Arrays.asList(senderId, receiverId));
         chatMeta.put("lastMessage", lastMessage);
-        chatMeta.put("lastTimestamp", System.currentTimeMillis());
+        chatMeta.put("lastTimestamp", FieldValue.serverTimestamp());
+        chatMeta.put("lastSenderId", senderId);
+        chatMeta.put("isRead", false);
 
         db.collection(CHATS_COLLECTION)
                 .document(chatId)

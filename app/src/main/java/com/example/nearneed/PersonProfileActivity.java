@@ -74,7 +74,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         final boolean isCurrentUser = isCurrentUser(userId);
 
         profileListener = FirebaseFirestore.getInstance()
-            .collection("Users").document(userId)
+            .collection("users").document(userId)
             .addSnapshotListener((snapshot, error) -> {
                 if (error != null || snapshot == null || !snapshot.exists()) return;
                 applySnapshot(snapshot, isCurrentUser);

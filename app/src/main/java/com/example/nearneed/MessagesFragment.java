@@ -151,10 +151,13 @@ public class MessagesFragment extends Fragment {
                         }
 
                         String snippet = doc.getString("lastMessage");
+                        String lastSenderId = doc.getString("lastSenderId");
                         Timestamp ts = doc.getTimestamp("lastTimestamp");
                         String time = formatChatTime(ts);
                         Boolean isRead = doc.getBoolean("isRead");
-                        boolean unread = isRead == null || !isRead;
+                        
+                        // Unread if last message is NOT from me AND it's not marked as read
+                        boolean unread = lastSenderId != null && !lastSenderId.equals(currentUserId) && (isRead == null || !isRead);
 
                         ChatEntry entry = new ChatEntry(
                                 doc.getId(),

@@ -32,7 +32,9 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
             tvGreeting.setText("Hello, " + cachedName);
         }
         if (cachedLocation != null && !cachedLocation.isEmpty()) {
-            tvDeliveryLocation.setText(cachedLocation);
+            tvDeliveryLocation.setText("DELIVER TO: " + cachedLocation.toUpperCase());
+        } else {
+            tvDeliveryLocation.setText("DELIVER TO: LOADING...");
         }
 
         // ViewModel drives real-time updates from Firestore
@@ -42,8 +44,10 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
             UserPrefs.saveName(this, name);
         });
         userViewModel.getLocation().observe(this, location -> {
-            tvDeliveryLocation.setText(location);
-            UserPrefs.saveLocation(this, location);
+            if (location != null && !location.isEmpty()) {
+                tvDeliveryLocation.setText("DELIVER TO: " + location.toUpperCase());
+                UserPrefs.saveLocation(this, location);
+            }
         });
 
         // Location section click

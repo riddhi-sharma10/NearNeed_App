@@ -19,8 +19,10 @@ public class UserRepository {
     private final MutableLiveData<String> locationLiveData = new MutableLiveData<>("");
     private final MutableLiveData<Integer> postsCountLiveData = new MutableLiveData<>(0);
     private final MutableLiveData<Integer> bookingsCountLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> providerJobsCountLiveData = new MutableLiveData<>(0);
+    private final MutableLiveData<Integer> weeklyJobsLiveData = new MutableLiveData<>(0);
     private final MutableLiveData<Double> ratingLiveData = new MutableLiveData<>(0.0);
-    private final MutableLiveData<String> mtdEarningsLiveData = new MutableLiveData<>("$0");
+    private final MutableLiveData<String> mtdEarningsLiveData = new MutableLiveData<>("₹0");
 
     private ListenerRegistration firestoreListener;
     private ListenerRegistration postsListener;
@@ -64,29 +66,33 @@ public class UserRepository {
                 }
             });
 
-        // Listen for bookings as seeker
+        // Listen for bookings as seeker (only updates seeker-side stats)
         bookingsListener = FirebaseFirestore.getInstance()
             .collection("bookings")
             .whereEqualTo("seekerId", user.getUid())
             .addSnapshotListener((snapshot, e) -> {
-                updateStats(snapshot, "providerRating");
+                if (snapshot != null) {
+                    bookingsCountLiveData.postValue(snapshot.size());
+                    updateRating(snapshot, "providerRating");
+                }
             });
 
-        // Listen for bookings as provider
+        // Listen for bookings as provider (JOBS count, MTD, weekly, rating)
         providerBookingsListener = FirebaseFirestore.getInstance()
             .collection("bookings")
             .whereEqualTo("providerId", user.getUid())
             .addSnapshotListener((snapshot, e) -> {
-                updateStats(snapshot, "seekerRating");
-                calculateMTDEarnings(snapshot);
+                if (snapshot != null) {
+                    providerJobsCountLiveData.postValue(snapshot.size());
+                    updateRating(snapshot, "seekerRating");
+                    calculateMTDEarnings(snapshot);
+                    calculateWeeklyJobs(snapshot);
+                }
             });
     }
 
-    private void updateStats(com.google.firebase.firestore.QuerySnapshot snapshot, String ratingField) {
+    private void updateRating(com.google.firebase.firestore.QuerySnapshot snapshot, String ratingField) {
         if (snapshot == null) return;
-        
-        bookingsCountLiveData.postValue(snapshot.size());
-        
         double totalRating = 0;
         int ratedCount = 0;
         for (DocumentSnapshot doc : snapshot.getDocuments()) {
@@ -103,28 +109,49 @@ public class UserRepository {
 
     private void calculateMTDEarnings(com.google.firebase.firestore.QuerySnapshot snapshot) {
         if (snapshot == null) return;
-        
         double mtd = 0;
         long startOfMonth = getStartOfMonthTimestamp();
-        
         for (DocumentSnapshot doc : snapshot.getDocuments()) {
             Long timestamp = doc.getLong("timestamp");
-            Double price = doc.getDouble("price");
-            if (timestamp != null && timestamp >= startOfMonth && price != null) {
-                mtd += price;
+            Double amount = doc.getDouble("amount");
+            if (timestamp != null && timestamp >= startOfMonth && amount != null) {
+                mtd += amount;
             }
         }
-        
         if (mtd >= 1000) {
-            mtdEarningsLiveData.postValue(String.format("$%.1fk", mtd / 1000.0));
+            mtdEarningsLiveData.postValue(String.format("₹%.1fk", mtd / 1000.0));
         } else {
-            mtdEarningsLiveData.postValue(String.format("$%.0f", mtd));
+            mtdEarningsLiveData.postValue(String.format("₹%.0f", mtd));
         }
+    }
+
+    private void calculateWeeklyJobs(com.google.firebase.firestore.QuerySnapshot snapshot) {
+        if (snapshot == null) return;
+        long startOfWeek = getStartOfWeekTimestamp();
+        int count = 0;
+        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+            Long timestamp = doc.getLong("timestamp");
+            String status = doc.getString("status");
+            if ("completed".equals(status) && timestamp != null && timestamp >= startOfWeek) {
+                count++;
+            }
+        }
+        weeklyJobsLiveData.postValue(count);
     }
 
     private long getStartOfMonthTimestamp() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
+    }
+
+    private long getStartOfWeekTimestamp() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(java.util.Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
         cal.set(java.util.Calendar.MINUTE, 0);
         cal.set(java.util.Calendar.SECOND, 0);
@@ -146,6 +173,14 @@ public class UserRepository {
 
     public LiveData<Integer> getBookingsCount() {
         return bookingsCountLiveData;
+    }
+
+    public LiveData<Integer> getProviderJobsCount() {
+        return providerJobsCountLiveData;
+    }
+
+    public LiveData<Integer> getWeeklyJobsCount() {
+        return weeklyJobsLiveData;
     }
 
     public LiveData<Double> getRating() {

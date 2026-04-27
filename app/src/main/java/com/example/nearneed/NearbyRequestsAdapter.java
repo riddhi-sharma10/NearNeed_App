@@ -75,7 +75,7 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
 
         public void bind(Post post) {
             tvJobTitle.setText(post.title);
-            tvDistance.setText("Nearby");
+            tvDistance.setText(post.location != null ? post.location : "Nearby");
             tvDescription.setText(post.description);
 
             btnView.setOnClickListener(v -> {
@@ -85,6 +85,9 @@ public class NearbyRequestsAdapter extends RecyclerView.Adapter<NearbyRequestsAd
                 intent.putExtra("type", post.type);
                 intent.putExtra("creator_id", post.createdBy);
                 intent.putExtra("description", post.description);
+                intent.putExtra("location", post.location);
+                intent.putExtra("category", post.category);
+                intent.putExtra("slots", post.volunteersNeeded != null ? post.volunteersNeeded : 0);
                 itemView.getContext().startActivity(intent);
             });
         }

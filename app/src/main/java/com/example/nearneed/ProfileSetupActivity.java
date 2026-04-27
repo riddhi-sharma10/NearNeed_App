@@ -426,6 +426,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
         if (user == null) return;
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("location", address); // Fixed: Save address string too
         if (!Double.isNaN(selectedLat)) data.put("latitude", selectedLat);
         if (!Double.isNaN(selectedLng)) data.put("longitude", selectedLng);
 

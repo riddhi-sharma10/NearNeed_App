@@ -38,6 +38,14 @@ public class UserViewModel extends ViewModel {
         return userRepository.getMtdEarnings();
     }
 
+    public LiveData<Integer> getProviderJobsCount() {
+        return userRepository.getProviderJobsCount();
+    }
+
+    public LiveData<Integer> getWeeklyJobsCount() {
+        return userRepository.getWeeklyJobsCount();
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

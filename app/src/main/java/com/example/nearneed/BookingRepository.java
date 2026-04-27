@@ -131,6 +131,22 @@ public class BookingRepository {
                                         db.collection("posts").document(postId).update(postUpdates);
                                     }
                                     callback.onSuccess(bookingId);
+                                    // 4. Notify the other party
+                                    String seekerId   = snapshot.getString("seekerId");
+                                    String providerId = snapshot.getString("providerId");
+                                    String currentUid = FirebaseAuth.getInstance().getCurrentUser() != null
+                                            ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
+                                    String recipientId = currentUid.equals(seekerId) ? providerId : seekerId;
+                                    if (recipientId != null && !recipientId.isEmpty()) {
+                                        String body;
+                                        switch (status.toLowerCase()) {
+                                            case "ongoing":   body = "Your booking has started."; break;
+                                            case "completed": body = "Booking complete. Please leave a review!"; break;
+                                            case "cancelled": body = "A booking was cancelled."; break;
+                                            default:          body = "Booking status: " + status; break;
+                                        }
+                                        FcmNotifier.sendToUser(recipientId, "Booking Update", body);
+                                    }
                                 })
                                 .addOnFailureListener(callback::onFailure);
                     } else {

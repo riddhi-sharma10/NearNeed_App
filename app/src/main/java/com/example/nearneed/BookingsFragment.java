@@ -27,7 +27,7 @@ public class BookingsFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tabLayout);
         viewPager = view.findViewById(R.id.viewPager);
 
-        // Get filter type from Activity intent
+        // Get filter/tab from Activity intent
         if (getActivity() != null && getActivity().getIntent() != null) {
             filterType = getActivity().getIntent().getStringExtra("filter_type");
         }
@@ -65,8 +65,14 @@ public class BookingsFragment extends Fragment {
             }
         }).attach();
 
-        // Select "Upcoming" by default (position 0)
-        viewPager.setCurrentItem(0, false);
+        // Jump to requested tab if specified via intent
+        int startTab = 0;
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            String openTab = getActivity().getIntent().getStringExtra("open_tab");
+            if ("past".equals(openTab)) startTab = 2;
+            else if ("ongoing".equals(openTab)) startTab = 1;
+        }
+        viewPager.setCurrentItem(startTab, false);
     }
     
     @Override

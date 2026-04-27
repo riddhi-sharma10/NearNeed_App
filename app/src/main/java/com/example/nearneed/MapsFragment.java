@@ -117,8 +117,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         String type;
         String postId;
         String creatorId;
-        MarkerData(int icon, int col, String title, String snippet, String budget, String type, String postId, String creatorId) { 
-            this.iconResId = icon; 
+        String distance;
+        String location;
+        String category;
+        int slots;
+
+        MarkerData(int icon, int col, String title, String snippet, String budget, String type, 
+                   String postId, String creatorId, String distance, String location, String category, int slots) {
+            this.iconResId = icon;
             this.color = col;
             this.title = title;
             this.snippet = snippet;
@@ -126,6 +132,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             this.type = type;
             this.postId = postId;
             this.creatorId = creatorId;
+            this.distance = distance;
+            this.location = location;
+            this.category = category;
+            this.slots = slots;
         }
     }
 
@@ -255,16 +265,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             btnViewJob.setOnClickListener(v -> {
                 MarkerData data = (selectedMarker != null) ? markerDataMap.get(selectedMarker) : null;
                 if (data != null && getContext() != null) {
-                    Intent intent;
-                    if ("COMMUNITY".equalsIgnoreCase(data.type)) {
-                        intent = new Intent(getContext(), CommunityPostDetailActivity.class);
-                    } else {
-                        intent = new Intent(getContext(), RequestDetailActivity.class);
-                    }
+                    Intent intent = new Intent(getContext(), RequestDetailActivity.class);
                     intent.putExtra("post_id", data.postId);
                     intent.putExtra("title", data.title);
                     intent.putExtra("description", data.snippet);
                     intent.putExtra("creator_id", data.creatorId);
+                    intent.putExtra("type", data.type);
+                    intent.putExtra("location", data.location);
+                    intent.putExtra("category", data.category);
+                    intent.putExtra("slots", data.slots);
                     startActivity(intent);
                 }
             });
@@ -388,20 +397,74 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private void showInfoCard(Marker marker, MarkerData data) {
         if (infoCard == null || data == null || !isAdded()) return;
         infoCard.setVisibility(View.VISIBLE);
-        
+
         TextView titleTv = infoCard.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.provider_name : R.id.job_title);
-        TextView descTv = infoCard.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.provider_desc : R.id.job_description);
-        
+        TextView descTv  = infoCard.findViewById(RoleManager.ROLE_SEEKER.equals(currentRole) ? R.id.provider_desc : R.id.job_description);
+
+        // Title
         if (titleTv != null) titleTv.setText(data.title != null ? data.title : "Untitled");
+
+        // Description — show actual post description, not the type label
         if (descTv != null) {
-            String type = data.type != null ? data.type : "";
-            String budgetStr = (data.budget != null && !data.budget.isEmpty() && !"N/A".equals(data.budget)) ? " • ₹" + data.budget : "";
-            descTv.setText(type + budgetStr);
+            String desc = (data.snippet != null && !data.snippet.trim().isEmpty())
+                    ? data.snippet : "No description provided.";
+            descTv.setText(desc);
+            descTv.setMaxLines(3);
+            descTv.setEllipsize(android.text.TextUtils.TruncateAt.END);
         }
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
-            TextView budgetTv = infoCard.findViewById(R.id.job_budget);
-            if (budgetTv != null) budgetTv.setText("₹" + (data.budget != null ? data.budget : "0"));
+            boolean isCommunity = "COMMUNITY".equalsIgnoreCase(data.type);
+            
+            // Type tag (GIG / COMMUNITY)
+            TextView tagTv = infoCard.findViewById(R.id.tag_gig);
+            if (tagTv != null) {
+                tagTv.setText(isCommunity ? "COMMUNITY" : "GIG");
+                tagTv.setBackgroundResource(isCommunity ? R.drawable.bg_tag_box_green : R.drawable.bg_tag_box_pink);
+                tagTv.setTextColor(ContextCompat.getColor(getContext(), isCommunity ? R.color.brand_success : R.color.brand_secondary));
+            }
+
+            // Card Background & Theme
+            MaterialCardView card = (MaterialCardView) infoCard;
+            card.setCardBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(getContext(), 
+                isCommunity ? Color.parseColor("#F0FDF4") : Color.WHITE))); // Light green vs white
+
+            // Distance
+            TextView distTv = infoCard.findViewById(R.id.job_distance);
+            if (distTv != null) {
+                if (data.distance != null && !data.distance.isEmpty()) {
+                    distTv.setText(data.distance);
+                    distTv.setVisibility(View.VISIBLE);
+                } else {
+                    distTv.setVisibility(View.GONE);
+                }
+            }
+
+            // Budget Box
+            View budgetBox = infoCard.findViewById(R.id.budget_box);
+            if (budgetBox != null) {
+                budgetBox.setVisibility(isCommunity ? View.GONE : View.VISIBLE);
+                TextView budgetTv = infoCard.findViewById(R.id.job_budget);
+                if (budgetTv != null && !isCommunity) {
+                    boolean hasBudget = data.budget != null && !data.budget.isEmpty()
+                            && !"0".equals(data.budget) && !"N/A".equals(data.budget);
+                    budgetTv.setText(hasBudget ? "₹" + data.budget : "Negotiable");
+                }
+            }
+
+            // Button Theme
+            MaterialButton btnViewJob = infoCard.findViewById(R.id.btn_accept_job);
+            if (btnViewJob != null) {
+                btnViewJob.setText(isCommunity ? "Support Community" : "View Job");
+                btnViewJob.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(),
+                        isCommunity ? R.color.brand_success : R.color.sapphire_primary)));
+            }
+
+            // Community slots row
+            View slotsRow = infoCard.findViewById(R.id.row_slots);
+            if (slotsRow != null) {
+                slotsRow.setVisibility(isCommunity ? View.VISIBLE : View.GONE);
+            }
         }
     }
 
@@ -446,7 +509,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             j.creatorId = p.createdBy;
             
             jobToMarkerMap.put(j, marker);
-            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, p.postId, p.createdBy));
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, 
+                p.postId, p.createdBy, p.distance, p.location, p.category, 
+                p.volunteersNeeded != null ? p.volunteersNeeded : 0));
             filteredJobs.add(j);
         }
     }
@@ -482,7 +547,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 LatLng pos = new LatLng(p.latitude, p.longitude);
                 String name = p.name != null ? p.name : "Provider";
                 Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(getMarkerBitmapDescriptor(name, R.drawable.ic_toolbox_seeker, blue, false)));
-                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId));
+                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId, null));
             }
         }
         */
@@ -497,7 +562,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;
             String title = p.title != null ? p.title : "Request";
             Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(title).icon(getMarkerBitmapDescriptor(title, icon, color, false)));
-            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, p.postId, p.createdBy));
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, 
+                p.postId, p.createdBy, p.distance, p.location, p.category, 
+                p.volunteersNeeded != null ? p.volunteersNeeded : 0));
         }
     }
 

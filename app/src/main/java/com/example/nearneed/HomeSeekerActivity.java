@@ -77,9 +77,9 @@ public class HomeSeekerActivity extends AppCompatActivity {
         }
         
         if (cachedLocation != null && !cachedLocation.isEmpty()) {
-            tvDeliveryLocation.setText(cachedLocation);
+            tvDeliveryLocation.setText("DELIVER TO: " + cachedLocation.toUpperCase());
         } else {
-            tvDeliveryLocation.setText("Loading location...");
+            tvDeliveryLocation.setText("DELIVER TO: LOADING...");
         }
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -93,7 +93,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
         });
         userViewModel.getLocation().observe(this, location -> {
             if (location != null && !location.isEmpty() && !location.contains("Fetching")) {
-                tvDeliveryLocation.setText(location);
+                tvDeliveryLocation.setText("DELIVER TO: " + location.toUpperCase());
                 UserPrefs.saveLocation(this, location);
             }
         });

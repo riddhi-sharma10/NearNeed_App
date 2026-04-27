@@ -38,13 +38,23 @@ public class ProviderScheduleAdapter extends RecyclerView.Adapter<ProviderSchedu
         holder.tvTitle.setText(booking.postTitle != null ? booking.postTitle : "Service Task");
         holder.tvSubtitle.setText(booking.seekerName != null ? "For " + booking.seekerName : "Community Task");
 
-        if (booking.timestamp != null) {
-            Date date = new Date(booking.timestamp);
+        long scheduledTime = booking.scheduledDate != null ? booking.scheduledDate : (booking.timestamp != null ? booking.timestamp : 0L);
+        if (scheduledTime != 0) {
+            Date date = new Date(scheduledTime);
             holder.tvTime.setText(timeFormat.format(date));
             holder.tvAmpm.setText(ampmFormat.format(date).toUpperCase());
         } else {
             holder.tvTime.setText("--:--");
             holder.tvAmpm.setText("??");
+        }
+        
+        // Indicator color based on status
+        if ("completed".equalsIgnoreCase(booking.status)) {
+            holder.indicator.setBackgroundColor(0xFF10B981); // Emerald Green
+        } else if ("cancelled".equalsIgnoreCase(booking.status) || "canceled".equalsIgnoreCase(booking.status)) {
+            holder.indicator.setBackgroundColor(0xFFEF4444); // Red
+        } else {
+            holder.indicator.setBackgroundColor(0xFF3B82F6); // Blue
         }
     }
 
@@ -55,6 +65,7 @@ public class ProviderScheduleAdapter extends RecyclerView.Adapter<ProviderSchedu
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTime, tvAmpm, tvTitle, tvSubtitle;
+        View indicator;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -62,6 +73,7 @@ public class ProviderScheduleAdapter extends RecyclerView.Adapter<ProviderSchedu
             tvAmpm = itemView.findViewById(R.id.tv_schedule_ampm);
             tvTitle = itemView.findViewById(R.id.tv_schedule_title);
             tvSubtitle = itemView.findViewById(R.id.tv_schedule_subtitle);
+            indicator = itemView.findViewById(R.id.border_indicator);
         }
     }
 }

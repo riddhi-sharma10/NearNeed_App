@@ -310,10 +310,11 @@
                             android:src="@drawable/ic_bookings_calendar"
                             app:tint="#B0C4DE" />
                         <TextView
+                            android:id="@+id/tv_provider_weekly_jobs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="3 jobs completed this week"
+                            android:text="-- jobs completed this week"
                             android:textColor="#B0C4DE"
                             android:textSize="13sp" />
                     </LinearLayout>

@@ -58,7 +58,7 @@ public class LocationPickerHelper {
         View rowHome = view.findViewById(R.id.rowHome);
         if (rowHome != null) {
             rowHome.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: HOME - SECTOR 15", 28.4671, 77.0425);
+                selectLocation("HOME - SECTOR 15", 28.4671, 77.0425);
                 dialog.dismiss();
             });
         }
@@ -67,7 +67,7 @@ public class LocationPickerHelper {
         View rowWork = view.findViewById(R.id.rowWork);
         if (rowWork != null) {
             rowWork.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: WORK - DLF CYBER CITY", 28.4951, 77.0881);
+                selectLocation("WORK - DLF CYBER CITY", 28.4951, 77.0881);
                 dialog.dismiss();
             });
         }
@@ -76,7 +76,7 @@ public class LocationPickerHelper {
         View rowRecent1 = view.findViewById(R.id.rowRecent1);
         if (rowRecent1 != null) {
             rowRecent1.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: SECTOR 21, GURUGRAM", 28.5034, 77.0678);
+                selectLocation("SECTOR 21, GURUGRAM", 28.5034, 77.0678);
                 dialog.dismiss();
             });
         }
@@ -85,7 +85,7 @@ public class LocationPickerHelper {
         View rowRecent2 = view.findViewById(R.id.rowRecent2);
         if (rowRecent2 != null) {
             rowRecent2.setOnClickListener(v -> {
-                selectLocation("DELIVER TO: CONNAUGHT PLACE, DELHI", 28.6304, 77.2177);
+                selectLocation("CONNAUGHT PLACE, DELHI", 28.6304, 77.2177);
                 dialog.dismiss();
             });
         }
@@ -109,8 +109,7 @@ public class LocationPickerHelper {
             rvPredictions.setLayoutManager(new LinearLayoutManager(activity));
             SearchPredictionAdapter adapter = new SearchPredictionAdapter((lat, lng, name) -> {
                 // When a search result is clicked
-                String displayText = "DELIVER TO: " + name;
-                selectLocation(displayText, lat, lng);
+                selectLocation(name, lat, lng);
                 dialog.dismiss();
             });
             rvPredictions.setAdapter(adapter);
@@ -210,8 +209,7 @@ public class LocationPickerHelper {
                     new Handler(Looper.getMainLooper()).post(() -> {
                         if (progressBar != null) progressBar.setVisibility(View.GONE);
                         if (finalAddress != null) {
-                            String displayText = "DELIVER TO: " + finalAddress;
-                            selectLocation(displayText, location.getLatitude(), location.getLongitude());
+                            selectLocation(finalAddress, location.getLatitude(), location.getLongitude());
                             dialog.dismiss();
                         } else {
                             if (tvSubtitle != null) tvSubtitle.setText("Tap to detect");

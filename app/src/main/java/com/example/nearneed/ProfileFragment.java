@@ -198,7 +198,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        userViewModel.getBookingsCount().observe(getViewLifecycleOwner(), count -> {
+        userViewModel.getProviderJobsCount().observe(getViewLifecycleOwner(), count -> {
             providerBinding.tvProviderJobsCount.setText(String.valueOf(count));
         });
 
@@ -208,13 +208,23 @@ public class ProfileFragment extends Fragment {
         });
 
         userViewModel.getRating().observe(getViewLifecycleOwner(), rating -> {
-            providerBinding.tvProviderRatingValue.setText(String.format("%.1f", rating));
+            if (rating != null && rating > 0) {
+                providerBinding.tvProviderRatingValue.setText(String.format("%.1f", rating));
+            } else {
+                providerBinding.tvProviderRatingValue.setText("--");
+            }
         });
 
-        // My Jobs
+        userViewModel.getWeeklyJobsCount().observe(getViewLifecycleOwner(), count -> {
+            providerBinding.tvProviderWeeklyJobs.setText(count + " jobs completed this week");
+        });
+
+        // My Jobs → open Bookings on the Past tab
         if (providerBinding.menuMyJobs != null) {
             providerBinding.menuMyJobs.setOnClickListener(v -> {
-                Snackbar.make(requireView(), "Loading Your Active Jobs...", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(requireActivity(), BookingsActivity.class);
+                intent.putExtra("open_tab", "past");
+                startActivity(intent);
             });
         }
 

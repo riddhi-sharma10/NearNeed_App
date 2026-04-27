@@ -39,29 +39,92 @@
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-black" />
 
-            <!-- Distance -->
-            <LinearLayout
+            <!-- Type Tag -->
+            <TextView
+                android:id="@+id/tv_request_type"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COMMUNITY"
+                android:textColor="@color/brand_success"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_pill_completed_soft"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
+
+            <!-- Posted By Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_posted_by_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Posted by "
+                    android:textColor="@color/text_body"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_poster_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="someone"
+                    android:textColor="@color/sapphire_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground" />
+            </LinearLayout>
+
+            <!-- Gig Placeholder Image -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+                
+                <ImageView
+                    android:id="@+id/iv_request_placeholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_plumbing" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Location Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="12dp">
+                android:layout_marginTop="16dp"
+                android:paddingHorizontal="4dp">
 
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_nav_map_final"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_loc_pin_small"
                     android:contentDescription="@null"
-                    app:tint="@color/sapphire_primary"
-                    android:layout_marginEnd="6dp" />
+                    app:tint="@color/sapphire_primary" />
 
                 <TextView
                     android:id="@+id/tv_request_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0.8 km away"
-                    android:textColor="@color/text_body"
-                    android:textSize="14sp" />
+                    android:layout_marginStart="8dp"
+                    android:text="Location loading..."
+                    android:textColor="@color/sapphire_primary"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
             </LinearLayout>
 
             <!-- Description Card -->
@@ -96,6 +159,59 @@
                         android:textSize="14sp"
                         android:lineSpacingMultiplier="1.5"
                         android:layout_marginTop="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Volunteers Needed Card (Community Only) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_volunteers_needed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="#F0F9F7"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/brand_success"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_toolbox_seeker"
+                        app:tint="@color/brand_success"
+                        android:layout_marginEnd="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Volunteers Needed"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_volunteers_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="5 volunteers needed"
+                            android:textColor="@color/text_header"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

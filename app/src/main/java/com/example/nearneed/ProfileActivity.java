@@ -19,13 +19,10 @@ import com.google.firebase.firestore.ListenerRegistration;
 public class ProfileActivity extends AppCompatActivity {
 
     private ListenerRegistration profileListener;
-    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        userViewModel = new androidx.lifecycle.ViewModelProvider(this).get(UserViewModel.class);
 
         String role = RoleManager.getRole(this);
         if (RoleManager.ROLE_PROVIDER.equals(role)) {
@@ -40,7 +37,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Instant display from local cache while Firestore loads
         applyLocalCache();
-        setupStatsObservers();
     }
 
     @Override
@@ -50,43 +46,11 @@ public class ProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         profileListener = FirebaseFirestore.getInstance()
-                .collection("users").document(user.getUid())
+                .collection("Users").document(user.getUid())
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null || !snapshot.exists()) return;
                     applySnapshot(snapshot);
                 });
-    }
-
-    private void setupStatsObservers() {
-        // Seeker Stats
-        userViewModel.getPostsCount().observe(this, count -> {
-            TextView tv = findViewById(R.id.tv_profile_posts_value);
-            if (tv != null) tv.setText(String.valueOf(count));
-        });
-        userViewModel.getBookingsCount().observe(this, count -> {
-            TextView tvSeeker = findViewById(R.id.tv_profile_bookings_value);
-            if (tvSeeker != null) tvSeeker.setText(String.valueOf(count));
-            
-            TextView tvProvider = findViewById(R.id.tv_provider_jobs_count);
-            if (tvProvider != null) tvProvider.setText(String.valueOf(count));
-        });
-        userViewModel.getRating().observe(this, rating -> {
-            String r = String.format("%.1f", rating);
-            TextView tvSeeker = findViewById(R.id.tv_profile_rating_value);
-            if (tvSeeker != null) tvSeeker.setText(r);
-            
-            TextView tvProvider = findViewById(R.id.tv_provider_rating_value);
-            if (tvProvider != null) tvProvider.setText(r);
-        });
-        
-        // Provider specific
-        userViewModel.getMtdEarnings().observe(this, earnings -> {
-            TextView tvProviderMTD = findViewById(R.id.tv_provider_mtd_value);
-            if (tvProviderMTD != null) tvProviderMTD.setText(earnings);
-            
-            TextView tvProviderMain = findViewById(R.id.tv_provider_earnings_main);
-            if (tvProviderMain != null) tvProviderMain.setText(earnings);
-        });
     }
 
     @Override

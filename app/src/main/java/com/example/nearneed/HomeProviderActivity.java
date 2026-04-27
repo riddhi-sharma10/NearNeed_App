@@ -52,6 +52,14 @@ public class HomeProviderActivity extends AppCompatActivity {
         tvGreeting = findViewById(R.id.tvGreeting);
         tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
 
+        // Show cached values immediately
+        String cachedLocation = UserPrefs.getLocation(this);
+        if (cachedLocation != null && !cachedLocation.isEmpty()) {
+            tvDeliveryLocation.setText("DELIVER TO: " + cachedLocation.toUpperCase());
+        } else {
+            tvDeliveryLocation.setText("DELIVER TO: LOADING...");
+        }
+
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         bookingViewModel = new ViewModelProvider(this).get(BookingViewModel.class);
@@ -157,7 +165,7 @@ public class HomeProviderActivity extends AppCompatActivity {
         // Observe user profile stats
         userViewModel.getLocation().observe(this, location -> {
             if (tvDeliveryLocation != null && location != null && !location.isEmpty()) {
-                tvDeliveryLocation.setText(location);
+                tvDeliveryLocation.setText("DELIVER TO: " + location.toUpperCase());
             }
         });
 
@@ -198,6 +206,18 @@ public class HomeProviderActivity extends AppCompatActivity {
                     }
                 }
                 scheduleAdapter.setBookings(todayBookings);
+                
+                TextView tvEmpty = findViewById(R.id.tvScheduleEmptyState);
+                RecyclerView rvSchedule = findViewById(R.id.rvProviderSchedule);
+                if (tvEmpty != null && rvSchedule != null) {
+                    if (todayBookings.isEmpty()) {
+                        rvSchedule.setVisibility(View.GONE);
+                        tvEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        rvSchedule.setVisibility(View.VISIBLE);
+                        tvEmpty.setVisibility(View.GONE);
+                    }
+                }
             }
         });
         bookingViewModel.observeUserBookings();

@@ -85,7 +85,17 @@ public class ApplicationRepository {
                         app.applicantPhone = phone;
                     }
                     db.collection(APPLICATIONS_COLLECTION).add(app)
-                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnSuccessListener(ref -> {
+                                callback.onSuccess(ref.getId());
+                                if (creatorId != null && !creatorId.isEmpty()) {
+                                    String name = (app.applicantName != null && !app.applicantName.isEmpty())
+                                            ? app.applicantName : "Someone";
+                                    String body = postTitle != null
+                                            ? name + " applied to \"" + postTitle + "\""
+                                            : name + " applied to your post";
+                                    FcmNotifier.sendToUser(creatorId, "New Application Received", body);
+                                }
+                            })
                             .addOnFailureListener(callback::onFailure);
                 })
                 .addOnFailureListener(e -> {
@@ -93,7 +103,13 @@ public class ApplicationRepository {
                     Application app = buildApp(postId, applicantId, message, postTitle, postType,
                             creatorId, budgetValue[0], paymentMethod);
                     db.collection(APPLICATIONS_COLLECTION).add(app)
-                            .addOnSuccessListener(ref -> callback.onSuccess(ref.getId()))
+                            .addOnSuccessListener(ref -> {
+                                callback.onSuccess(ref.getId());
+                                if (creatorId != null && !creatorId.isEmpty()) {
+                                    FcmNotifier.sendToUser(creatorId, "New Application Received",
+                                            "Someone applied to your post");
+                                }
+                            })
                             .addOnFailureListener(callback::onFailure);
                 });
     }
@@ -126,7 +142,31 @@ public class ApplicationRepository {
         db.collection(APPLICATIONS_COLLECTION)
                 .document(applicationId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
+                .addOnSuccessListener(aVoid -> {
+                    callback.onSuccess(applicationId);
+                    if ("accepted".equals(status) || "rejected".equals(status)) {
+                        db.collection(APPLICATIONS_COLLECTION).document(applicationId).get()
+                                .addOnSuccessListener(doc -> {
+                                    if (doc == null || !doc.exists()) return;
+                                    String applicantId = doc.getString("applicantId");
+                                    String postTitle   = doc.getString("postTitle");
+                                    if (applicantId == null || applicantId.isEmpty()) return;
+                                    String title, body;
+                                    if ("accepted".equals(status)) {
+                                        title = "Application Accepted!";
+                                        body  = postTitle != null
+                                                ? "You were accepted for \"" + postTitle + "\""
+                                                : "Your application was accepted!";
+                                    } else {
+                                        title = "Application Update";
+                                        body  = postTitle != null
+                                                ? "Your application for \"" + postTitle + "\" was not selected"
+                                                : "Your application was not selected";
+                                    }
+                                    FcmNotifier.sendToUser(applicantId, title, body);
+                                });
+                    }
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 

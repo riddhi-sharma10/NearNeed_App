@@ -114,9 +114,12 @@ public final class UserProfileRepository {
     @Nullable
     public static UserProfile fromSnapshot(@NonNull DocumentSnapshot snapshot) {
         UserProfile profile = new UserProfile();
-        profile.fullName = snapshot.getString("fullName");
-        profile.location = snapshot.getString("location");
-        profile.photoUrl = snapshot.getString("photoUrl");
+        profile.userId = snapshot.getId();
+        profile.fullName = snapshot.contains("fullName") ? snapshot.getString("fullName") : snapshot.getString("name");
+        profile.name = profile.fullName;
+        profile.location = snapshot.contains("location") ? snapshot.getString("location") : snapshot.getString("address");
+        profile.photoUrl = snapshot.contains("photoUrl") ? snapshot.getString("photoUrl") : snapshot.getString("profileImageUrl");
+        profile.profileImageUrl = profile.photoUrl;
         profile.bio = snapshot.getString("bio");
         profile.dob = snapshot.getString("dob");
         profile.email = snapshot.getString("email");
@@ -208,7 +211,7 @@ public final class UserProfileRepository {
      */
     public static ListenerRegistration observeAllProviders(java.util.List<UserProfile> providerList, Runnable onComplete) {
         return FirebaseFirestore.getInstance().collection(USERS_COLLECTION)
-                .whereEqualTo("role", RoleManager.ROLE_PROVIDER)
+                .whereIn("role", java.util.Arrays.asList("PROVIDER", "provider"))
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null) return;
                     providerList.clear();

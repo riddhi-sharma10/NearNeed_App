@@ -41,8 +41,16 @@ public class UserRepository {
                 if (error != null || snapshot == null || !snapshot.exists()) return;
 
                 String name = snapshot.getString("name");
+                if (name == null || name.isEmpty()) {
+                    name = snapshot.getString("fullName");
+                }
                 if (name != null && !name.isEmpty()) {
                     nameLiveData.postValue(name);
+                }
+                
+                String location = snapshot.getString("location");
+                if (location != null && !location.isEmpty()) {
+                    locationLiveData.postValue(location);
                 }
             });
 
@@ -148,11 +156,12 @@ public class UserRepository {
         return mtdEarningsLiveData;
     }
 
-    public void saveLocation(double lat, double lng) {
+    public void saveLocation(String address, double lat, double lng) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
         Map<String, Object> data = new HashMap<>();
+        data.put("location", address);
         data.put("latitude", lat);
         data.put("longitude", lng);
         FirebaseFirestore.getInstance()

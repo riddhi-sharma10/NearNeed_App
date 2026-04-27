@@ -18,8 +18,8 @@ public class UserViewModel extends ViewModel {
         return userRepository.getLocation();
     }
 
-    public void saveLocation(double lat, double lng) {
-        userRepository.saveLocation(lat, lng);
+    public void saveLocation(String address, double lat, double lng) {
+        userRepository.saveLocation(address, lat, lng);
     }
 
     public LiveData<Integer> getPostsCount() {

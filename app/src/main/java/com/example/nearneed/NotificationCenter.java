@@ -38,7 +38,7 @@ public final class NotificationCenter {
         if (userId == null || userId.isEmpty()) return;
         
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference ref = db.collection("Users").document(userId).collection("notifications");
+        CollectionReference ref = db.collection("users").document(userId).collection("notifications");
         
         String id = UUID.randomUUID().toString();
         Map<String, Object> data = new HashMap<>();
@@ -111,7 +111,7 @@ public final class NotificationCenter {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return null;
         return FirebaseFirestore.getInstance()
-                .collection("Users").document(user.getUid())
+                .collection("users").document(user.getUid())
                 .collection("notifications");
     }
 

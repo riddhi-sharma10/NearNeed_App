@@ -22,14 +22,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkAndPerformReset() {
         android.content.SharedPreferences prefs = getSharedPreferences("AppConfig", MODE_PRIVATE);
-        boolean isResetDone = prefs.getBoolean("db_master_reset_v3", false);
+        boolean isResetDone = prefs.getBoolean("db_master_reset_v4", false);
 
         if (!isResetDone) {
             Log.d("MainActivity", "Triggering Master Database Reset...");
             new DataSeeder().resetAndSeed(new DataSeeder.SeederCallback() {
                 @Override
                 public void onSuccess() {
-                    prefs.edit().putBoolean("db_master_reset_v3", true).apply();
+                    prefs.edit().putBoolean("db_master_reset_v4", true).apply();
                     UserPrefs.clear(MainActivity.this);
                     Log.d("MainActivity", "Database Reset Complete.");
                     dispatchByRole();

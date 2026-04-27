@@ -90,7 +90,7 @@ public class RatingDialog {
 
     private static void updateUserRating(String userId, float newRating) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        com.google.firebase.firestore.DocumentReference userRef = db.collection("Users").document(userId);
+        com.google.firebase.firestore.DocumentReference userRef = db.collection("users").document(userId);
 
         db.runTransaction(transaction -> {
             com.google.firebase.firestore.DocumentSnapshot snapshot = transaction.get(userRef);

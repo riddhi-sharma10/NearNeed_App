@@ -26,7 +26,7 @@ public final class UserProfileRepository {
         void onFailure(@NonNull Exception error);
     }
 
-    private static final String USERS_COLLECTION = "Users";
+    private static final String USERS_COLLECTION = "users";
 
     private UserProfileRepository() {
     }

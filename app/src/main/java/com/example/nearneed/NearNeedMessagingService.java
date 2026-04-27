@@ -53,7 +53,7 @@ public class NearNeedMessagingService extends FirebaseMessagingService {
         if (userId != null) {
             Map<String, Object> data = new HashMap<>();
             data.put("fcmToken", token);
-            FirebaseFirestore.getInstance().collection("Users").document(userId)
+            FirebaseFirestore.getInstance().collection("users").document(userId)
                     .update(data);
         }
     }

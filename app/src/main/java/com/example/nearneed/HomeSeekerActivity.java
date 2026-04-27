@@ -206,11 +206,11 @@ public class HomeSeekerActivity extends AppCompatActivity {
                 }
 
                 if (myCommunity.isEmpty()) {
-                    emptyStateCommunityContainer.setVisibility(View.VISIBLE);
-                    rvCommunity.setVisibility(View.GONE);
+                    if (emptyStateCommunityContainer != null) emptyStateCommunityContainer.setVisibility(View.VISIBLE);
+                    if (rvCommunity != null) rvCommunity.setVisibility(View.GONE);
                 } else {
-                    emptyStateCommunityContainer.setVisibility(View.GONE);
-                    rvCommunity.setVisibility(View.VISIBLE);
+                    if (emptyStateCommunityContainer != null) emptyStateCommunityContainer.setVisibility(View.GONE);
+                    if (rvCommunity != null) rvCommunity.setVisibility(View.VISIBLE);
                 }
             });
             postViewModel.observeUserPosts(this, userId);

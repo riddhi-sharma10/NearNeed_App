@@ -62,6 +62,14 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewVi
             tvRating.setText(String.format("★ %.1f", review.getRating()));
             tvDate.setText(formatTime(review.getReviewDate()));
             tvText.setText(review.getReviewText());
+
+            if (ivAvatar != null) {
+                com.bumptech.glide.Glide.with(ivAvatar.getContext())
+                        .load(DbConstants.getCatAvatarUrl(review.getReviewerName()))
+                        .placeholder(R.drawable.ic_nav_profile)
+                        .circleCrop()
+                        .into(ivAvatar);
+            }
         }
 
         private String formatTime(long timestamp) {

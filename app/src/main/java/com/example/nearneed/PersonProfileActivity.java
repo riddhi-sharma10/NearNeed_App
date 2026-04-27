@@ -74,7 +74,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         final boolean isCurrentUser = isCurrentUser(userId);
 
         profileListener = FirebaseFirestore.getInstance()
-            .collection("users").document(userId)
+            .collection(DbConstants.COL_USERS).document(userId)
             .addSnapshotListener((snapshot, error) -> {
                 if (error != null || snapshot == null || !snapshot.exists()) return;
                 applySnapshot(snapshot, isCurrentUser);
@@ -87,7 +87,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void applySnapshot(DocumentSnapshot snapshot, boolean isCurrentUser) {
-        String name        = snapshot.getString("fullName");
+        String name        = DbConstants.getSafeName(snapshot);
         String photoUrl    = snapshot.getString("photoUrl");
         String bio         = snapshot.getString("bio");
         String phone       = snapshot.getString("phone");
@@ -96,6 +96,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         Boolean verified   = snapshot.getBoolean("isVerified");
         Double rating      = snapshot.getDouble("rating");
         Long reviewCount   = snapshot.getLong("reviewCount");
+        String location    = snapshot.getString("location");
 
         // Email: authoritative source is Firebase Auth for the current user
         String email;
@@ -127,6 +128,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         setText(R.id.tvGender,     gender);
         setText(R.id.tvExperience, experience);
         setText(R.id.tvBio,        bio);
+        setText(R.id.tvLocation,   location);
 
         if (rating != null) {
             setText(R.id.tvRating, String.format("%.1f", rating));
@@ -138,15 +140,17 @@ public class PersonProfileActivity extends AppCompatActivity {
         // ── Profile photo ──
         ImageView ivProfile = findViewById(R.id.ivProfile);
         if (ivProfile != null) {
-            if (photoUrl != null && !photoUrl.isEmpty()) {
-                Glide.with(this)
-                    .load(photoUrl)
-                    .placeholder(avatarForGender(gender))
-                    .circleCrop()
-                    .into(ivProfile);
-            } else {
-                ivProfile.setImageResource(avatarForGender(gender));
-            }
+            String imageToLoad = (photoUrl != null && !photoUrl.isEmpty()) 
+                ? photoUrl 
+                : DbConstants.getCatAvatarUrl(snapshot.getId());
+                
+            Glide.with(this)
+                .load(imageToLoad)
+                .placeholder(R.drawable.avatar_alex)
+                .error(R.drawable.avatar_alex)
+                .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                .circleCrop()
+                .into(ivProfile);
         }
     }
 
@@ -158,11 +162,5 @@ public class PersonProfileActivity extends AppCompatActivity {
         if (tv != null) tv.setText(text);
     }
 
-    private int avatarForGender(String gender) {
-        if (gender == null) return R.drawable.avatar_alex;
-        String lower = gender.toLowerCase();
-        if (lower.contains("female")) return R.drawable.avatar_sarah;
-        if (lower.contains("male"))   return R.drawable.avatar_david;
-        return R.drawable.avatar_alex;
-    }
+
 }

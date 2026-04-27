@@ -38,14 +38,11 @@ public class UserRepository {
         if (user == null) return;
 
         firestoreListener = FirebaseFirestore.getInstance()
-            .collection("users").document(user.getUid())
+            .collection(DbConstants.COL_USERS).document(user.getUid())
             .addSnapshotListener((snapshot, error) -> {
                 if (error != null || snapshot == null || !snapshot.exists()) return;
 
-                String name = snapshot.getString("name");
-                if (name == null || name.isEmpty()) {
-                    name = snapshot.getString("fullName");
-                }
+                String name = DbConstants.getSafeName(snapshot);
                 if (name != null && !name.isEmpty()) {
                     nameLiveData.postValue(name);
                 }
@@ -199,7 +196,7 @@ public class UserRepository {
         data.put("latitude", lat);
         data.put("longitude", lng);
         FirebaseFirestore.getInstance()
-            .collection("users").document(user.getUid())
+            .collection(DbConstants.COL_USERS).document(user.getUid())
             .set(data, SetOptions.merge());
     }
 

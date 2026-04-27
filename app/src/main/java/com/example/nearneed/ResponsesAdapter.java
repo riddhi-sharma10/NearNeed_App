@@ -134,12 +134,10 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
 
             // ── Photo ────────────────────────────────────────────────────────────────
             if (ivAvatar != null) {
-                if (app.applicantPhotoUrl != null && !app.applicantPhotoUrl.isEmpty()) {
-                    loadPhoto(app.applicantPhotoUrl);
-                } else {
-                    ivAvatar.setImageResource(R.drawable.ic_nav_profile);
-                    ivAvatar.setColorFilter(ContextCompat.getColor(itemView.getContext(), R.color.brand_primary));
-                }
+                String photoUrl = (app.applicantPhotoUrl != null && !app.applicantPhotoUrl.isEmpty())
+                        ? app.applicantPhotoUrl
+                        : DbConstants.getCatAvatarUrl(app.applicantId);
+                loadPhoto(photoUrl);
             }
 
             // ── Rating ───────────────────────────────────────────────────────────────

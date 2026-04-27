@@ -47,7 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         profileListener = FirebaseFirestore.getInstance()
-                .collection("Users").document(user.getUid())
+                .collection(DbConstants.COL_USERS).document(user.getUid())
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null || !snapshot.exists()) return;
                     applySnapshot(snapshot);
@@ -112,7 +112,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void applySnapshot(DocumentSnapshot snapshot) {
-        String name = snapshot.getString("fullName");
+        String name = DbConstants.getSafeName(snapshot);
         String location = snapshot.getString("location");
         String photoUrl = snapshot.getString("photoUrl");
         Boolean verified = snapshot.getBoolean("isVerified");

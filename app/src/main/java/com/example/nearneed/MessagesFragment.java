@@ -211,7 +211,7 @@ public class MessagesFragment extends Fragment {
 
                     displayedChats.clear();
                     displayedChats.addAll(allChats);
-                    if (adapter != null) {
+                    if (adapter != null && isAdded()) {
                         adapter.notifyDataSetChanged();
                     }
                     updateEmptyState();
@@ -219,7 +219,7 @@ public class MessagesFragment extends Fragment {
     }
 
     private void hydrateUserInfo(ChatEntry entry) {
-        firestore.collection("users").document(entry.userId).get()
+        firestore.collection(DbConstants.COL_USERS).document(entry.userId).get()
                 .addOnSuccessListener(snapshot -> {
                     if (snapshot != null && snapshot.exists()) {
                         applyUserSnapshot(entry, snapshot, true);
@@ -232,7 +232,9 @@ public class MessagesFragment extends Fragment {
             return;
         }
 
-        entry.name = readString(snapshot, modern ? "name" : "fullName", entry.name);
+        String fetchedName = DbConstants.getSafeName(snapshot);
+        if (fetchedName != null && !fetchedName.isEmpty()) entry.name = fetchedName;
+
         entry.email = readString(snapshot, "email", buildEmail(entry.name));
         entry.phone = readString(snapshot, "phone", buildPhone(entry.name));
         entry.gender = readString(snapshot, "gender", buildGender(entry.name));
@@ -245,7 +247,7 @@ public class MessagesFragment extends Fragment {
         Boolean verified = snapshot.getBoolean("isVerified");
         entry.isVerified = verified != null && verified;
 
-        if (adapter != null) {
+        if (adapter != null && isAdded()) {
             adapter.notifyDataSetChanged();
         }
     }
@@ -320,17 +322,15 @@ public class MessagesFragment extends Fragment {
         if (displayedChats.isEmpty()) {
             emptyStateContainer.setVisibility(View.VISIBLE);
             rvMessages.setVisibility(View.GONE);
-            if (isAdded() && getContext() != null) {
-                ImageView ivCat = emptyStateContainer.findViewById(R.id.ivEmptyCat);
-                if (ivCat != null) {
-                    com.bumptech.glide.Glide.with(getContext())
-                            .load("https://cataas.com/cat/cute")
-                            .placeholder(R.drawable.avatar_alex)
-                            .error(R.drawable.avatar_alex)
-                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
-                            .centerCrop()
-                            .into(ivCat);
-                }
+            ImageView ivCat = emptyStateContainer.findViewById(R.id.ivEmptyCat);
+            if (ivCat != null && isAdded()) {
+                com.bumptech.glide.Glide.with(ivCat)
+                        .load("https://cataas.com/cat/cute")
+                        .placeholder(R.drawable.avatar_alex)
+                        .error(R.drawable.avatar_alex)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                        .centerCrop()
+                        .into(ivCat);
             }
         } else {
             emptyStateContainer.setVisibility(View.GONE);
@@ -515,8 +515,8 @@ public class MessagesFragment extends Fragment {
             if (holder.ivAvatar != null) {
                 String imageToLoad = (chat.profileImage != null && !chat.profileImage.isEmpty())
                         ? chat.profileImage
-                        : getCatUrl(chat.userId);
-                com.bumptech.glide.Glide.with(holder.ivAvatar.getContext())
+                        : DbConstants.getCatAvatarUrl(chat.userId);
+                com.bumptech.glide.Glide.with(holder.ivAvatar)
                         .load(imageToLoad)
                         .placeholder(R.drawable.avatar_alex)
                         .error(R.drawable.avatar_alex)
@@ -557,9 +557,5 @@ public class MessagesFragment extends Fragment {
             }
         }
 
-        private String getCatUrl(String userId) {
-            int slot = Math.abs((userId != null ? userId.hashCode() : 0) % 25);
-            return "https://cataas.com/cat/cute?i=" + slot;
-        }
     }
 }

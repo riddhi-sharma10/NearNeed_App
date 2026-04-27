@@ -93,78 +93,7 @@
                         android:textColor="@color/text_subheadline"
                         android:textSize="12sp" />
 
-                    <LinearLayout
-                        android:id="@+id/llRatingRow"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_community_badge"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingStart="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingEnd="8dp"
-                            android:paddingBottom="4dp">
-
-                            <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:src="@drawable/ic_star_yellow"
-                                app:tint="@color/brand_secondary" />
-
-                            <TextView
-                                android:id="@+id/tvRating"
-                                style="@style/AppFormText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="—"
-                                android:textColor="@color/brand_secondary"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/llReviewsChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/bg_chip_blue_soft"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingStart="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingEnd="8dp"
-                            android:paddingBottom="4dp"
-                            android:clickable="true"
-                            android:focusable="true">
-
-                            <ImageView
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:src="@drawable/ic_chat_outline"
-                                app:tint="@color/text_subheadline" />
-
-                            <TextView
-                                android:id="@+id/tvReviews"
-                                style="@style/AppFormText"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="—"
-                                android:textColor="@color/text_subheadline"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
+                    <!-- Rating Row Removed -->
 
                     <LinearLayout
                         android:id="@+id/llVerifiedBadge"
@@ -196,23 +125,44 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnMessagePerson"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        android:text="Message"
-                        android:textSize="14sp"
-                        android:textColor="@color/white"
-                        android:visibility="gone"
-                        app:icon="@drawable/ic_chat_outline"
-                        app:iconSize="16dp"
-                        app:iconGravity="start"
-                        app:iconTint="@color/white"
-                        app:backgroundTint="@color/sapphire_primary"
-                        app:cornerRadius="20dp" />
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnReviewsPerson"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="10dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:text="Reviews"
+                            android:textColor="@color/sapphire_primary"
+                            android:textSize="14sp"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_star_yellow"
+                            app:iconTint="@color/sapphire_primary"
+                            app:strokeColor="@color/sapphire_primary" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMessagePerson"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:text="Message"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:visibility="gone"
+                            app:backgroundTint="@color/sapphire_primary"
+                            app:cornerRadius="20dp"
+                            app:icon="@drawable/ic_chat_outline"
+                            app:iconTint="@color/white" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -253,6 +203,7 @@
                         android:textSize="14sp" />
 
                     <LinearLayout
+                        android:id="@+id/llPhoneRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -294,6 +245,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/llGenderRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"

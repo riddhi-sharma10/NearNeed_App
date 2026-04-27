@@ -42,18 +42,16 @@ public class PersonProfileActivity extends AppCompatActivity {
             }
         });
 
-        // Wire up reviews/rating tap — name comes from the live TextView
+        // Wire up reviews tap — name comes from the live TextView
         TextView tvName = findViewById(R.id.tvName);
-        View reviewsChip = findViewById(R.id.llReviewsChip);
-        View ratingRow = findViewById(R.id.llRatingRow);
+        View btnReviews = findViewById(R.id.btnReviewsPerson);
         View.OnClickListener openReviews = v -> {
             Intent intent = new Intent(PersonProfileActivity.this, ReviewsActivity.class);
             intent.putExtra("PERSON_NAME",
                 tvName != null && tvName.getText() != null ? tvName.getText().toString() : "");
             startActivity(intent);
         };
-        if (reviewsChip != null) reviewsChip.setOnClickListener(openReviews);
-        if (ratingRow != null) ratingRow.setOnClickListener(openReviews);
+        if (btnReviews != null) btnReviews.setOnClickListener(openReviews);
 
         // Message button — only shown for other users, wired up after userId is resolved
         MaterialButton btnMessage = findViewById(R.id.btnMessagePerson);
@@ -141,13 +139,21 @@ public class PersonProfileActivity extends AppCompatActivity {
         setText(R.id.tvPhone,    phone);
         setText(R.id.tvGender,   gender);
         setText(R.id.tvBio,      bio);
-        setText(R.id.tvLocation, location);
 
-        if (rating != null) {
-            setText(R.id.tvRating, String.format("%.1f", rating));
+        TextView tvLocation = findViewById(R.id.tvLocation);
+        if (tvLocation != null) {
+            tvLocation.setText(location != null && !location.isEmpty() ? location : "Location not provided");
         }
-        if (reviewCount != null) {
-            setText(R.id.tvReviews, reviewCount + " reviews");
+
+        // Hide rows if incomplete
+        View llPhoneRow = findViewById(R.id.llPhoneRow);
+        if (llPhoneRow != null) {
+            llPhoneRow.setVisibility(phone != null && !phone.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+
+        View llGenderRow = findViewById(R.id.llGenderRow);
+        if (llGenderRow != null) {
+            llGenderRow.setVisibility(gender != null && !gender.isEmpty() ? View.VISIBLE : View.GONE);
         }
 
         // ── Profile photo ──

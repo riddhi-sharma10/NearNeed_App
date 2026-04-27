@@ -92,6 +92,7 @@ public class CommunityPostStep2Activity extends AppCompatActivity {
                     tvSelectedDate.setTextColor(0xFF0F172A);
                 }
             }, cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH));
+            dpd.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
             dpd.show();
         });
 

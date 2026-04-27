@@ -69,7 +69,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
         String cachedName = UserPrefs.getName(this);
         String cachedLocation = UserPrefs.getLocation(this);
         
-        if (!cachedName.isEmpty()) {
+        if (cachedName != null && !cachedName.isEmpty()) {
             tvGreeting.setText("Hello, " + cachedName);
         } else {
             tvGreeting.setText("Hello, Loading...");
@@ -146,6 +146,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
 
         if (!userId.isEmpty()) {
             postViewModel.getUserPosts().observe(this, posts -> {
+                if (posts == null) return;
                 List<Post> myGigs = new ArrayList<>();
                 for (Post p : posts) {
                     if ("GIG".equalsIgnoreCase(p.type)) myGigs.add(p);

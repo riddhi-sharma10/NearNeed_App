@@ -188,11 +188,16 @@ public class PostRepository {
     public static Post fromSnapshot(DocumentSnapshot doc) {
         if (doc == null || !doc.exists()) return null;
 
-        Post post = doc.toObject(Post.class);
-        if (post != null) {
-            post.postId = doc.getId();
+        try {
+            Post post = doc.toObject(Post.class);
+            if (post != null) {
+                post.postId = doc.getId();
+            }
+            return post;
+        } catch (Exception e) {
+            android.util.Log.e("PostRepository", "Error deserializing post: " + doc.getId(), e);
+            return null;
         }
-        return post;
     }
 
     /**

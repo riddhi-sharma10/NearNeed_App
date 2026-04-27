@@ -27,11 +27,13 @@ public class AddScheduleActivity extends AppCompatActivity {
         // DATE PICKER
         findViewById(R.id.layoutDate).setOnClickListener(v -> {
             java.util.Calendar cal = java.util.Calendar.getInstance();
-            new android.app.DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            android.app.DatePickerDialog dpd = new android.app.DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
                 android.widget.TextView tv = findViewById(R.id.tvSelectedDate);
                 tv.setText((month + 1) + "/" + dayOfMonth + "/" + year);
                 tv.setTextColor(0xFF1E293B);
-            }, cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH)).show();
+            }, cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH));
+            dpd.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+            dpd.show();
         });
 
         // TIME PICKER

@@ -152,6 +152,13 @@ public class MessagesFragment extends Fragment {
 
                         String snippet = doc.getString("lastMessage");
                         String lastSenderId = doc.getString("lastSenderId");
+                        
+                        // Add "You: " prefix if I sent the last message
+                        String displaySnippet = snippet;
+                        if (lastSenderId != null && lastSenderId.equals(currentUserId)) {
+                            displaySnippet = "You: " + snippet;
+                        }
+                        
                         Timestamp ts = doc.getTimestamp("lastTimestamp");
                         String time = formatChatTime(ts);
                         Boolean isRead = doc.getBoolean("isRead");
@@ -164,7 +171,7 @@ public class MessagesFragment extends Fragment {
                                 otherUserId,
                                 "NearNeed User",
                                 "CHAT",
-                                snippet != null ? snippet : "Start chatting",
+                                displaySnippet != null ? displaySnippet : "Start chatting",
                                 time,
                                 false,
                                 unread

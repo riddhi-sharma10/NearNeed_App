@@ -86,6 +86,32 @@ public final class NotificationCenter {
                 });
     }
 
+    /**
+     * Attach a real-time listener for the unread CHAT message count across all threads.
+     */
+    public static ListenerRegistration listenChatUnreadCount(OnCountChanged callback) {
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid == null) {
+            callback.onChange(0);
+            return () -> {};
+        }
+        
+        return FirebaseFirestore.getInstance().collection("chats")
+                .whereArrayContains("participants", uid)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null || snapshot == null) return;
+                    int unreadCount = 0;
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String lastSenderId = doc.getString("lastSenderId");
+                        Boolean isRead = doc.getBoolean("isRead");
+                        if (lastSenderId != null && !lastSenderId.equals(uid) && (isRead == null || !isRead)) {
+                            unreadCount++;
+                        }
+                    }
+                    callback.onChange(unreadCount);
+                });
+    }
+
     /** Mark a single notification as read. */
     public static void markAsRead(String notificationId) {
         CollectionReference ref = notifRef();

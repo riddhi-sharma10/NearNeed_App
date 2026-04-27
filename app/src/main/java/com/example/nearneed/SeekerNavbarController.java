@@ -148,6 +148,18 @@ public final class SeekerNavbarController {
                 }
             });
         }
+
+        // Real-time Chat Badge Sync
+        View chatBadge = root.findViewById(R.id.nav_chat_badge);
+        if (chatBadge != null) {
+            NotificationCenter.listenChatUnreadCount(count -> {
+                if (count > 0) {
+                    chatBadge.setVisibility(View.VISIBLE);
+                } else {
+                    chatBadge.setVisibility(View.GONE);
+                }
+            });
+        }
     }
 
     // Legacy method for backward compatibility

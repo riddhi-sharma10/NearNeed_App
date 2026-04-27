@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -19,11 +20,19 @@ import com.google.firebase.firestore.ListenerRegistration;
 public class PersonProfileActivity extends AppCompatActivity {
 
     private ListenerRegistration profileListener;
+    private String personUserId;
+    private String personName = "User";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_person_profile);
+
+        // Accept both key names for backward compatibility
+        personUserId = getIntent().getStringExtra("PERSON_USER_ID");
+        if (personUserId == null || personUserId.isEmpty()) {
+            personUserId = getIntent().getStringExtra("user_id");
+        }
 
         findViewById(R.id.btnBack).setOnClickListener(v -> {
             if (getOnBackPressedDispatcher().hasEnabledCallbacks()) {
@@ -45,6 +54,16 @@ public class PersonProfileActivity extends AppCompatActivity {
         };
         if (reviewsChip != null) reviewsChip.setOnClickListener(openReviews);
         if (ratingRow != null) ratingRow.setOnClickListener(openReviews);
+
+        // Message button — only shown for other users, wired up after userId is resolved
+        MaterialButton btnMessage = findViewById(R.id.btnMessagePerson);
+        if (btnMessage != null) {
+            boolean isOtherUser = personUserId != null && !personUserId.isEmpty() && !isCurrentUser(personUserId);
+            btnMessage.setVisibility(isOtherUser ? View.VISIBLE : View.GONE);
+            if (isOtherUser) {
+                btnMessage.setOnClickListener(v -> openChatWithPerson());
+            }
+        }
     }
 
     @Override
@@ -63,8 +82,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void startFirestoreListener() {
-        // Prefer an explicit userId passed by the caller; fall back to current user.
-        String userId = getIntent().getStringExtra("PERSON_USER_ID");
+        String userId = personUserId;
         if (userId == null || userId.isEmpty()) {
             FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
             if (current != null) userId = current.getUid();
@@ -87,26 +105,23 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private void applySnapshot(DocumentSnapshot snapshot, boolean isCurrentUser) {
-        String name        = DbConstants.getSafeName(snapshot);
-        String photoUrl    = snapshot.getString("photoUrl");
-        String bio         = snapshot.getString("bio");
-        String phone       = snapshot.getString("phone");
-        String gender      = snapshot.getString("gender");
-        String experience  = snapshot.getString("experience");
-        Boolean verified   = snapshot.getBoolean("isVerified");
-        Double rating      = snapshot.getDouble("rating");
-        Long reviewCount   = snapshot.getLong("reviewCount");
-        String location    = snapshot.getString("location");
+        String name      = DbConstants.getSafeName(snapshot);
+        String photoUrl  = snapshot.getString("photoUrl");
+        String bio       = snapshot.getString("bio");
+        String phone     = snapshot.getString("phone");
+        String gender    = snapshot.getString("gender");
+        Boolean verified = snapshot.getBoolean("isVerified");
+        Double rating    = snapshot.getDouble("rating");
+        Long reviewCount = snapshot.getLong("reviewCount");
+        String location  = snapshot.getString("location");
 
-        // Email: authoritative source is Firebase Auth for the current user
-        String email;
-        if (isCurrentUser) {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            email = (user != null && user.getEmail() != null)
-                ? user.getEmail()
-                : snapshot.getString("email");
-        } else {
-            email = snapshot.getString("email");
+        if (name != null && !name.isEmpty()) {
+            personName = name;
+            // Update button label to "Message <Name>"
+            MaterialButton btnMessage = findViewById(R.id.btnMessagePerson);
+            if (btnMessage != null && btnMessage.getVisibility() == View.VISIBLE) {
+                btnMessage.setText("Message " + name);
+            }
         }
 
         // ── Name + verified badge ──
@@ -123,12 +138,10 @@ public class PersonProfileActivity extends AppCompatActivity {
         }
 
         // ── Text fields ──
-        setText(R.id.tvEmail,      email);
-        setText(R.id.tvPhone,      phone);
-        setText(R.id.tvGender,     gender);
-        setText(R.id.tvExperience, experience);
-        setText(R.id.tvBio,        bio);
-        setText(R.id.tvLocation,   location);
+        setText(R.id.tvPhone,    phone);
+        setText(R.id.tvGender,   gender);
+        setText(R.id.tvBio,      bio);
+        setText(R.id.tvLocation, location);
 
         if (rating != null) {
             setText(R.id.tvRating, String.format("%.1f", rating));
@@ -152,6 +165,12 @@ public class PersonProfileActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(ivProfile);
         }
+    }
+
+    private void openChatWithPerson() {
+        if (personUserId == null || personUserId.isEmpty()) return;
+        ChatBottomSheet.newInstance(personUserId, personName)
+                .show(getSupportFragmentManager(), "ChatBottomSheet");
     }
 
     // ── Helpers ──

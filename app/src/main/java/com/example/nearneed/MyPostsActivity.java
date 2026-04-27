@@ -147,10 +147,20 @@ public class MyPostsActivity extends AppCompatActivity {
             }
 
             holder.btnAction.setOnClickListener(v -> {
-                Intent intent = new Intent(MyPostsActivity.this, ResponsesActivity.class);
-                intent.putExtra("post_id", post.postId);
-                intent.putExtra("post_title", post.title);
-                startActivity(intent);
+                if ("COMMUNITY".equalsIgnoreCase(post.type)) {
+                    Intent intent = new Intent(MyPostsActivity.this, VolunteersActivity.class);
+                    intent.putExtra("post_id", post.postId);
+                    intent.putExtra("post_title", post.title);
+                    intent.putExtra("max_slots", post.volunteersNeeded != null ? post.volunteersNeeded : 0);
+                    intent.putExtra("is_seeker", true);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(MyPostsActivity.this, ResponsesActivity.class);
+                    intent.putExtra("post_id", post.postId);
+                    intent.putExtra("post_title", post.title);
+                    intent.putExtra("is_gig", true);
+                    startActivity(intent);
+                }
             });
         }
 

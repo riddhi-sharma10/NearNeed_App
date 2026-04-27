@@ -6,29 +6,30 @@
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <!-- App Bar -->
+    <!-- App Bar with Gradient styling -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:elevation="2dp">
+        android:background="@drawable/bg_header_gradient"
+        app:elevation="0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:paddingHorizontal="20dp">
+            android:layout_height="80dp"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp">
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="-12dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_circle_white_card"
                 android:contentDescription="@string/back_description"
                 android:src="@drawable/ic_back_arrow"
                 android:scaleType="centerInside"
-                app:tint="@color/black" />
+                android:elevation="4dp"
+                app:tint="@color/text_header" />
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -37,9 +38,9 @@
                 android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
                 android:fontFamily="sans-serif-black"
-                android:text="Volunteers (0)"
-                android:textColor="@color/text_header"
-                android:textSize="20sp" />
+                android:text="Volunteers"
+                android:textColor="@color/white"
+                android:textSize="22sp" />
 
         </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -49,56 +50,74 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@drawable/bg_bottom_sheet_rounded"
+        android:layout_marginTop="-16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Filter Chips -->
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupFilter"
+        <!-- Filter Chips container with a nice background -->
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:clipToPadding="false"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            app:singleSelection="true"
-            app:singleLine="true">
+            android:paddingVertical="16dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:tag="all"
-                android:text="All"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
+                app:singleSelection="true"
+                app:singleLine="true"
+                app:checkedChip="@+id/chipAll">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipConfirmed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="confirmed"
-                android:text="Confirmed"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tag="all"
+                    android:text="All"
+                    android:textColor="@color/sel_chip_text_primary"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:chipBackgroundColor="@color/sel_chip_bg_primary"
+                    app:checkedIconVisible="false"
+                    app:chipStrokeWidth="0dp" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPending"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:tag="pending"
-                android:text="Pending"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                app:chipBackgroundColor="@color/surface_background" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipConfirmed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tag="confirmed"
+                    android:text="Confirmed"
+                    android:textColor="@color/sel_chip_text_primary"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:chipBackgroundColor="@color/sel_chip_bg_primary"
+                    app:checkedIconVisible="false"
+                    app:chipStrokeWidth="0dp" />
 
-        </com.google.android.material.chip.ChipGroup>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipPending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tag="pending"
+                    android:text="Pending"
+                    android:textColor="@color/sel_chip_text_primary"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    app:chipBackgroundColor="@color/sel_chip_bg_primary"
+                    app:checkedIconVisible="false"
+                    app:chipStrokeWidth="0dp" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
 
         <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
+            android:layout_marginHorizontal="20dp"
             android:background="@color/border_light" />
 
         <!-- Volunteers RecyclerView -->
-
-        <!-- Empty State -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvVolunteers"
             android:layout_width="match_parent"
@@ -106,9 +125,10 @@
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            tools:listitem="@layout/item_volunteer_card" />
+            android:paddingVertical="16dp"
+            tools:listitem="@layout/item_response_card" />
 
+        <!-- Empty State -->
         <LinearLayout
             android:id="@+id/emptyStateLayout"
             android:layout_width="match_parent"
@@ -116,14 +136,15 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
+            android:paddingHorizontal="40dp"
             android:visibility="gone">
 
             <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_nav_profile"
-                app:tint="@color/text_muted"
-                android:layout_marginBottom="16dp" />
+                android:id="@+id/ivEmptyCat"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:src="@drawable/img_empty_posts"
+                android:layout_marginBottom="24dp" />
 
             <TextView
                 android:id="@+id/emptyStateTitle"
@@ -131,17 +152,20 @@
                 android:layout_height="wrap_content"
                 android:text="No volunteers yet"
                 android:textColor="@color/text_header"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-black"
+                android:layout_marginBottom="12dp"
+                android:gravity="center" />
 
             <TextView
                 android:id="@+id/emptyStateSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Share your post to get volunteers!"
+                android:text="Share your post with friends or the community to get more volunteers!"
                 android:textColor="@color/text_muted"
-                android:textSize="14sp" />
+                android:textSize="15sp"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center" />
 
         </LinearLayout>
 

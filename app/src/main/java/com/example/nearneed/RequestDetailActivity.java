@@ -59,7 +59,7 @@ public class RequestDetailActivity extends AppCompatActivity {
         if (creatorId != null) {
             tvPosterName.setOnClickListener(v -> {
                 Intent intent = new Intent(this, PersonProfileActivity.class);
-                intent.putExtra("user_id", creatorId);
+                intent.putExtra("PERSON_USER_ID", creatorId);
                 startActivity(intent);
             });
             fetchPosterName(creatorId);
@@ -110,7 +110,12 @@ public class RequestDetailActivity extends AppCompatActivity {
     }
 
     private void showApplySheet() {
-        RequestApplyBottomSheet sheet = RequestApplyBottomSheet.newInstance(postId, postTitle, postType, creatorId);
-        sheet.show(getSupportFragmentManager(), "apply_sheet");
+        if ("COMMUNITY".equalsIgnoreCase(postType)) {
+            CommunityVolunteerBottomSheet sheet = CommunityVolunteerBottomSheet.newInstance(postId, postTitle, postType, creatorId);
+            sheet.show(getSupportFragmentManager(), "community_volunteer_sheet");
+        } else {
+            RequestApplyBottomSheet sheet = RequestApplyBottomSheet.newInstance(postId, postTitle, postType, creatorId);
+            sheet.show(getSupportFragmentManager(), "apply_sheet");
+        }
     }
 }

@@ -196,6 +196,24 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMessagePerson"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="14dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:text="Message"
+                        android:textSize="14sp"
+                        android:textColor="@color/white"
+                        android:visibility="gone"
+                        app:icon="@drawable/ic_chat_outline"
+                        app:iconSize="16dp"
+                        app:iconGravity="start"
+                        app:iconTint="@color/white"
+                        app:backgroundTint="@color/sapphire_primary"
+                        app:cornerRadius="20dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -233,47 +251,6 @@
                         android:text=""
                         android:textColor="@color/text_subheadline"
                         android:textSize="14sp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:background="@drawable/bg_chip_blue_soft"
-                            android:padding="5dp"
-                            android:src="@drawable/ic_email"
-                            app:tint="@color/brand_primary" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                style="@style/AppHeading.Small"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="EMAIL"
-                                android:textColor="@color/text_muted"
-                                android:textSize="11sp" />
-
-                            <TextView
-                                android:id="@+id/tvEmail"
-                                style="@style/AppFormText"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text=""
-                                android:textColor="@color/text_header"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -357,46 +334,6 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:background="@drawable/bg_chip_blue_soft"
-                            android:padding="5dp"
-                            android:src="@drawable/ic_bookings_calendar"
-                            app:tint="@color/brand_primary" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                style="@style/AppHeading.Small"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="EXPERIENCE"
-                                android:textColor="@color/text_muted"
-                                android:textSize="11sp" />
-
-                            <TextView
-                                android:id="@+id/tvExperience"
-                                style="@style/AppFormText"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text=""
-                                android:textColor="@color/text_header"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

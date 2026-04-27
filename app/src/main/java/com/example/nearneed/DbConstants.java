@@ -36,13 +36,13 @@ public class DbConstants {
     }
 
     /**
-     * Generates a deterministic Cataas URL based on the userId so that each
-     * user gets a consistent, unique cat avatar when no profile picture is set.
+     * Returns a unique cat avatar url from Cataas for the given userId.
+     * By appending the userId as a query parameter (even if cataas ignores it),
+     * Glide uses the full URL as the cache key. This ensures that the random cat
+     * fetched for this user is cached and remains consistent across the app.
      */
     public static String getCatAvatarUrl(String userId) {
-        if (userId == null) userId = "default";
-        int slot = Math.abs(userId.hashCode() % 50);
-        // Using ?uid= ensures Glide caches it uniquely per user.
-        return "https://cataas.com/cat/cute?uid=" + slot;
+        if (userId == null || userId.isEmpty()) userId = "default";
+        return "https://cataas.com/cat?type=square&v=" + userId;
     }
 }

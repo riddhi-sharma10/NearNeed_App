@@ -91,7 +91,7 @@ public class VolunteersActivity extends AppCompatActivity {
     private void setupRecyclerView() {
         rvVolunteers.setLayoutManager(new LinearLayoutManager(this));
         // Reusing ResponsesAdapter as it handles Application models perfectly
-        adapter = new ResponsesAdapter(new ArrayList<>(), new ResponsesAdapter.OnResponseActionListener() {
+        adapter = new ResponsesAdapter(new ArrayList<>(), true, new ResponsesAdapter.OnResponseActionListener() {
             @Override
             public void onAccept(Application application, int position) {
                 appViewModel.updateApplicationStatus(application.applicationId, "accepted");

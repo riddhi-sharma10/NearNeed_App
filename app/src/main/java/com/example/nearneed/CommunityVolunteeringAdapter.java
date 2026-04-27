@@ -89,11 +89,10 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
             tvPostedBy.setText(post.postedBy != null ? post.postedBy : "Community Member");
             tvDescription.setText(post.description);
 
-            boolean isProvider = RoleManager.isProvider(itemView.getContext());
-            btnView.setText(isProvider ? "Volunteer" : "View Responses");
+            btnView.setText("View Details");
 
             btnView.setOnClickListener(v -> {
-                Intent intent = new Intent(itemView.getContext(), RequestDetailActivity.class);
+                Intent intent = new Intent(itemView.getContext(), CommunityPostDetailActivity.class);
                 intent.putExtra("post_id", post.postId);
                 intent.putExtra("creator_id", post.createdBy);
                 intent.putExtra("title", post.title);
@@ -101,7 +100,8 @@ public class CommunityVolunteeringAdapter extends RecyclerView.Adapter<Community
                 intent.putExtra("description", post.description);
                 intent.putExtra("location", post.location);
                 intent.putExtra("category", post.category);
-                intent.putExtra("slots", post.volunteersNeeded != null ? post.volunteersNeeded : 0);
+                intent.putExtra("slots", post.volunteersNeeded != null ? String.valueOf(post.volunteersNeeded) : "0");
+                intent.putExtra("postedBy", post.postedBy);
                 itemView.getContext().startActivity(intent);
             });
         }

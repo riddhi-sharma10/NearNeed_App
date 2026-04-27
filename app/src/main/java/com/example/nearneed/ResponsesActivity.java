@@ -70,7 +70,7 @@ public class ResponsesActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         rvResponses.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ResponsesAdapter(new ArrayList<>(), new ResponsesAdapter.OnResponseActionListener() {
+        adapter = new ResponsesAdapter(new ArrayList<>(), false, new ResponsesAdapter.OnResponseActionListener() {
             @Override
             public void onAccept(Application application, int position) {
                 confirmAcceptance(application);

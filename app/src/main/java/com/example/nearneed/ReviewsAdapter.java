@@ -67,6 +67,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewVi
                 com.bumptech.glide.Glide.with(ivAvatar.getContext())
                         .load(DbConstants.getCatAvatarUrl(review.getReviewerName()))
                         .placeholder(R.drawable.ic_nav_profile)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                         .circleCrop()
                         .into(ivAvatar);
             }

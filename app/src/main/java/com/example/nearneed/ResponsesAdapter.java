@@ -28,6 +28,7 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
 
     private List<Application> applications;
     private OnResponseActionListener listener;
+    private boolean isCommunity;
 
     public interface OnResponseActionListener {
         void onAccept(Application application, int position);
@@ -36,8 +37,9 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
         void onMessage(Application application);
     }
 
-    public ResponsesAdapter(List<Application> applications, OnResponseActionListener listener) {
+    public ResponsesAdapter(List<Application> applications, boolean isCommunity, OnResponseActionListener listener) {
         this.applications = applications;
+        this.isCommunity = isCommunity;
         this.listener = listener;
     }
 
@@ -56,7 +58,7 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
 
     @Override
     public void onBindViewHolder(@NonNull ResponseViewHolder holder, int position) {
-        holder.bind(applications.get(position), position, listener);
+        holder.bind(applications.get(position), position, isCommunity, listener);
     }
 
     @Override
@@ -71,6 +73,8 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
         private MaterialButton btnAccept, btnDecline;
         private LinearLayout llBudgetCard;
         private TextView tvProposedBudget, tvPaymentMethod, tvPriceAppliedValue;
+
+        private LinearLayout llPriceApplied;
 
         public ResponseViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -88,9 +92,10 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
             tvProposedBudget   = itemView.findViewById(R.id.tvProposedBudget);
             tvPaymentMethod    = itemView.findViewById(R.id.tvPaymentMethod);
             tvPriceAppliedValue = itemView.findViewById(R.id.tvPriceAppliedValue);
+            llPriceApplied     = itemView.findViewById(R.id.llPriceApplied);
         }
 
-        public void bind(Application app, int position, OnResponseActionListener listener) {
+        public void bind(Application app, int position, boolean isCommunity, OnResponseActionListener listener) {
 
             // ── Name ────────────────────────────────────────────────────────────────
             if (app.applicantName != null && !app.applicantName.isEmpty()) {
@@ -157,9 +162,12 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
             if (tvLocation != null) tvLocation.setText(app.applicantLocation != null ? app.applicantLocation : "Nearby");
             if (tvTime     != null) tvTime.setText(formatTime(app.appliedAt));
 
-            // ── Budget card ───────────────────────────────────────────────────────────
+            // ── Budget & Price Applied ───────────────────────────────────────────────
+            if (llPriceApplied != null) {
+                llPriceApplied.setVisibility(isCommunity ? View.GONE : View.VISIBLE);
+            }
             if (llBudgetCard != null) {
-                if (app.proposedBudget != null && app.proposedBudget > 0) {
+                if (!isCommunity && app.proposedBudget != null && app.proposedBudget > 0) {
                     llBudgetCard.setVisibility(View.VISIBLE);
                     String budgetStr = "₹" + String.format(Locale.getDefault(), "%.0f", app.proposedBudget);
                     if (tvProposedBudget   != null) tvProposedBudget.setText(budgetStr);
@@ -194,19 +202,42 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
                 }
                 if (btnAccept != null) btnAccept.setVisibility(View.GONE);
 
-            } else {
                 // Pending — reset both buttons to default
                 if (btnAccept != null) {
                     btnAccept.setText("Accept");
                     btnAccept.setEnabled(true);
                     btnAccept.setVisibility(View.VISIBLE);
                     btnAccept.setBackgroundTintList(
-                            ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), R.color.sapphire_primary)));
+                            ColorStateList.valueOf(ContextCompat.getColor(itemView.getContext(), isCommunity ? R.color.brand_success : R.color.sapphire_primary)));
                 }
                 if (btnDecline != null) {
                     btnDecline.setText("Decline");
                     btnDecline.setEnabled(true);
                     btnDecline.setVisibility(View.VISIBLE);
+                    btnDecline.setStrokeColorResource(isCommunity ? R.color.brand_success : R.color.sapphire_primary);
+                }
+            }
+            
+            // Community Colors for Contact Buttons
+            if (isCommunity) {
+                int greenColor = ContextCompat.getColor(itemView.getContext(), R.color.brand_success);
+                if (btnCallApplicant != null) {
+                    btnCallApplicant.setBackgroundResource(R.drawable.bg_circle_light_green);
+                    btnCallApplicant.setImageTintList(ColorStateList.valueOf(greenColor));
+                }
+                if (btnMessageApplicant != null) {
+                    btnMessageApplicant.setBackgroundResource(R.drawable.bg_circle_light_green);
+                    btnMessageApplicant.setImageTintList(ColorStateList.valueOf(greenColor));
+                }
+            } else {
+                int blueColor = ContextCompat.getColor(itemView.getContext(), R.color.sapphire_primary);
+                if (btnCallApplicant != null) {
+                    btnCallApplicant.setBackgroundResource(R.drawable.bg_circle_light_blue);
+                    btnCallApplicant.setImageTintList(ColorStateList.valueOf(blueColor));
+                }
+                if (btnMessageApplicant != null) {
+                    btnMessageApplicant.setBackgroundResource(R.drawable.bg_circle_light_blue);
+                    btnMessageApplicant.setImageTintList(ColorStateList.valueOf(blueColor));
                 }
             }
 
@@ -223,6 +254,7 @@ public class ResponsesAdapter extends RecyclerView.Adapter<ResponsesAdapter.Resp
                     .load(url)
                     .placeholder(R.drawable.ic_nav_profile)
                     .error(R.drawable.ic_nav_profile)
+                    .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
                     .circleCrop()
                     .transition(DrawableTransitionOptions.withCrossFade())
                     .into(ivAvatar);

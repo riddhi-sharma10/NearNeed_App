@@ -352,6 +352,10 @@ public class HomeSeekerActivity extends AppCompatActivity {
             
             String status = post.status != null ? post.status.toUpperCase() : "ACTIVE";
             holder.tvBadge.setText(status);
+
+            // Set dummy image based on category
+            int dummyResId = getDummyImageForCategory(post.category);
+            holder.ivPostImage.setImageResource(dummyResId);
             
             // Status-based coloring
             if ("COMPLETED".equals(status)) {
@@ -379,16 +383,29 @@ public class HomeSeekerActivity extends AppCompatActivity {
             });
         }
 
+        private int getDummyImageForCategory(String category) {
+            if (category == null) return R.drawable.welcome_bg_optimized;
+            String lower = category.toLowerCase();
+            if (lower.contains("plumb")) return R.drawable.img_gig_hero_plumbing;
+            if (lower.contains("clean")) return R.drawable.img_gig_hero_cleaning;
+            if (lower.contains("electr")) return R.drawable.img_gig_hero_electrical;
+            if (lower.contains("pet") || lower.contains("dog")) return R.drawable.img_dog_walking;
+            if (lower.contains("garden") || lower.contains("lawn") || lower.contains("mow")) return R.drawable.img_lawn_mowing;
+            return R.drawable.welcome_bg_optimized;
+        }
+
         @Override
         public int getItemCount() { return posts.size(); }
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvTitle, tvDetail, tvBadge;
+            ImageView ivPostImage;
             ViewHolder(View v) {
                 super(v);
                 tvTitle = v.findViewById(R.id.tv_post_title);
                 tvDetail = v.findViewById(R.id.tv_post_detail);
                 tvBadge = v.findViewById(R.id.tv_post_badge);
+                ivPostImage = v.findViewById(R.id.iv_post_image);
             }
         }
     }

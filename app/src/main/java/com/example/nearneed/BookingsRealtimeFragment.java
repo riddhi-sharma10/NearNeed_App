@@ -28,10 +28,16 @@ public class BookingsRealtimeFragment extends Fragment {
     private TextView tvEmpty;
     private BookingsAdapter adapter;
     private BookingViewModel bookingViewModel;
+    private PostViewModel postViewModel;
+    private ApplicationViewModel applicationViewModel;
 
     private String role;
     private String tab;
     private String filterType;
+
+    private List<Booking> currentBookings = new ArrayList<>();
+    private List<Post> currentPosts = new ArrayList<>();
+    private List<Application> currentApplications = new ArrayList<>();
 
     public static BookingsRealtimeFragment newInstance(String role, String tab, @Nullable String filterType) {
         BookingsRealtimeFragment fragment = new BookingsRealtimeFragment();
@@ -68,7 +74,7 @@ public class BookingsRealtimeFragment extends Fragment {
         adapter = new BookingsAdapter(role, new BookingsAdapter.OnBookingActionListener() {
             @Override
             public void onUpdateStatus(Booking booking) {
-                // Adapter handles navigation to UpdateStatusActivity itself.
+                // Handled in adapter
             }
 
             @Override
@@ -94,41 +100,110 @@ public class BookingsRealtimeFragment extends Fragment {
 
             @Override
             public void onCancel(Booking booking) {
-                // Not used in current card UI.
             }
         });
         rvBookings.setAdapter(adapter);
 
+        setupViewModels();
+    }
+
+    private void setupViewModels() {
         bookingViewModel = new ViewModelProvider(this).get(BookingViewModel.class);
         bookingViewModel.getUserBookings().observe(getViewLifecycleOwner(), bookings -> {
-            List<Booking> filtered = filterBookings(bookings != null ? bookings : new ArrayList<>());
-            adapter.setBookings(filtered);
-            tvEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+            currentBookings = bookings != null ? bookings : new ArrayList<>();
+            updateUI();
         });
-
         bookingViewModel.observeUserBookings();
-    }
 
-    private List<Booking> filterBookings(List<Booking> source) {
-        List<Booking> filtered = new ArrayList<>();
-        for (Booking booking : source) {
-            if (!matchesFilterType(booking)) {
-                continue;
+        if (RoleManager.ROLE_SEEKER.equals(role)) {
+            postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
+            String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+            if (userId != null) {
+                postViewModel.getUserPosts().observe(getViewLifecycleOwner(), posts -> {
+                    currentPosts = posts != null ? posts : new ArrayList<>();
+                    updateUI();
+                });
+                postViewModel.observeUserPosts(requireContext(), userId);
             }
-            if (!matchesTab(booking)) {
-                continue;
-            }
-            filtered.add(booking);
+        } else if (RoleManager.ROLE_PROVIDER.equals(role)) {
+            applicationViewModel = new ViewModelProvider(this).get(ApplicationViewModel.class);
+            applicationViewModel.getUserApplications().observe(getViewLifecycleOwner(), applications -> {
+                currentApplications = applications != null ? applications : new ArrayList<>();
+                updateUI();
+            });
+            applicationViewModel.observeUserApplications();
         }
-        return filtered;
     }
 
-    private boolean matchesFilterType(Booking booking) {
+    private void updateUI() {
+        List<BookingsAdapter.BookingWrapper> items = new ArrayList<>();
+
+        // Add Bookings
+        for (Booking b : currentBookings) {
+            if (matchesFilterType(b) && matchesTab(b)) {
+                items.add(new BookingsAdapter.BookingWrapper(b));
+            }
+        }
+
+        // Add Posts (Seeker only)
+        if (RoleManager.ROLE_SEEKER.equals(role)) {
+            for (Post p : currentPosts) {
+                if (matchesFilterType(p) && matchesTab(p)) {
+                    // Avoid duplicate if booking already exists for this post
+                    boolean exists = false;
+                    for (Booking b : currentBookings) {
+                        if (p.postId != null && p.postId.equals(b.postId)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        items.add(new BookingsAdapter.BookingWrapper(p));
+                    }
+                }
+            }
+        }
+
+        // Add Applications (Provider only)
+        if (RoleManager.ROLE_PROVIDER.equals(role)) {
+            for (Application a : currentApplications) {
+                if (matchesFilterType(a) && matchesTab(a)) {
+                    // Avoid duplicate if booking already exists for this application
+                    boolean exists = false;
+                    for (Booking b : currentBookings) {
+                        if (a.applicationId != null && a.applicationId.equals(b.applicationId)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        items.add(new BookingsAdapter.BookingWrapper(a));
+                    }
+                }
+            }
+        }
+
+        // Sort by timestamp descending
+        java.util.Collections.sort(items, (o1, o2) -> Long.compare(o2.timestamp, o1.timestamp));
+
+        adapter.setItems(items);
+        tvEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean matchesFilterType(Object obj) {
         if (filterType == null || filterType.trim().isEmpty()) {
             return true;
         }
         String normalizedFilter = filterType.trim().toLowerCase(Locale.ROOT);
-        String postType = booking.postType != null ? booking.postType.toLowerCase(Locale.ROOT) : "";
+        String postType = "";
+
+        if (obj instanceof Booking) {
+            postType = ((Booking) obj).postType != null ? ((Booking) obj).postType.toLowerCase(Locale.ROOT) : "";
+        } else if (obj instanceof Post) {
+            postType = ((Post) obj).type != null ? ((Post) obj).type.toLowerCase(Locale.ROOT) : "";
+        } else if (obj instanceof Application) {
+            postType = ((Application) obj).postType != null ? ((Application) obj).postType.toLowerCase(Locale.ROOT) : "";
+        }
 
         if ("community".equals(normalizedFilter)) {
             return "community".equals(postType);
@@ -139,27 +214,23 @@ public class BookingsRealtimeFragment extends Fragment {
         return true;
     }
 
-    /**
-     * Routes bookings to tabs purely by Firestore status field for real-time sync.
-     * Status mapping:
-     *   "upcoming" / "pending"                        -> Upcoming tab
-     *   "ongoing" / "in_progress" / "confirmed"       -> Ongoing tab
-     *   "completed" / "cancelled" / "canceled"        -> Past tab
-     */
-    private boolean matchesTab(Booking booking) {
-        String status = booking.status != null ? booking.status.trim().toLowerCase(Locale.ROOT) : "upcoming";
+    private boolean matchesTab(Object obj) {
+        String status = "upcoming";
+        if (obj instanceof Booking) {
+            status = ((Booking) obj).status != null ? ((Booking) obj).status.trim().toLowerCase(Locale.ROOT) : "upcoming";
+        } else if (obj instanceof Post) {
+            status = "upcoming"; // Open posts are always upcoming in seeker view
+        } else if (obj instanceof Application) {
+            status = "upcoming"; // Pending applications are always upcoming in provider view
+        }
 
         switch (tab) {
             case "upcoming":
-                return "upcoming".equals(status) || "pending".equals(status);
+                return "upcoming".equals(status) || "pending".equals(status) || "active".equals(status);
             case "ongoing":
-                return "ongoing".equals(status)
-                        || "in_progress".equals(status)
-                        || "confirmed".equals(status);
+                return "ongoing".equals(status) || "in_progress".equals(status) || "confirmed".equals(status);
             case "past":
-                return "completed".equals(status)
-                        || "cancelled".equals(status)
-                        || "canceled".equals(status);
+                return "completed".equals(status) || "cancelled".equals(status) || "canceled".equals(status);
             default:
                 return true;
         }

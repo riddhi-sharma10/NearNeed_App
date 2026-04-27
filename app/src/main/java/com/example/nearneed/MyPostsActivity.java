@@ -128,6 +128,10 @@ public class MyPostsActivity extends AppCompatActivity {
                          (post.slots != null ? post.slots : 0) + " Volunteers";
             }
             holder.tvDetail.setText(detail);
+
+            // Set dummy image based on category
+            int dummyResId = getDummyImageForCategory(post.category);
+            holder.ivPostImage.setImageResource(dummyResId);
             
             holder.tvBadge.setText(post.type != null ? post.type : "POST");
 
@@ -164,6 +168,17 @@ public class MyPostsActivity extends AppCompatActivity {
             });
         }
 
+        private int getDummyImageForCategory(String category) {
+            if (category == null) return R.drawable.welcome_bg_optimized;
+            String lower = category.toLowerCase();
+            if (lower.contains("plumb")) return R.drawable.img_gig_hero_plumbing;
+            if (lower.contains("clean")) return R.drawable.img_gig_hero_cleaning;
+            if (lower.contains("electr")) return R.drawable.img_gig_hero_electrical;
+            if (lower.contains("pet") || lower.contains("dog")) return R.drawable.img_dog_walking;
+            if (lower.contains("garden") || lower.contains("lawn") || lower.contains("mow")) return R.drawable.img_lawn_mowing;
+            return R.drawable.welcome_bg_optimized;
+        }
+
         @Override
         public int getItemCount() {
             return posts.size();
@@ -171,6 +186,7 @@ public class MyPostsActivity extends AppCompatActivity {
 
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvTitle, tvDetail, tvBadge, btnAction;
+            ImageView ivPostImage;
 
             ViewHolder(View itemView) {
                 super(itemView);
@@ -178,6 +194,7 @@ public class MyPostsActivity extends AppCompatActivity {
                 tvDetail = itemView.findViewById(R.id.tv_post_detail);
                 tvBadge = itemView.findViewById(R.id.tv_post_badge);
                 btnAction = itemView.findViewById(R.id.btn_action_link);
+                ivPostImage = itemView.findViewById(R.id.iv_post_image);
             }
         }
     }

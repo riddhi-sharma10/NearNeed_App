@@ -20,9 +20,36 @@ import java.util.Locale;
 
 public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.BookingViewHolder> {
 
-    private List<Booking> bookings = new ArrayList<>();
+    private List<BookingWrapper> items = new ArrayList<>();
     private final String userRole;
     private final OnBookingActionListener actionListener;
+
+    public static class BookingWrapper {
+        public enum Type { BOOKING, POST, APPLICATION }
+        public Type type;
+        public Booking booking;
+        public Post post;
+        public Application application;
+        public long timestamp;
+
+        public BookingWrapper(Booking booking) {
+            this.type = Type.BOOKING;
+            this.booking = booking;
+            this.timestamp = (booking.createdAt != null) ? booking.createdAt : (booking.timestamp != null ? booking.timestamp : 0L);
+        }
+
+        public BookingWrapper(Post post) {
+            this.type = Type.POST;
+            this.post = post;
+            this.timestamp = (post.timestamp != null) ? post.timestamp : 0L;
+        }
+
+        public BookingWrapper(Application application) {
+            this.type = Type.APPLICATION;
+            this.application = application;
+            this.timestamp = (application.timestamp != null) ? application.timestamp : 0L;
+        }
+    }
 
     public interface OnBookingActionListener {
         void onUpdateStatus(Booking booking);
@@ -35,8 +62,16 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
         this.actionListener = actionListener;
     }
 
+    public void setItems(List<BookingWrapper> items) {
+        this.items = items;
+        notifyDataSetChanged();
+    }
+
+    @Deprecated
     public void setBookings(List<Booking> bookings) {
-        this.bookings = bookings;
+        List<BookingWrapper> wrappers = new ArrayList<>();
+        for (Booking b : bookings) wrappers.add(new BookingWrapper(b));
+        this.items = wrappers;
         notifyDataSetChanged();
     }
 
@@ -49,13 +84,13 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
 
     @Override
     public void onBindViewHolder(@NonNull BookingViewHolder holder, int position) {
-        Booking booking = bookings.get(position);
-        holder.bind(booking);
+        BookingWrapper wrapper = items.get(position);
+        holder.bind(wrapper);
     }
 
     @Override
     public int getItemCount() {
-        return bookings.size();
+        return items.size();
     }
 
     class BookingViewHolder extends RecyclerView.ViewHolder {
@@ -77,23 +112,28 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
             btnViewDetails = itemView.findViewById(R.id.btnViewDetails);
         }
 
-        public void bind(Booking booking) {
+        public void bind(BookingWrapper wrapper) {
+            switch (wrapper.type) {
+                case BOOKING:
+                    bindBooking(wrapper.booking);
+                    break;
+                case POST:
+                    bindPost(wrapper.post);
+                    break;
+                case APPLICATION:
+                    bindApplication(wrapper.application);
+                    break;
+            }
+        }
+
+        private void bindBooking(Booking booking) {
             if (tvTitle != null) tvTitle.setText(booking.postTitle != null ? booking.postTitle : "Untitled");
             if (tvType  != null) tvType.setText(booking.postType != null ? booking.postType.toUpperCase() : "");
+            if (tvLocation != null) tvLocation.setText("Location Details"); // Could be improved
 
             String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+            boolean isSeeker = !RoleManager.ROLE_PROVIDER.equalsIgnoreCase(userRole);
 
-            // Use the role passed to the adapter as the primary source of truth.
-            // Fall back to per-booking UID check only if userRole is "all" (both roles).
-            boolean isSeeker;
-            if ("all".equalsIgnoreCase(userRole)) {
-                // Dual-role view: decide per booking
-                isSeeker = currentUserId != null && currentUserId.equals(booking.seekerId);
-            } else {
-                isSeeker = !RoleManager.ROLE_PROVIDER.equalsIgnoreCase(userRole);
-            }
-
-            // ── Label + other-party name ─────────────────────────────────────────
             String label;
             String otherPartyName;
 
@@ -107,36 +147,14 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
                         ? booking.seekerName : "Seeker";
             }
 
-            // Update the label TextView inside the profile block
-            View profileBlock = itemView.findViewById(R.id.profileBlock);
-            if (profileBlock != null) {
-                android.widget.LinearLayout inner = (android.widget.LinearLayout)
-                        ((android.widget.LinearLayout) profileBlock).getChildAt(1);
-                if (inner != null && inner.getChildCount() > 0) {
-                    android.widget.TextView lbl = (android.widget.TextView) inner.getChildAt(0);
-                    if (lbl != null) lbl.setText(label);
-                }
-            }
-
-            if (tvName != null) tvName.setText(otherPartyName);
-
+            updateProfileBlock(label, otherPartyName, null);
             updateStatusUI(booking.status);
 
-            // ── Message button: always visible for both roles ──────────────────
             if (btnMessage != null) {
-                // Make Message full-width when provider (no second button)
-                android.view.ViewGroup.LayoutParams params = btnMessage.getLayoutParams();
-                if (params instanceof android.widget.LinearLayout.LayoutParams) {
-                    android.widget.LinearLayout.LayoutParams lp =
-                            (android.widget.LinearLayout.LayoutParams) params;
-                    lp.weight        = isSeeker ? 1f : 1f;
-                    lp.setMarginEnd(isSeeker ? (int)(8 * itemView.getResources().getDisplayMetrics().density) : 0);
-                    btnMessage.setLayoutParams(lp);
-                }
+                btnMessage.setVisibility(View.VISIBLE);
                 btnMessage.setOnClickListener(v -> actionListener.onMessage(booking));
             }
 
-            // ── Update Status: SEEKER only ────────────────────────────────────
             if (btnUpdate != null) {
                 if (isSeeker) {
                     boolean isDone = "completed".equals(booking.status) || "cancelled".equals(booking.status);
@@ -151,12 +169,79 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
                         itemView.getContext().startActivity(intent);
                     });
                 } else {
-                    btnUpdate.setVisibility(View.GONE); // Provider never sees Update Status
+                    btnUpdate.setVisibility(View.GONE);
                 }
             }
-
-            // ── View Details: hidden for now (provider has Message only) ──────
             if (btnViewDetails != null) btnViewDetails.setVisibility(View.GONE);
+        }
+
+        private void bindPost(Post post) {
+            if (tvTitle != null) tvTitle.setText(post.title != null ? post.title : "Untitled");
+            if (tvType  != null) tvType.setText(post.type != null ? post.type.toUpperCase() : "");
+            if (tvLocation != null) tvLocation.setText(post.location != null ? post.location : "Location");
+
+            updateProfileBlock("POST CREATOR", "You", null);
+            updateStatusUI("ACTIVE");
+
+            if (btnMessage != null) btnMessage.setVisibility(View.GONE);
+            if (btnUpdate != null) {
+                btnUpdate.setVisibility(View.VISIBLE);
+                btnUpdate.setText("View Responses");
+                btnUpdate.setOnClickListener(v -> {
+                    if ("COMMUNITY".equalsIgnoreCase(post.type)) {
+                        Intent intent = new Intent(itemView.getContext(), VolunteersActivity.class);
+                        intent.putExtra("post_id", post.postId);
+                        intent.putExtra("post_title", post.title);
+                        intent.putExtra("max_slots", post.volunteersNeeded != null ? post.volunteersNeeded : 0);
+                        intent.putExtra("is_seeker", true);
+                        itemView.getContext().startActivity(intent);
+                    } else {
+                        Intent intent = new Intent(itemView.getContext(), ResponsesActivity.class);
+                        intent.putExtra("post_id", post.postId);
+                        intent.putExtra("post_title", post.title);
+                        intent.putExtra("is_gig", true);
+                        itemView.getContext().startActivity(intent);
+                    }
+                });
+            }
+            if (btnViewDetails != null) btnViewDetails.setVisibility(View.GONE);
+        }
+
+        private void bindApplication(Application app) {
+            if (tvTitle != null) tvTitle.setText(app.postTitle != null ? app.postTitle : "Untitled");
+            if (tvType  != null) tvType.setText(app.postType != null ? app.postType.toUpperCase() : "");
+            if (tvLocation != null) tvLocation.setText("Pending Acceptance");
+
+            updateProfileBlock("APPLIED AS", "Provider", null);
+            updateStatusUI("PENDING");
+
+            if (btnMessage != null) btnMessage.setVisibility(View.GONE);
+            if (btnUpdate != null) {
+                btnUpdate.setVisibility(View.VISIBLE);
+                btnUpdate.setText("View Job");
+                btnUpdate.setOnClickListener(v -> {
+                    // Navigate to job detail
+                    Intent intent = new Intent(itemView.getContext(), GigPostDetailActivity.class);
+                    intent.putExtra("post_id", app.postId);
+                    itemView.getContext().startActivity(intent);
+                });
+            }
+            if (btnViewDetails != null) btnViewDetails.setVisibility(View.GONE);
+        }
+
+        private void updateProfileBlock(String label, String name, String rating) {
+            if (tvName != null) tvName.setText(name);
+            if (tvRating != null) tvRating.setText(rating != null ? rating : "N/A");
+            
+            View profileBlock = itemView.findViewById(R.id.profileBlock);
+            if (profileBlock != null) {
+                android.widget.LinearLayout inner = (android.widget.LinearLayout)
+                        ((android.widget.LinearLayout) profileBlock).getChildAt(1);
+                if (inner != null && inner.getChildCount() > 0) {
+                    android.widget.TextView lbl = (android.widget.TextView) inner.getChildAt(0);
+                    if (lbl != null) lbl.setText(label);
+                }
+            }
         }
 
         private void updateStatusUI(String status) {
@@ -165,6 +250,7 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
             switch (status.toLowerCase()) {
                 case "confirmed":
                 case "in_progress":
+                case "ongoing":
                     tvStatus.setText("IN PROGRESS");
                     tvStatus.setTextColor(Color.parseColor("#047857"));
                     tvStatus.setBackgroundResource(R.drawable.bg_pill_in_progress);
@@ -178,6 +264,11 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
                     tvStatus.setText("CANCELLED");
                     tvStatus.setTextColor(Color.parseColor("#DC2626"));
                     tvStatus.setBackgroundResource(R.drawable.bg_pill_cancelled_soft);
+                    break;
+                case "active":
+                    tvStatus.setText("OPEN");
+                    tvStatus.setTextColor(Color.parseColor("#3B82F6"));
+                    tvStatus.setBackgroundResource(R.drawable.bg_pill_in_progress); // Reuse for now
                     break;
                 default:
                     tvStatus.setText(status.toUpperCase());

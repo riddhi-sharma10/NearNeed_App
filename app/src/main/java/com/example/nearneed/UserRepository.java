@@ -27,18 +27,16 @@ public class UserRepository {
         if (user == null) return;
 
         firestoreListener = FirebaseFirestore.getInstance()
-            .collection("Users").document(user.getUid())
+            .collection("users").document(user.getUid())
             .addSnapshotListener((snapshot, error) -> {
                 if (error != null || snapshot == null || !snapshot.exists()) return;
 
-                String name = snapshot.getString("fullName");
-                String location = snapshot.getString("location");
-
+                String name = snapshot.getString("name");
+                // Note: The new schema doesn't have a single 'location' field, but lat/lng.
+                // For now, we'll keep the LiveData for compatibility if needed, or just let it be.
+                
                 if (name != null && !name.isEmpty()) {
                     nameLiveData.postValue(name);
-                }
-                if (location != null && !location.isEmpty()) {
-                    locationLiveData.postValue(location);
                 }
             });
     }
@@ -51,17 +49,15 @@ public class UserRepository {
         return locationLiveData;
     }
 
-    public void saveLocation(String location) {
-        // Optimistic update — UI reflects instantly without waiting for Firestore round-trip
-        locationLiveData.setValue(location);
-
+    public void saveLocation(double lat, double lng) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) return;
 
         Map<String, Object> data = new HashMap<>();
-        data.put("location", location);
+        data.put("latitude", lat);
+        data.put("longitude", lng);
         FirebaseFirestore.getInstance()
-            .collection("Users").document(user.getUid())
+            .collection("users").document(user.getUid())
             .set(data, SetOptions.merge());
     }
 

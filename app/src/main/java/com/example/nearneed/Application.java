@@ -6,43 +6,34 @@ package com.example.nearneed;
  */
 public class Application {
     public String applicationId;
-    public String postId;               // Reference to the post
-    public String postTitle;            // Denormalized post title for quick display
-    public String postType;             // "GIG" or "COMMUNITY"
-    public String applicantId;          // User applying
-    public String applicantName;        // Denormalized applicant name
-    public String applicantPhotoUrl;    // Denormalized applicant photo
-    public String status;               // "pending", "accepted", "rejected", "completed"
-    public String message;              // Optional message from applicant
-    public Long appliedAt;
-    public Long updatedAt;
+    public String postId;
+    public String applicantId;
+    public String message;
+    public String status; // "pending" | "accepted" | "rejected"
+    public Long timestamp;
 
-    // Creator (post owner) info for queries
-    public String creatorId;            // Post creator's user ID
+    // Denormalized fields for UI performance
+    public String postTitle;
+    public String postType;
+    public String applicantName;
+    public String applicantPhotoUrl;
 
-    // Workflow fields
-    public String providerStatus;       // For provider: "pending_response", "accepted", "rejected"
-    public String seekerStatus;         // For seeker: "waiting", "accepted", "completed"
-    public Long acceptedAt;
-    public Long completedAt;
-
-    // Optional fields for Gigs
-    public Double proposedBudget;
-    public String paymentMethod;
+    // Extended applicant profile fields (populated from user document)
     public Double applicantRating;
     public String applicantLocation;
     public String applicantPhone;
+    public Long appliedAt;
+    public Double proposedBudget;
+    public String paymentMethod;
+    public String creatorId;
 
     public Application() {}
 
-    public Application(String postId, String postTitle, String postType, 
-                      String applicantId, String creatorId) {
+    public Application(String postId, String applicantId, String message) {
         this.postId = postId;
-        this.postTitle = postTitle;
-        this.postType = postType;
         this.applicantId = applicantId;
-        this.creatorId = creatorId;
+        this.message = message;
         this.status = "pending";
-        this.appliedAt = System.currentTimeMillis();
+        this.timestamp = System.currentTimeMillis();
     }
 }

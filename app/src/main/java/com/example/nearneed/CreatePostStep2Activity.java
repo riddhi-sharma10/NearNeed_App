@@ -70,30 +70,14 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         tvLocationSearch = findViewById(R.id.tvLocationSearch);
         btnPostRequest = findViewById(R.id.btnPostRequest);
 
-        urgencyCards.add(findViewById(R.id.cardUrgencyNow));
-        urgencyCards.add(findViewById(R.id.cardUrgencyToday));
-        urgencyCards.add(findViewById(R.id.cardUrgencyWeek));
-        urgencyCards.add(findViewById(R.id.cardUrgencyFlexible));
 
-        urgencyTexts.add(findViewById(R.id.tvUrgencyNow));
-        urgencyTexts.add(findViewById(R.id.tvUrgencyToday));
-        urgencyTexts.add(findViewById(R.id.tvUrgencyWeek));
-        urgencyTexts.add(findViewById(R.id.tvUrgencyFlexible));
-
-        urgencyIcons.add(findViewById(R.id.ivUrgencyNow));
-        urgencyIcons.add(findViewById(R.id.ivUrgencyToday));
-        urgencyIcons.add(findViewById(R.id.ivUrgencyWeek));
-        urgencyIcons.add(findViewById(R.id.ivUrgencyFlexible));
 
         ImageView btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
     }
 
     private void setupListeners() {
-        for (int i = 0; i < urgencyCards.size(); i++) {
-            final int index = i;
-            urgencyCards.get(i).setOnClickListener(v -> selectUrgency(index));
-        }
+        
 
         findViewById(R.id.llLocationSearch).setOnClickListener(v -> {
             LocationPickerHelper.show(this, (displayText, lat, lng) -> {
@@ -212,7 +196,7 @@ public class CreatePostStep2Activity extends AppCompatActivity {
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
         
         Post post = new Post();
-        post.userId = userId;
+        post.createdBy = userId;
         post.type = (postType != null && postType.equalsIgnoreCase("community")) ? "COMMUNITY" : "GIG";
         post.title = title;
         post.description = description;
@@ -222,12 +206,12 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         post.preferredDate = tvDisplayDate.getText().toString();
         post.preferredTime = tvDisplayTime.getText().toString();
         post.additionalNotes = etAdditionalNotes.getText().toString().trim();
-        post.createdAt = System.currentTimeMillis();
+        post.timestamp = System.currentTimeMillis();
         post.status = "active";
         post.imageUrls = imageUrls; // Assuming Post model has this field
         
-        post.lat = selectedLat; 
-        post.lng = selectedLng;
+        post.latitude = selectedLat; 
+        post.longitude = selectedLng;
 
         btnPostRequest.setText("Posting...");
 

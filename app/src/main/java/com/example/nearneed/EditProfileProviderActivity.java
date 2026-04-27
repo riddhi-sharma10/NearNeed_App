@@ -139,11 +139,11 @@ public class EditProfileProviderActivity extends AppCompatActivity {
 
         // Preload from Firestore
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
-            .collection("Users").document(user.getUid())
+            .collection("users").document(user.getUid())
             .get()
             .addOnSuccessListener(snapshot -> {
                 if (snapshot.exists()) {
-                    String fullName = snapshot.getString("fullName");
+                    String fullName = snapshot.getString("name");
                     String phone = snapshot.getString("phone");
                     if (fullName != null && etName != null) etName.setText(fullName);
                     if (phone != null && etPhone != null) etPhone.setText(phone);
@@ -156,11 +156,11 @@ public class EditProfileProviderActivity extends AppCompatActivity {
         if (user == null) return;
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
-        if (!name.isEmpty()) data.put("fullName", name);
+        if (!name.isEmpty()) data.put("name", name);
         if (!phone.isEmpty()) data.put("phone", phone);
 
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
-            .collection("Users").document(user.getUid())
+            .collection("users").document(user.getUid())
             .set(data, com.google.firebase.firestore.SetOptions.merge())
             .addOnSuccessListener(unused -> {
                 if (!name.isEmpty()) UserPrefs.saveName(this, name);

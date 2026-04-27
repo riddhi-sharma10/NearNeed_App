@@ -48,4 +48,8 @@ public final class UserPrefs {
     public static boolean isVerified(Context ctx) {
         return prefs(ctx).getBoolean(KEY_VERIFIED, false);
     }
+
+    public static void clear(Context ctx) {
+        prefs(ctx).edit().clear().apply();
+    }
 }

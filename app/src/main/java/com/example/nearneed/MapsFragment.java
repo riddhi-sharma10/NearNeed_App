@@ -115,13 +115,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         String snippet;
         String budget;
         String type;
-        MarkerData(int icon, int col, String title, String snippet, String budget, String type) { 
+        String postId;
+        String creatorId;
+        MarkerData(int icon, int col, String title, String snippet, String budget, String type, String postId, String creatorId) { 
             this.iconResId = icon; 
             this.color = col;
             this.title = title;
             this.snippet = snippet;
             this.budget = budget;
             this.type = type;
+            this.postId = postId;
+            this.creatorId = creatorId;
         }
     }
 
@@ -247,7 +251,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             btnViewJob.setOnClickListener(v -> {
                 MarkerData data = (selectedMarker != null) ? markerDataMap.get(selectedMarker) : null;
                 if (data != null && getContext() != null) {
-                    Toast.makeText(getContext(), "Opening details for: " + data.title, Toast.LENGTH_SHORT).show();
+                    Intent intent;
+                    if ("COMMUNITY".equalsIgnoreCase(data.type)) {
+                        intent = new Intent(getContext(), CommunityPostDetailActivity.class);
+                    } else {
+                        intent = new Intent(getContext(), RequestDetailActivity.class);
+                    }
+                    intent.putExtra("post_id", data.postId);
+                    intent.putExtra("title", data.title);
+                    intent.putExtra("description", data.snippet);
+                    intent.putExtra("creator_id", data.creatorId);
+                    startActivity(intent);
                 }
             });
         }
@@ -413,7 +427,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         for (Post p : latestPosts) {
             if (p == null) continue;
-            LatLng pos = new LatLng(p.lat != null ? p.lat : 28.4595, p.lng != null ? p.lng : 77.0266);
+            LatLng pos = new LatLng(p.latitude != null ? p.latitude : 28.4595, p.longitude != null ? p.longitude : 77.0266);
             int color = "COMMUNITY".equalsIgnoreCase(p.type) ? green : orange;
             int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;
             
@@ -425,10 +439,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             
             Job j = new Job(title, p.description, p.distance, p.budget, p.urgency, icon, color, pos, p.type);
             j.postId = p.postId;
-            j.creatorId = p.userId;
+            j.creatorId = p.createdBy;
             
             jobToMarkerMap.put(j, marker);
-            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type));
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, p.postId, p.createdBy));
             filteredJobs.add(j);
         }
     }
@@ -461,22 +475,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         int green = ContextCompat.getColor(context, R.color.brand_success);
 
         for (UserProfile p : latestProviders) {
-            if (p != null && p.lat != null && p.lng != null) {
-                LatLng pos = new LatLng(p.lat, p.lng);
-                String name = p.fullName != null ? p.fullName : "Provider";
+            if (p != null && p.latitude != null && p.longitude != null) {
+                LatLng pos = new LatLng(p.latitude, p.longitude);
+                String name = p.name != null ? p.name : "Provider";
                 Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(name).icon(getMarkerBitmapDescriptor(name, R.drawable.ic_toolbox_seeker, blue, false)));
-                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER"));
+                markerDataMap.put(marker, new MarkerData(R.drawable.ic_toolbox_seeker, blue, name, p.bio, "N/A", "PROVIDER", null, p.userId));
             }
         }
 
         for (Post p : latestPosts) {
             if (p == null) continue;
-            LatLng pos = new LatLng(p.lat != null ? p.lat : 28.4595, p.lng != null ? p.lng : 77.0266);
+            LatLng pos = new LatLng(p.latitude != null ? p.latitude : 28.4595, p.longitude != null ? p.longitude : 77.0266);
             int color = "COMMUNITY".equalsIgnoreCase(p.type) ? green : orange;
             int icon = "COMMUNITY".equalsIgnoreCase(p.type) ? R.drawable.ic_gardening : R.drawable.ic_plumber;
             String title = p.title != null ? p.title : "Request";
             Marker marker = mMap.addMarker(new MarkerOptions().position(pos).title(title).icon(getMarkerBitmapDescriptor(title, icon, color, false)));
-            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type));
+            markerDataMap.put(marker, new MarkerData(icon, color, title, p.description, p.budget, p.type, p.postId, p.createdBy));
         }
     }
 

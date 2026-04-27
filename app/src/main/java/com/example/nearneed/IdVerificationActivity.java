@@ -235,7 +235,7 @@ public class IdVerificationActivity extends AppCompatActivity {
         java.util.Map<String, Object> data = new java.util.HashMap<>();
         data.put("isVerified", true);
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                .collection("Users").document(user.getUid())
+                .collection("users").document(user.getUid())
                 .set(data, com.google.firebase.firestore.SetOptions.merge());
     }
 

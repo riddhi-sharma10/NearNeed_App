@@ -1,18 +1,15 @@
 package com.example.nearneed;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Repository for managing Booking data with Firestore.
@@ -33,128 +30,68 @@ public class BookingRepository {
     }
 
     /**
-     * Create a new booking (typically after application acceptance).
+     * Create a new booking (simple form).
+     */
+    public static void createBooking(String postId, String seekerId, String providerId, SaveCallback callback) {
+        createBooking(postId, null, null, seekerId, providerId, null, callback);
+    }
+
+    /**
+     * Create a new booking (full form).
      */
     public static void createBooking(String postId, String postTitle, String postType,
-                                     String seekerId, String providerId, 
-                                     String applicationId, SaveCallback callback) {
-        if (postId == null || seekerId == null || providerId == null || callback == null) return;
+                                     String seekerId, String providerId, String applicationId,
+                                     SaveCallback callback) {
+        if (postId == null || callback == null) return;
 
-        String bookingId = UUID.randomUUID().toString();
-
-        Booking booking = new Booking(postId, postTitle, postType, seekerId, providerId, providerId);
-        booking.bookingId = bookingId;
+        Booking booking = new Booking(postId, seekerId, providerId);
+        booking.postTitle = postTitle;
+        booking.postType = postType;
         booking.applicationId = applicationId;
         booking.createdAt = System.currentTimeMillis();
-        booking.status = "confirmed";
-        booking.paymentStatus = "pending";
-        booking.participants = java.util.Arrays.asList(seekerId, providerId);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        
-        // Fetch names for denormalization
-        db.collection("Users").document(seekerId).get().addOnSuccessListener(seekerDoc -> {
-            if (seekerDoc.exists()) booking.seekerName = seekerDoc.getString("fullName");
-            
-            db.collection("Users").document(providerId).get().addOnSuccessListener(providerDoc -> {
-                if (providerDoc.exists()) booking.providerName = providerDoc.getString("fullName");
-                
-                db.collection(BOOKINGS_COLLECTION)
-                        .document(bookingId)
-                        .set(booking)
-                        .addOnSuccessListener(aVoid -> {
-                            NotificationCenter.sendNotificationToUser(providerId, "You've been Booked!", 
-                                "You've been booked for: " + postTitle);
-                            callback.onSuccess(bookingId);
-                        })
-                        .addOnFailureListener(callback::onFailure);
-            });
-        });
+        db.collection(BOOKINGS_COLLECTION)
+                .add(booking)
+                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
+                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
     }
 
     /**
-     * Observe bookings for current user (as seeker or provider).
-     * Returns ListenerRegistration for cleanup.
+     * Update booking status.
+     */
+    public static void updateBookingStatus(String bookingId, String status, SaveCallback callback) {
+        if (bookingId == null || callback == null) return;
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", status);
+        updates.put("timestamp", System.currentTimeMillis());
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(BOOKINGS_COLLECTION)
+                .document(bookingId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Observe bookings for current user (Context overload used by ViewModel).
      */
     public static ListenerRegistration observeUserBookings(Context context, BookingListener listener) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if (listener == null) return null;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        return db.collection(BOOKINGS_COLLECTION)
-                .whereArrayContains("participants", currentUserId)
-                .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) {
-                        listener.onError(e);
-                        return;
-                    }
-                    if (snapshot != null) {
-                        List<Booking> bookings = new ArrayList<>();
-                        List<BookingEntity> entities = new ArrayList<>();
-                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                            Booking booking = fromSnapshot(doc);
-                            if (booking != null) {
-                                bookings.add(booking);
-                                entities.add(BookingEntity.fromBooking(booking));
-                            }
-                        }
-
-                        // Async cache in Room
-                        new Thread(() -> {
-                            AppDatabase.getDatabase(context).bookingDao().insertAll(entities);
-                        }).start();
-
-                        listener.onBookingsLoaded(bookings);
-                    }
-                });
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        return observeUserBookings(uid, "seeker", listener);
     }
 
     /**
-     * Load bookings from Room for offline-first display.
+     * Load bookings from Room cache (stub — falls back to empty list).
      */
-    public static void loadBookingsFromRoom(Context context, String userId, BookingListener listener) {
-        new Thread(() -> {
-            List<BookingEntity> entities = AppDatabase.getDatabase(context).bookingDao().getUserBookings(userId);
-            List<Booking> bookings = new ArrayList<>();
-            for (BookingEntity entity : entities) {
-                bookings.add(entity.toBooking());
-            }
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                listener.onBookingsLoaded(bookings);
-            });
-        }).start();
+    public static void loadBookingsFromRoom(Context context, String uid, BookingListener listener) {
+        if (listener != null) listener.onBookingsLoaded(new ArrayList<>());
     }
 
     /**
-     * Simpler version: observe all user bookings (separate queries for seeker and provider).
-     */
-    public static ListenerRegistration observeUserBookingsSimple(BookingListener listener) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        if (listener == null) return null;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        return db.collection(BOOKINGS_COLLECTION)
-                .whereArrayContains("participants", currentUserId)
-                .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) {
-                        listener.onError(e);
-                        return;
-                    }
-                    if (snapshot != null) {
-                        List<Booking> bookings = new ArrayList<>();
-                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                            Booking booking = fromSnapshot(doc);
-                            if (booking != null) {
-                                bookings.add(booking);
-                            }
-                        }
-                        listener.onBookingsLoaded(bookings);
-                    }
-                });
-    }
-
-    /**
-     * Observe bookings for a specific post (for post creator).
+     * Observe bookings for a specific post.
      */
     public static ListenerRegistration observeBookingsForPost(String postId, BookingListener listener) {
         if (postId == null || listener == null) return null;
@@ -162,6 +99,67 @@ public class BookingRepository {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo("postId", postId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) { listener.onError(e); return; }
+                    if (snapshot != null) {
+                        List<Booking> bookings = new ArrayList<>();
+                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                            Booking b = fromSnapshot(doc);
+                            if (b != null) bookings.add(b);
+                        }
+                        listener.onBookingsLoaded(bookings);
+                    }
+                });
+    }
+
+    /**
+     * Mark payment as completed for a booking.
+     */
+    public static void markPaymentCompleted(String bookingId, SaveCallback callback) {
+        if (bookingId == null || callback == null) return;
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("paymentStatus", "paid");
+        updates.put("timestamp", System.currentTimeMillis());
+        FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
+                .document(bookingId)
+                .update(updates)
+                .addOnSuccessListener(v -> callback.onSuccess(bookingId))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Submit a rating for a booking.
+     */
+    public static void submitRating(String bookingId, int rating, String review, String raterRole, SaveCallback callback) {
+        if (bookingId == null || callback == null) return;
+        String ratingField = "provider".equals(raterRole) ? "seekerRating" : "providerRating";
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(ratingField, rating);
+        updates.put(ratingField + "Review", review);
+        updates.put("timestamp", System.currentTimeMillis());
+        FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
+                .document(bookingId)
+                .update(updates)
+                .addOnSuccessListener(v -> callback.onSuccess(bookingId))
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Observe bookings for a user.
+     */
+    public static ListenerRegistration observeUserBookings(String userId, String role, BookingListener listener) {
+        if (userId == null || listener == null) return null;
+
+        String field = "seekerId";
+        if ("provider".equals(role)) {
+            field = "providerId";
+        }
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        return db.collection(BOOKINGS_COLLECTION)
+                .whereEqualTo(field, userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -178,86 +176,6 @@ public class BookingRepository {
                         listener.onBookingsLoaded(bookings);
                     }
                 });
-    }
-
-    /**
-     * Update booking status.
-     */
-    public static void updateBookingStatus(String bookingId, String newStatus, SaveCallback callback) {
-        if (bookingId == null || newStatus == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", newStatus);
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        if ("completed".equals(newStatus)) {
-            updates.put("completedAt", System.currentTimeMillis());
-        } else if ("cancelled".equals(newStatus)) {
-            updates.put("cancelledAt", System.currentTimeMillis());
-        }
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify both parties
-                    db.collection(BOOKINGS_COLLECTION).document(bookingId).get()
-                        .addOnSuccessListener(snapshot -> {
-                            Booking booking = fromSnapshot(snapshot);
-                            if (booking != null) {
-                                String msg = "The booking for '" + booking.postTitle + "' is now " + newStatus + ".";
-                                NotificationCenter.sendNotificationToUser(booking.seekerId, "Booking Status Update", msg);
-                                NotificationCenter.sendNotificationToUser(booking.providerId, "Booking Status Update", msg);
-                            }
-                        });
-                    callback.onSuccess(bookingId);
-                })
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Mark booking payment as completed.
-     */
-    public static void markPaymentCompleted(String bookingId, SaveCallback callback) {
-        if (bookingId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("paymentStatus", "completed");
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Submit rating and review for a booking.
-     */
-    public static void submitRating(String bookingId, int rating, String review, 
-                                    String raterRole, SaveCallback callback) {
-        if (bookingId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("ratedAt", System.currentTimeMillis());
-
-        if ("seeker".equals(raterRole)) {
-            updates.put("seekerRating", rating);
-            updates.put("seekerReview", review);
-        } else if ("provider".equals(raterRole)) {
-            updates.put("providerRating", rating);
-            updates.put("providerReview", review);
-        }
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(bookingId))
-                .addOnFailureListener(callback::onFailure);
     }
 
     /**

@@ -2,6 +2,8 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
@@ -14,8 +16,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Dispatch based on saved role
-        dispatchByRole();
+        // Trigger one-time master reset if needed
+        checkAndPerformReset();
+    }
+
+    private void checkAndPerformReset() {
+        android.content.SharedPreferences prefs = getSharedPreferences("AppConfig", MODE_PRIVATE);
+        boolean isResetDone = prefs.getBoolean("db_master_reset_v3", false);
+
+        if (!isResetDone) {
+            Log.d("MainActivity", "Triggering Master Database Reset...");
+            new DataSeeder().resetAndSeed(new DataSeeder.SeederCallback() {
+                @Override
+                public void onSuccess() {
+                    prefs.edit().putBoolean("db_master_reset_v3", true).apply();
+                    UserPrefs.clear(MainActivity.this);
+                    Log.d("MainActivity", "Database Reset Complete.");
+                    dispatchByRole();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("MainActivity", "Database Reset Failed", e);
+                    Toast.makeText(MainActivity.this, "Database Sync Failed. Check Connection.", Toast.LENGTH_LONG).show();
+                    dispatchByRole(); // Continue anyway to avoid bricking app
+                }
+            });
+        } else {
+            dispatchByRole();
+        }
     }
 
     private void dispatchByRole() {

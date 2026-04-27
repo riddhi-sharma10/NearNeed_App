@@ -45,10 +45,14 @@ public class ResponsesActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        View btnBack = findViewById(R.id.btnBack);
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
+        
         rvResponses = findViewById(R.id.rvResponses);
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
-        ((TextView)findViewById(R.id.tvTitle)).setText("Applicants");
+        
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        if (tvTitle != null) tvTitle.setText("Applicants");
     }
 
     private void setupViewModels() {
@@ -88,6 +92,7 @@ public class ResponsesActivity extends AppCompatActivity {
             public void onMessage(Application application) {
                 Intent intent = new Intent(ResponsesActivity.this, ChatActivity.class);
                 intent.putExtra("CHAT_NAME", application.applicantName);
+                intent.putExtra("CHAT_USER_ID", application.applicantId);
                 startActivity(intent);
             }
         });

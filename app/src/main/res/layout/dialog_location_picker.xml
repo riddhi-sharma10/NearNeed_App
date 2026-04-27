@@ -153,6 +153,7 @@
 
     <!-- Saved Locations Header -->
     <TextView
+        android:id="@+id/headerSavedLocations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SAVED LOCATIONS"
@@ -161,7 +162,8 @@
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.05"
         android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp" />
+        android:paddingVertical="12dp"
+        android:visibility="gone" />
 
     <!-- Home Row -->
     <LinearLayout
@@ -173,7 +175,8 @@
         android:paddingHorizontal="20dp"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground">
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:layout_width="40dp"
@@ -228,7 +231,8 @@
         android:paddingHorizontal="20dp"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground">
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:layout_width="40dp"
@@ -275,13 +279,16 @@
 
     <!-- Divider -->
     <View
+        android:id="@+id/dividerLocations"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/border_light"
-        android:layout_marginVertical="8dp" />
+        android:layout_marginVertical="8dp"
+        android:visibility="gone" />
 
     <!-- Recent Locations Header -->
     <TextView
+        android:id="@+id/headerRecentLocations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="RECENT"
@@ -290,7 +297,8 @@
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.05"
         android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp" />
+        android:paddingVertical="12dp"
+        android:visibility="gone" />
 
     <!-- Recent 1 -->
     <LinearLayout
@@ -302,7 +310,8 @@
         android:paddingHorizontal="20dp"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground">
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="20dp"
@@ -349,7 +358,8 @@
         android:paddingHorizontal="20dp"
         android:clickable="true"
         android:focusable="true"
-        android:background="?attr/selectableItemBackground">
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="20dp"

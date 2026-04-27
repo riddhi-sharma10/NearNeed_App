@@ -18,8 +18,8 @@ public class UserViewModel extends ViewModel {
         return userRepository.getLocation();
     }
 
-    public void saveLocation(String location) {
-        userRepository.saveLocation(location);
+    public void saveLocation(double lat, double lng) {
+        userRepository.saveLocation(lat, lng);
     }
 
     @Override

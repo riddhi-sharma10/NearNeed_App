@@ -21,12 +21,32 @@ public class ProfileSuccessActivity extends AppCompatActivity {
 
         View successContainer = findViewById(R.id.successContainer);
         TextView tvUserNamePreview = findViewById(R.id.tvUserNamePreview);
+        TextView tvJoinedDate = findViewById(R.id.tvJoinedDate);
+        com.google.android.material.imageview.ShapeableImageView ivProfilePicturePreview = findViewById(R.id.ivProfilePicturePreview);
         MaterialButton btnDone = findViewById(R.id.btnDone);
 
-        // Sync real name
-        String name = UserPrefs.getName(this);
-        if (name != null && !name.isEmpty()) {
-            tvUserNamePreview.setText(name);
+        // Sync real-time data
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Set Joined Date from Firebase Metadata
+            long creationTimestamp = user.getMetadata().getCreationTimestamp();
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM yyyy", java.util.Locale.getDefault());
+            String joinedDate = "Joined " + sdf.format(new java.util.Date(creationTimestamp));
+            tvJoinedDate.setText(joinedDate);
+
+            // Fetch name and photo from Firestore for absolute accuracy
+            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(user.getUid())
+                .get().addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String name = doc.getString("name");
+                        if (name != null && !name.isEmpty()) tvUserNamePreview.setText(name);
+                        
+                        String photoUrl = doc.getString("profileImageUrl");
+                        if (photoUrl != null && !photoUrl.isEmpty()) {
+                            com.bumptech.glide.Glide.with(this).load(photoUrl).into(ivProfilePicturePreview);
+                        }
+                    }
+                });
         }
 
         // Apply Pop-in effect

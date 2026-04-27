@@ -241,7 +241,7 @@ public class AiChatActivity extends AppCompatActivity {
         // Fetch bookings where user is seeker
         db.collection("bookings")
                 .whereEqualTo("seekerId", uid)
-                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
                 .limit(20)
                 .get()
                 .addOnSuccessListener(seekerSnap -> {
@@ -254,8 +254,7 @@ public class AiChatActivity extends AppCompatActivity {
                         ctx.append(++count).append(". Service: \"").append(b.postTitle)
                                 .append("\" | Status: ").append(b.status)
                                 .append(" | Provider: ").append(b.providerName != null ? b.providerName : "N/A")
-                                .append(" | Amount: ₹").append(b.amount != null ? b.amount : "?")
-                                .append(" | Date: ").append(b.createdAt != null ? sdf.format(new Date(b.createdAt)) : "?")
+                                .append(" | Date: ").append(b.timestamp != null ? sdf.format(new Date(b.timestamp)) : "?")
                                 .append("\n");
                     }
                     if (count == 0) ctx.append("No bookings found as seeker.\n");
@@ -263,7 +262,7 @@ public class AiChatActivity extends AppCompatActivity {
                     // Now fetch as provider
                     db.collection("bookings")
                             .whereEqualTo("providerId", uid)
-                            .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
                             .limit(20)
                             .get()
                             .addOnSuccessListener(providerSnap -> {
@@ -274,8 +273,7 @@ public class AiChatActivity extends AppCompatActivity {
                                     ctx.append(++pc).append(". Service: \"").append(b.postTitle)
                                             .append("\" | Status: ").append(b.status)
                                             .append(" | Seeker: ").append(b.seekerName != null ? b.seekerName : "N/A")
-                                            .append(" | Amount: ₹").append(b.amount != null ? b.amount : "?")
-                                            .append(" | Date: ").append(b.createdAt != null ? sdf.format(new Date(b.createdAt)) : "?")
+                                            .append(" | Date: ").append(b.timestamp != null ? sdf.format(new Date(b.timestamp)) : "?")
                                             .append("\n");
                                 }
                                 if (pc == 0) ctx.append("No bookings found as provider.\n");

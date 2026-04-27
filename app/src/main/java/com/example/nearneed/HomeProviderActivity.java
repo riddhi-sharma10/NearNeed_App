@@ -84,7 +84,7 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void showLocationPicker() {
         LocationPickerHelper.show(this, (location, lat, lng) -> {
-            userViewModel.saveLocation(location);
+            userViewModel.saveLocation(lat, lng);
         });
     }
 

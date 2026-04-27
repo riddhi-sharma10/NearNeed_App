@@ -7,7 +7,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,88 +26,55 @@ public class ApplicationRepository {
         void onError(Exception e);
     }
 
-    public interface ApplicationCallback {
-        void onApplicationFetched(Application application);
-        void onError(Exception e);
-    }
-
     public interface SaveCallback {
         void onSuccess(String applicationId);
         void onFailure(Exception e);
     }
 
     /**
-     * Fetch a single application by ID.
+     * Submit an application to a post (simple form).
      */
-    public static void getApplication(String applicationId, ApplicationCallback callback) {
-        if (applicationId == null || callback == null) return;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    if (snapshot.exists()) {
-                        Application app = fromSnapshot(snapshot);
-                        callback.onApplicationFetched(app);
-                    } else {
-                        callback.onApplicationFetched(null);
-                    }
-                })
-                .addOnFailureListener(callback::onError);
+    public static void submitApplication(String postId, String message, SaveCallback callback) {
+        submitApplication(postId, null, null, null, message, null, null, callback);
     }
 
     /**
-     * Submit an application to a post (Gig or Community).
+     * Submit an application to a post (full form).
      */
-    public static void submitApplication(String postId, String postTitle, String postType, 
-                                         String creatorId, String message, String budget, 
+    public static void submitApplication(String postId, String postTitle, String postType,
+                                         String creatorId, String message, String budget,
                                          String paymentMethod, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
         String applicantId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String applicationId = UUID.randomUUID().toString();
-
-        Application app = new Application(postId, postTitle, postType, applicantId, creatorId);
-        app.applicationId = applicationId;
-        app.message = message;
-        app.paymentMethod = paymentMethod;
-        try {
-            if (budget != null && budget.startsWith("₹")) {
-                app.proposedBudget = Double.parseDouble(budget.substring(1));
-            } else if (budget != null) {
-                app.proposedBudget = Double.parseDouble(budget);
-            }
-        } catch (Exception e) {
-            app.proposedBudget = 0.0;
-        }
+        Application app = new Application(postId, applicantId, message);
+        app.postTitle = postTitle;
+        app.postType = postType;
+        app.creatorId = creatorId;
         app.appliedAt = System.currentTimeMillis();
+        if (budget != null) {
+            try {
+                app.proposedBudget = Double.parseDouble(budget.replace("₹", "").trim());
+            } catch (NumberFormatException ignored) {}
+        }
+        app.paymentMethod = paymentMethod;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .set(app)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify post creator
-                    NotificationCenter.sendNotificationToUser(creatorId, "New Application", 
-                        "Someone applied to your post: " + postTitle);
-                    callback.onSuccess(applicationId);
-                })
+                .add(app)
+                .addOnSuccessListener(docRef -> callback.onSuccess(docRef.getId()))
                 .addOnFailureListener(callback::onFailure);
     }
 
     /**
-     * Update application status generically.
+     * Update application status.
      */
     public static void updateApplicationStatus(String applicationId, String status, SaveCallback callback) {
         if (applicationId == null || callback == null) return;
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", status);
-        updates.put("updatedAt", System.currentTimeMillis());
-        if ("accepted".equals(status)) {
-            updates.put("acceptedAt", System.currentTimeMillis());
-        }
+        updates.put("timestamp", System.currentTimeMillis());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(APPLICATIONS_COLLECTION)
@@ -118,229 +84,88 @@ public class ApplicationRepository {
                 .addOnFailureListener(callback::onFailure);
     }
 
+    public static void acceptApplication(String applicationId, SaveCallback callback) {
+        updateApplicationStatus(applicationId, "accepted", callback);
+    }
+
+    public static void rejectApplication(String applicationId, SaveCallback callback) {
+        updateApplicationStatus(applicationId, "rejected", callback);
+    }
+
+    public static void withdrawApplication(String applicationId, SaveCallback callback) {
+        updateApplicationStatus(applicationId, "withdrawn", callback);
+    }
+
+    public static void completeApplication(String applicationId, SaveCallback callback) {
+        updateApplicationStatus(applicationId, "completed", callback);
+    }
+
     /**
-     * Observe applications for a post (for post creator / seeker).
-     * Returns ListenerRegistration for cleanup.
+     * Observe applications for a post (basic).
      */
-    public static ListenerRegistration observeApplicationsForPost(Context context, String postId, ApplicationListener listener) {
+    public static ListenerRegistration observeApplicationsForPost(String postId, ApplicationListener listener) {
         if (postId == null || listener == null) return null;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(APPLICATIONS_COLLECTION)
                 .whereEqualTo("postId", postId)
-                .orderBy("appliedAt", Query.Direction.DESCENDING)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) {
-                        listener.onError(e);
-                        return;
-                    }
+                    if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
                         List<Application> applications = new ArrayList<>();
-                        List<ApplicationEntity> entities = new ArrayList<>();
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
                             Application app = fromSnapshot(doc);
-                            if (app != null) {
-                                applications.add(app);
-                                entities.add(ApplicationEntity.fromApplication(app));
-                            }
+                            if (app != null) applications.add(app);
                         }
-
-                        // Async cache in Room
-                        new Thread(() -> {
-                            AppDatabase.getDatabase(context).applicationDao().insertAll(entities);
-                        }).start();
-
                         listener.onApplicationsLoaded(applications);
                     }
                 });
     }
 
     /**
-     * Load applications from Room for offline access.
+     * Observe applications for a post (Context overload for offline-first callers).
      */
-    public static void loadApplicationsFromRoom(Context context, String postId, ApplicationListener listener) {
-        new Thread(() -> {
-            List<ApplicationEntity> entities = AppDatabase.getDatabase(context).applicationDao().getApplicationsForPost(postId);
-            List<Application> applications = new ArrayList<>();
-            for (ApplicationEntity entity : entities) {
-                applications.add(entity.toApplication());
-            }
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                listener.onApplicationsLoaded(applications);
-            });
-        }).start();
+    public static ListenerRegistration observeApplicationsForPost(Context context, String postId, ApplicationListener listener) {
+        return observeApplicationsForPost(postId, listener);
     }
 
     /**
-     * Observe applications submitted by current user.
-     * Returns ListenerRegistration for cleanup.
+     * Load applications for a post from Room cache (stub — falls back to empty list).
+     */
+    public static void loadApplicationsFromRoom(Context context, String postId, ApplicationListener listener) {
+        if (listener != null) listener.onApplicationsLoaded(new ArrayList<>());
+    }
+
+    /**
+     * Observe current user's own applications in real-time.
      */
     public static ListenerRegistration observeUserApplications(Context context, ApplicationListener listener) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         if (listener == null) return null;
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(APPLICATIONS_COLLECTION)
-                .whereEqualTo("applicantId", currentUserId)
-                .orderBy("appliedAt", Query.Direction.DESCENDING)
+                .whereEqualTo("applicantId", uid)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
-                    if (e != null) {
-                        listener.onError(e);
-                        return;
-                    }
+                    if (e != null) { listener.onError(e); return; }
                     if (snapshot != null) {
                         List<Application> applications = new ArrayList<>();
-                        List<ApplicationEntity> entities = new ArrayList<>();
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
                             Application app = fromSnapshot(doc);
-                            if (app != null) {
-                                applications.add(app);
-                                entities.add(ApplicationEntity.fromApplication(app));
-                            }
+                            if (app != null) applications.add(app);
                         }
-
-                        // Async cache in Room
-                        new Thread(() -> {
-                            AppDatabase.getDatabase(context).applicationDao().insertAll(entities);
-                        }).start();
-
                         listener.onApplicationsLoaded(applications);
                     }
                 });
     }
 
     /**
-     * Load user's submitted applications from Room.
+     * Load user's own applications from Room cache (stub — falls back to empty list).
      */
-    public static void loadUserApplicationsFromRoom(Context context, String userId, ApplicationListener listener) {
-        new Thread(() -> {
-            List<ApplicationEntity> entities = AppDatabase.getDatabase(context).applicationDao().getUserApplications(userId);
-            List<Application> applications = new ArrayList<>();
-            for (ApplicationEntity entity : entities) {
-                applications.add(entity.toApplication());
-            }
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                listener.onApplicationsLoaded(applications);
-            });
-        }).start();
-    }
-
-    /**
-     * Accept an application (for post creator / provider).
-     */
-    public static void acceptApplication(String applicationId, SaveCallback callback) {
-        if (applicationId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "accepted");
-        updates.put("providerStatus", "accepted");
-        updates.put("acceptedAt", System.currentTimeMillis());
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify applicant
-                    getApplication(applicationId, new ApplicationCallback() {
-                        @Override
-                        public void onApplicationFetched(Application application) {
-                            if (application != null) {
-                                NotificationCenter.sendNotificationToUser(application.applicantId, 
-                                    "Application Accepted!", "Your application for '" + application.postTitle + "' was accepted.");
-                            }
-                        }
-                        @Override public void onError(Exception e) {}
-                    });
-                    callback.onSuccess(applicationId);
-                })
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Reject an application.
-     */
-    public static void rejectApplication(String applicationId, SaveCallback callback) {
-        if (applicationId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "rejected");
-        updates.put("providerStatus", "rejected");
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify applicant
-                    getApplication(applicationId, new ApplicationCallback() {
-                        @Override
-                        public void onApplicationFetched(Application application) {
-                            if (application != null) {
-                                NotificationCenter.sendNotificationToUser(application.applicantId, 
-                                    "Application Update", "Your application for '" + application.postTitle + "' was rejected.");
-                            }
-                        }
-                        @Override public void onError(Exception e) {}
-                    });
-                    callback.onSuccess(applicationId);
-                })
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Withdraw an application (applicant action).
-     */
-    public static void withdrawApplication(String applicationId, SaveCallback callback) {
-        if (applicationId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "rejected");
-        updates.put("seekerStatus", "withdrawn");
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(applicationId))
-                .addOnFailureListener(callback::onFailure);
-    }
-
-    /**
-     * Mark application as completed.
-     */
-    public static void completeApplication(String applicationId, SaveCallback callback) {
-        if (applicationId == null || callback == null) return;
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "completed");
-        updates.put("completedAt", System.currentTimeMillis());
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(APPLICATIONS_COLLECTION)
-                .document(applicationId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify both parties if needed
-                    getApplication(applicationId, new ApplicationCallback() {
-                        @Override
-                        public void onApplicationFetched(Application application) {
-                            if (application != null) {
-                                NotificationCenter.sendNotificationToUser(application.applicantId, 
-                                    "Job Completed", "The job '" + application.postTitle + "' has been marked as completed.");
-                                NotificationCenter.sendNotificationToUser(application.creatorId, 
-                                    "Job Completed", "The job '" + application.postTitle + "' has been marked as completed.");
-                            }
-                        }
-                        @Override public void onError(Exception e) {}
-                    });
-                    callback.onSuccess(applicationId);
-                })
-                .addOnFailureListener(callback::onFailure);
+    public static void loadUserApplicationsFromRoom(Context context, String uid, ApplicationListener listener) {
+        if (listener != null) listener.onApplicationsLoaded(new ArrayList<>());
     }
 
     /**

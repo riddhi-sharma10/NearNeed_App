@@ -1,30 +1,38 @@
 package com.example.nearneed;
 
-import com.google.firebase.Timestamp;
-
 /**
  * Model representing a chat message.
+ * Firestore path: messages/{chatId}/messages/{messageId}
  */
 public class ChatMessage {
     public String messageId;
     public String senderId;
-    public String receiverId;
-    public Timestamp timestamp;
     public String messageText;
-    public boolean isVoice;
-    public boolean isOutgoing;
-    public boolean isPlaying = false;
-    public int progress = 0;
-    public int durationSecs = 0;
-    public String imageUri;
+    public Long timestamp;
+
+    // Media fields
     public String audioPath;
+    public String imageUri;
+
+    // UI-only state fields (transient, not stored in Firestore)
+    public transient boolean isOutgoing;
+    public transient boolean isVoice;
+    public transient boolean isPlaying;
+    public transient int progress;
+    public transient int durationSecs;
 
     public ChatMessage() {}
 
-    public ChatMessage(String messageText, boolean isVoice, boolean isOutgoing) {
+    public ChatMessage(String senderId, String messageText) {
+        this.senderId = senderId;
         this.messageText = messageText;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public ChatMessage(String text, boolean isVoice, boolean isOutgoing) {
+        this.messageText = text;
         this.isVoice = isVoice;
         this.isOutgoing = isOutgoing;
-        if (this.isVoice) this.durationSecs = 7;
+        this.timestamp = System.currentTimeMillis();
     }
 }

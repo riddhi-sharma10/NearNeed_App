@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class OtpVerifyActivity extends AppCompatActivity {
 
@@ -102,21 +103,45 @@ public class OtpVerifyActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-                        Intent intent;
                         if (isSignup) {
-                            // Redirect to Profile Setup (Step 1)
-                            intent = new Intent(this, ProfileInfoActivity.class);
+                            checkIfUserExistsAndRoute();
                         } else {
-                            // Login flow: OTP -> Account Type
-                            intent = new Intent(this, AccountTypeActivity.class);
+                            startActivity(new Intent(this, AccountTypeActivity.class));
+                            finish();
                         }
-                        startActivity(intent);
-                        finish();
                     } else {
                         Toast.makeText(this, "Verification failed or Incorrect Code.", Toast.LENGTH_SHORT).show();
                         btnVerify.setEnabled(true);
-                        btnVerify.setText("Verify"); // Reset text
+                        btnVerify.setText("Verify");
                     }
+                });
+    }
+
+    private void checkIfUserExistsAndRoute() {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore.getInstance().collection("users").document(uid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists() && doc.getString("name") != null) {
+                        // Account already registered — send to login
+                        Toast.makeText(this,
+                                "An account already exists for this number. Please log in.",
+                                Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(this, AccountTypeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    } else {
+                        // Genuinely new user — wipe stale cache, go to profile setup
+                        UserPrefs.clear(this);
+                        startActivity(new Intent(this, ProfileInfoActivity.class));
+                    }
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    // If the check fails, proceed to signup as a safe fallback
+                    UserPrefs.clear(this);
+                    startActivity(new Intent(this, ProfileInfoActivity.class));
+                    finish();
                 });
     }
 

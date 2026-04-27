@@ -30,15 +30,14 @@ public class PostRepository {
 
     /**
      * Observe current user's own posts in real-time.
-     * Returns a ListenerRegistration for cleanup in onStop().
      */
     public static ListenerRegistration observeUserPosts(Context context, String userId, PostListener listener) {
         if (userId == null || listener == null) return null;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(POSTS_COLLECTION)
-                .whereEqualTo("userId", userId)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .whereEqualTo("createdBy", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -46,51 +45,25 @@ public class PostRepository {
                     }
                     if (snapshot != null) {
                         java.util.List<Post> posts = new java.util.ArrayList<>();
-                        java.util.List<PostEntity> entities = new java.util.ArrayList<>();
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
                             Post post = fromSnapshot(doc);
                             if (post != null) {
                                 posts.add(post);
-                                entities.add(PostEntity.fromPost(post));
                             }
                         }
-                        
-                        // Async cache in Room
-                        new Thread(() -> {
-                            AppDatabase.getDatabase(context).postDao().insertAll(entities);
-                        }).start();
-
                         listener.onPostsLoaded(posts);
                     }
                 });
     }
 
     /**
-     * Load posts from local Room cache for immediate display.
-     */
-    public static void loadPostsFromRoom(Context context, String userId, PostListener listener) {
-        new Thread(() -> {
-            java.util.List<PostEntity> entities = AppDatabase.getDatabase(context).postDao().getUserPosts(userId);
-            java.util.List<Post> posts = new java.util.ArrayList<>();
-            for (PostEntity entity : entities) {
-                posts.add(entity.toPost());
-            }
-            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                listener.onPostsLoaded(posts);
-            });
-        }).start();
-    }
-
-    /**
      * Observe all active posts in real-time.
-     * Useful for global feeds or when location filtering is not desired.
      */
     public static ListenerRegistration observeAllActivePosts(PostListener listener) {
         if (listener == null) return null;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(POSTS_COLLECTION)
-                .whereEqualTo("status", "active")
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -110,11 +83,7 @@ public class PostRepository {
     }
 
     /**
-     * Observe nearby posts (within radius) in real-time, optionally filtered by type.
-     * Returns a ListenerRegistration for cleanup in onStop().
-     * Note: Firestore doesn't support spatial queries directly; this fetches all posts
-     * and client-side filters by distance. For production, consider Firestore's
-     * geographic queries or Google Maps API.
+     * Observe nearby posts (within radius) in real-time.
      */
     public static ListenerRegistration observeNearbyPosts(Context context, double userLat, double userLng, 
                                                            double radiusKm, PostListener listener) {
@@ -122,7 +91,6 @@ public class PostRepository {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(POSTS_COLLECTION)
-                .whereEqualTo("status", "active")
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         listener.onError(e);
@@ -132,11 +100,10 @@ public class PostRepository {
                         java.util.List<Post> posts = new java.util.ArrayList<>();
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
                             Post post = fromSnapshot(doc);
-                            if (post != null && post.lat != null && post.lng != null) {
+                            if (post != null && post.latitude != null && post.longitude != null) {
                                 // Client-side distance filter
-                                double distance = calculateDistance(userLat, userLng, post.lat, post.lng);
+                                double distance = calculateDistance(userLat, userLng, post.latitude, post.longitude);
                                 if (distance <= radiusKm) {
-                                    post.distance = String.format("%.1f km away", distance);
                                     posts.add(post);
                                 }
                             }
@@ -146,31 +113,6 @@ public class PostRepository {
                 });
     }
 
-
-    /**
-     * Fetch all active posts (used by adapters that don't need real-time updates).
-     */
-    public static void fetchAllActivePosts(PostListener listener) {
-        if (listener == null) return;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(POSTS_COLLECTION)
-                .whereEqualTo("status", "active")
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    java.util.List<Post> posts = new java.util.ArrayList<>();
-                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
-                        Post post = fromSnapshot(doc);
-                        if (post != null) {
-                            posts.add(post);
-                        }
-                    }
-                    listener.onPostsLoaded(posts);
-                })
-                .addOnFailureListener(listener::onError);
-    }
-
     /**
      * Create a new post.
      */
@@ -178,9 +120,8 @@ public class PostRepository {
         if (post == null || callback == null) return;
 
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        post.userId = currentUserId;
-        post.createdAt = System.currentTimeMillis();
-        post.status = "active";
+        post.createdBy = currentUserId;
+        post.timestamp = System.currentTimeMillis();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         com.google.firebase.firestore.DocumentReference docRef = db.collection(POSTS_COLLECTION).document();
@@ -196,14 +137,11 @@ public class PostRepository {
      */
     public static void updatePost(String postId, Map<String, Object> updates, SaveCallback callback) {
         if (postId == null || updates == null || callback == null) return;
-
-        updates.put("updatedAt", System.currentTimeMillis());
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(POSTS_COLLECTION)
+        updates.put("timestamp", System.currentTimeMillis());
+        FirebaseFirestore.getInstance().collection(POSTS_COLLECTION)
                 .document(postId)
                 .update(updates)
-                .addOnSuccessListener(aVoid -> callback.onSuccess(postId))
+                .addOnSuccessListener(v -> callback.onSuccess(postId))
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -212,12 +150,10 @@ public class PostRepository {
      */
     public static void deletePost(String postId, SaveCallback callback) {
         if (postId == null || callback == null) return;
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(POSTS_COLLECTION)
+        FirebaseFirestore.getInstance().collection(POSTS_COLLECTION)
                 .document(postId)
                 .delete()
-                .addOnSuccessListener(aVoid -> callback.onSuccess(postId))
+                .addOnSuccessListener(v -> callback.onSuccess(postId))
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -236,7 +172,6 @@ public class PostRepository {
 
     /**
      * Calculate distance between two geographic points (in kilometers).
-     * Uses Haversine formula.
      */
     private static double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
         final int EARTH_RADIUS_KM = 6371;

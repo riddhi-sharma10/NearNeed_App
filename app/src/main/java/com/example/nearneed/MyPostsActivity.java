@@ -134,15 +134,15 @@ public class MyPostsActivity extends AppCompatActivity {
             // Apply badge colors based on category/type
             if ("High Urgency".equalsIgnoreCase(post.category) || "URGENT".equalsIgnoreCase(post.type)) {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_urgent_badge);
-                holder.tvBadge.setTextColor(getColor(R.color.urgent_red));
+                holder.tvBadge.setTextColor(androidx.core.content.ContextCompat.getColor(MyPostsActivity.this, R.color.urgent_red));
                 holder.tvBadge.setText("URGENT");
             } else if ("COMMUNITY".equalsIgnoreCase(post.type)) {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_community_badge);
-                holder.tvBadge.setTextColor(getColor(R.color.community_green));
+                holder.tvBadge.setTextColor(androidx.core.content.ContextCompat.getColor(MyPostsActivity.this, R.color.community_green));
                 holder.tvBadge.setText("COMMUNITY");
             } else {
                 holder.tvBadge.setBackgroundResource(R.drawable.bg_paid_badge);
-                holder.tvBadge.setTextColor(getColor(R.color.brand_primary));
+                holder.tvBadge.setTextColor(androidx.core.content.ContextCompat.getColor(MyPostsActivity.this, R.color.brand_primary));
                 holder.tvBadge.setText("PAID GIG");
             }
 

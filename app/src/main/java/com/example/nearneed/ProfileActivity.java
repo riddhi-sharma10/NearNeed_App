@@ -50,7 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         profileListener = FirebaseFirestore.getInstance()
-                .collection("Users").document(user.getUid())
+                .collection("users").document(user.getUid())
                 .addSnapshotListener((snapshot, error) -> {
                     if (error != null || snapshot == null || !snapshot.exists()) return;
                     applySnapshot(snapshot);
@@ -90,9 +90,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void applySnapshot(DocumentSnapshot snapshot) {
-        String name = snapshot.getString("fullName");
-        String location = snapshot.getString("location");
-        String photoUrl = snapshot.getString("photoUrl");
+        String name = snapshot.getString("name");
+        String location = snapshot.getString("address"); // Using address as fallback for legacy UI
+        String photoUrl = snapshot.getString("profileImageUrl");
         Boolean verified = snapshot.getBoolean("isVerified");
 
         // Persist to local cache for instant display next time
@@ -124,16 +124,15 @@ public class ProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         Map<String, Object> map = new HashMap<>();
-        map.put("fullName", name == null ? "NearNeed User" : name);
-        map.put("photoUrl", profileImage == null ? "" : profileImage);
-        map.put("location", address == null ? "" : address);
+        map.put("name", name == null ? "NearNeed User" : name);
+        map.put("profileImageUrl", profileImage == null ? "" : profileImage);
         map.put("isVerified", isVerified);
         if (user.getEmail() != null) {
             map.put("email", user.getEmail());
         }
 
         FirebaseFirestore.getInstance()
-                .collection("Users")
+                .collection("users")
                 .document(user.getUid())
                 .set(map, SetOptions.merge());
     }

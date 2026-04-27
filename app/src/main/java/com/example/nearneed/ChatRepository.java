@@ -32,6 +32,7 @@ public class ChatRepository {
 
     /**
      * Observe messages in a chat conversation.
+     * Firestore path: messages/{chatId}/messages/{messageId}
      */
     public static ListenerRegistration observeMessages(String chatId, MessageListener listener) {
         if (chatId == null || listener == null) return null;
@@ -63,11 +64,8 @@ public class ChatRepository {
         
         Map<String, Object> messageMap = new HashMap<>();
         messageMap.put("senderId", senderId);
-        messageMap.put("receiverId", receiverId);
         messageMap.put("messageText", text.trim());
-        messageMap.put("isVoice", false);
-        messageMap.put("isOutgoing", false); // Receiver will see it as false
-        messageMap.put("timestamp", FieldValue.serverTimestamp());
+        messageMap.put("timestamp", System.currentTimeMillis());
 
         db.collection(MESSAGES_COLLECTION)
                 .document(chatId)
@@ -83,41 +81,45 @@ public class ChatRepository {
     }
 
     /**
-     * Send a media message (Image or Voice).
+     * Send a media message (image or voice).
      */
-    public static void sendMediaMessage(String chatId, String senderId, String receiverId, 
+    public static void sendMediaMessage(String chatId, String senderId, String receiverId,
                                         String mediaUrl, boolean isVoice, SaveCallback callback) {
         if (chatId == null || mediaUrl == null) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        
         Map<String, Object> messageMap = new HashMap<>();
         messageMap.put("senderId", senderId);
-        messageMap.put("receiverId", receiverId);
-        messageMap.put("messageText", isVoice ? "Voice message" : "Image message");
-        messageMap.put("isVoice", isVoice);
-        if (isVoice) {
-            messageMap.put("audioPath", mediaUrl);
-        } else {
-            messageMap.put("imageUri", mediaUrl);
-        }
-        messageMap.put("timestamp", FieldValue.serverTimestamp());
+        messageMap.put("messageText", "");
+        messageMap.put(isVoice ? "audioPath" : "imageUri", mediaUrl);
+        messageMap.put("timestamp", System.currentTimeMillis());
 
         db.collection(MESSAGES_COLLECTION)
                 .document(chatId)
                 .collection("messages")
                 .add(messageMap)
                 .addOnSuccessListener(doc -> {
-                    updateChatMetadata(chatId, senderId, receiverId, isVoice ? "Voice message" : "Image message");
+                    updateChatMetadata(chatId, senderId, receiverId, isVoice ? "🎤 Voice message" : "📷 Image");
                     if (callback != null) callback.onSuccess();
                 })
-                .addOnFailureListener(e -> {
-                    if (callback != null) callback.onFailure(e);
-                });
+                .addOnFailureListener(e -> { if (callback != null) callback.onFailure(e); });
+    }
+
+    /**
+     * Mark a chat conversation as read for the current user.
+     */
+    public static void markAsRead(String chatId) {
+        if (chatId == null) return;
+        Map<String, Object> update = new HashMap<>();
+        update.put("unreadCount", 0);
+        FirebaseFirestore.getInstance().collection(CHATS_COLLECTION)
+                .document(chatId)
+                .update(update);
     }
 
     /**
      * Update chat thread metadata for the inbox view.
+     * Firestore path: chats/{chatId}
      */
     private static void updateChatMetadata(String chatId, String senderId, String receiverId, String lastMessage) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -125,21 +127,10 @@ public class ChatRepository {
         Map<String, Object> chatMeta = new HashMap<>();
         chatMeta.put("participants", Arrays.asList(senderId, receiverId));
         chatMeta.put("lastMessage", lastMessage);
-        chatMeta.put("lastTimestamp", FieldValue.serverTimestamp());
-        chatMeta.put("isRead", false);
-        chatMeta.put("lastSenderId", senderId);
+        chatMeta.put("lastTimestamp", System.currentTimeMillis());
 
         db.collection(CHATS_COLLECTION)
                 .document(chatId)
                 .set(chatMeta, SetOptions.merge());
-    }
-
-    /**
-     * Mark a chat as read.
-     */
-    public static void markAsRead(String chatId) {
-        if (chatId == null) return;
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(CHATS_COLLECTION).document(chatId).update("isRead", true);
     }
 }

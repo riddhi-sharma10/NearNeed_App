@@ -54,18 +54,6 @@ public class PostViewModel extends ViewModel {
             userPostsListener.remove();
         }
 
-        // Offline First: Load from Room first
-        PostRepository.loadPostsFromRoom(context, userId, new PostRepository.PostListener() {
-            @Override
-            public void onPostsLoaded(List<Post> posts) {
-                if (userPosts.getValue() == null || userPosts.getValue().isEmpty()) {
-                    userPosts.setValue(posts);
-                }
-            }
-            @Override
-            public void onError(Exception e) {}
-        });
-
         isLoading.setValue(true);
         userPostsListener = PostRepository.observeUserPosts(context, userId, new PostRepository.PostListener() {
             @Override

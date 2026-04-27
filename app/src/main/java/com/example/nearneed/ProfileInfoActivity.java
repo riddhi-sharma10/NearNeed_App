@@ -52,8 +52,6 @@ public class ProfileInfoActivity extends AppCompatActivity {
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
-                    getContentResolver().takePersistableUriPermission(
-                            uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     selectedPhotoUri = uri;
                     uploadedPhotoUrl = null;
                     Glide.with(this).load(uri).circleCrop().into(ivProfilePicture);
@@ -86,40 +84,9 @@ public class ProfileInfoActivity extends AppCompatActivity {
     }
 
     private void restoreSavedData() {
-        String savedName = UserPrefs.getName(this);
-        if (!savedName.isEmpty()) etFullName.setText(savedName);
-
-        String savedUri = UserPrefs.getPhotoUri(this);
-        if (savedUri != null) {
-            Glide.with(this).load(Uri.parse(savedUri)).circleCrop().into(ivProfilePicture);
-        }
-
-        // Restore already-uploaded URL from Firestore user doc
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            FirebaseFirestore.getInstance().collection("Users").document(user.getUid())
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        if (doc.exists()) {
-                            String name = doc.getString("fullName");
-                            if (name != null && !name.isEmpty() && etFullName.getText().toString().isEmpty()) {
-                                etFullName.setText(name);
-                            }
-                            String bio = doc.getString("bio");
-                            if (bio != null && etBio.getText().toString().isEmpty()) {
-                                etBio.setText(bio);
-                            }
-                            String dob = doc.getString("dob");
-                            if (dob != null && etDob.getText().toString().isEmpty()) {
-                                etDob.setText(dob);
-                            }
-                            uploadedPhotoUrl = doc.getString("photoUrl");
-                            if (uploadedPhotoUrl != null) {
-                                Glide.with(this).load(uploadedPhotoUrl).circleCrop().into(ivProfilePicture);
-                            }
-                        }
-                    });
-        }
+        etFullName.setText("");
+        // Photo and fields start blank — UserPrefs was cleared before entering this activity.
+        // Do not load from Firestore either, as that belongs to a previous registration.
     }
 
     private void startPhotoUpload(Uri uri) {
@@ -131,28 +98,29 @@ public class ProfileInfoActivity extends AppCompatActivity {
         btnContinue.setText("Uploading photo...");
 
         StorageReference ref = FirebaseStorage.getInstance()
-                .getReference("profile_photos/" + user.getUid() + "/profile.jpg");
+                .getReference("profile_images/" + user.getUid() + ".jpg");
 
         ref.putFile(uri)
-                .continueWithTask(task -> {
-                    if (!task.isSuccessful() && task.getException() != null) {
-                        throw task.getException();
-                    }
-                    return ref.getDownloadUrl();
-                })
-                .addOnSuccessListener(downloadUri -> {
-                    uploadedPhotoUrl = downloadUri.toString();
-                    UserPrefs.savePhotoUri(this, uploadedPhotoUrl);
-                    isUploading = false;
-                    btnContinue.setEnabled(true);
-                    btnContinue.setText("Continue");
-                })
+                .addOnSuccessListener(taskSnapshot ->
+                    ref.getDownloadUrl()
+                            .addOnSuccessListener(downloadUri -> {
+                                uploadedPhotoUrl = downloadUri.toString();
+                                UserPrefs.savePhotoUri(this, uploadedPhotoUrl);
+                                isUploading = false;
+                                btnContinue.setEnabled(true);
+                                btnContinue.setText("Continue");
+                            })
+                            .addOnFailureListener(e -> {
+                                isUploading = false;
+                                btnContinue.setEnabled(true);
+                                btnContinue.setText("Continue");
+                            })
+                )
                 .addOnFailureListener(e -> {
-                    // Upload failed — keep local URI, proceed without cloud photo
                     isUploading = false;
                     btnContinue.setEnabled(true);
                     btnContinue.setText("Continue");
-                    Toast.makeText(this, "Photo upload failed, will retry later.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Photo upload failed. Check your connection and try again.", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -208,15 +176,15 @@ public class ProfileInfoActivity extends AppCompatActivity {
             }
 
             Map<String, Object> data = new HashMap<>();
-            data.put("fullName", name);
+            data.put("name", name);
             data.put("bio", etBio.getText().toString().trim());
             data.put("dob", etDob.getText().toString().trim());
             if (uploadedPhotoUrl != null) {
-                data.put("photoUrl", uploadedPhotoUrl);
+                data.put("profileImageUrl", uploadedPhotoUrl);
             }
 
             FirebaseFirestore.getInstance()
-                    .collection("Users").document(user.getUid())
+                    .collection("users").document(user.getUid())
                     .set(data, com.google.firebase.firestore.SetOptions.merge())
                     .addOnSuccessListener(unused -> {
                         UserPrefs.saveName(this, name);

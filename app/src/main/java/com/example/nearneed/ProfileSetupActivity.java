@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.material.button.MaterialButton;
 
 import org.json.JSONArray;
@@ -58,9 +59,10 @@ public class ProfileSetupActivity extends AppCompatActivity {
     private RecyclerView rvSearchPredictions;
 
     private int selectedRadius = 10;
-    
+
     private static final int LOCATION_PERMISSION_REQ = 101;
     private FusedLocationProviderClient fusedLocationClient;
+    private CancellationTokenSource cancellationTokenSource;
     private OkHttpClient httpClient;
     private SearchPredictionAdapter searchPredictionAdapter;
     private Handler searchHandler;
@@ -322,7 +324,10 @@ public class ProfileSetupActivity extends AppCompatActivity {
         tvDetectedLocation.setText("Detecting...");
         tvDetectedLocation.setTextColor(0xFF64748B);
 
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(location -> {
+        if (cancellationTokenSource != null) cancellationTokenSource.cancel();
+        cancellationTokenSource = new CancellationTokenSource();
+
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.getToken()).addOnSuccessListener(location -> {
             if (location == null) {
                 fusedLocationClient.getLastLocation().addOnSuccessListener(lastLocation -> {
                     if (lastLocation == null) {
@@ -338,36 +343,63 @@ public class ProfileSetupActivity extends AppCompatActivity {
     }
 
     private void applyResolvedCurrentLocation(double lat, double lng) {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                String detected = addresses.get(0).getAddressLine(0);
-                selectedLat = lat;
-                selectedLng = lng;
-                selectedAddress = detected;
+        geocodeExecutor.submit(() -> {
+            String detected = null;
 
-                tvDetectedLocation.setText(detected);
-                tvDetectedLocation.setTextColor(0xFF0F172A);
-
-                if (etLocationSearch != null) {
-                    etLocationSearch.setText(detected);
-                    etLocationSearch.setSelection(etLocationSearch.getText().length());
+            // Try Android system Geocoder first (off main thread)
+            try {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    detected = addresses.get(0).getAddressLine(0);
                 }
-                if (rvSearchPredictions != null) {
-                    rvSearchPredictions.setVisibility(View.GONE);
-                }
+            } catch (Exception ignored) {}
 
-                btnDetectLocation.setText("Location Confirmed");
-                btnDetectLocation.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF16A34A));
-                btnDetectLocation.setTextColor(android.graphics.Color.WHITE);
-                Toast.makeText(this, "Location set to: " + detected, Toast.LENGTH_SHORT).show();
-            } else {
-                showLocationError("Address not found");
+            // Fallback: Nominatim reverse geocoding (works without Google Play geocoder)
+            if (detected == null || detected.isEmpty()) {
+                try {
+                    String url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lng + "&zoom=16";
+                    Request req = new Request.Builder()
+                            .url(url)
+                            .addHeader("Accept-Language", "en")
+                            .addHeader("User-Agent", "NearNeed-AndroidApp")
+                            .build();
+                    Response response = httpClient.newCall(req).execute();
+                    if (response.isSuccessful() && response.body() != null) {
+                        JSONObject obj = new JSONObject(response.body().string());
+                        detected = obj.optString("display_name", null);
+                    }
+                } catch (Exception ignored) {}
             }
-        } catch (IOException e) {
-            showLocationError("Error getting address");
-        }
+
+            final String finalDetected = detected;
+            runOnUiThread(() -> {
+                if (finalDetected != null && !finalDetected.isEmpty()) {
+                    selectedLat = lat;
+                    selectedLng = lng;
+                    selectedAddress = finalDetected;
+
+                    tvDetectedLocation.setText(finalDetected);
+                    tvDetectedLocation.setTextColor(0xFF0F172A);
+
+                    if (etLocationSearch != null) {
+                        etLocationSearch.setText(finalDetected);
+                        etLocationSearch.setSelection(etLocationSearch.getText().length());
+                    }
+                    if (rvSearchPredictions != null) {
+                        rvSearchPredictions.setVisibility(View.GONE);
+                    }
+
+                    btnDetectLocation.setEnabled(true);
+                    btnDetectLocation.setText("Location Confirmed");
+                    btnDetectLocation.setBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF16A34A));
+                    btnDetectLocation.setTextColor(android.graphics.Color.WHITE);
+                    Toast.makeText(this, "Location set to: " + finalDetected, Toast.LENGTH_SHORT).show();
+                } else {
+                    showLocationError("Address not found");
+                }
+            });
+        });
     }
 
     private void showLocationError(String errorMsg) {
@@ -394,12 +426,11 @@ public class ProfileSetupActivity extends AppCompatActivity {
         if (user == null) return;
 
         java.util.Map<String, Object> data = new java.util.HashMap<>();
-        data.put("location", address);
-        if (!Double.isNaN(selectedLat)) data.put("lat", selectedLat);
-        if (!Double.isNaN(selectedLng)) data.put("lng", selectedLng);
+        if (!Double.isNaN(selectedLat)) data.put("latitude", selectedLat);
+        if (!Double.isNaN(selectedLng)) data.put("longitude", selectedLng);
 
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                .collection("Users").document(user.getUid())
+                .collection("users").document(user.getUid())
                 .set(data, com.google.firebase.firestore.SetOptions.merge());
     }
 
@@ -409,6 +440,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
         if (searchHandler != null && searchRunnable != null) {
             searchHandler.removeCallbacks(searchRunnable);
         }
+        if (cancellationTokenSource != null) cancellationTokenSource.cancel();
         geocodeExecutor.shutdownNow();
     }
 

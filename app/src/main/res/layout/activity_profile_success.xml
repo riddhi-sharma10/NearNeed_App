@@ -20,7 +20,7 @@
         android:id="@+id/successContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginHorizontal="32dp"
         app:cardCornerRadius="32dp"
         app:cardElevation="24dp"
         app:cardBackgroundColor="@color/white"
@@ -141,6 +141,7 @@
                         </LinearLayout>
 
                         <TextView
+                            android:id="@+id/tvJoinedDate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="6dp"

@@ -23,13 +23,13 @@ public class UserEntity {
     public static UserEntity fromProfile(UserProfile profile) {
         UserEntity entity = new UserEntity();
         entity.userId = profile.userId;
-        entity.name = profile.fullName;
+        entity.name = profile.name;
         entity.phone = profile.phone;
-        entity.address = profile.location;
-        entity.profileImageUrl = profile.photoUrl;
+        entity.address = ""; // Location string is deprecated in schema
+        entity.profileImageUrl = profile.profileImageUrl;
         entity.bio = profile.bio;
-        entity.role = "User"; // default
-        entity.rating = 0.0; // default
+        entity.role = profile.role;
+        entity.rating = profile.rating != null ? profile.rating : 0.0;
         entity.jobsCompleted = 0; // default
         return entity;
     }
@@ -37,11 +37,12 @@ public class UserEntity {
     public UserProfile toProfile() {
         UserProfile profile = new UserProfile();
         profile.userId = this.userId;
-        profile.fullName = this.name;
+        profile.name = this.name;
         profile.phone = this.phone;
-        profile.location = this.address;
-        profile.photoUrl = this.profileImageUrl;
+        profile.profileImageUrl = this.profileImageUrl;
         profile.bio = this.bio;
+        profile.role = this.role;
+        profile.rating = this.rating;
         return profile;
     }
 }

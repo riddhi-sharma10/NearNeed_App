@@ -151,7 +151,7 @@ public class EditProfileActivity extends AppCompatActivity {
         if (user == null) return;
 
         FirebaseFirestore.getInstance()
-            .collection("Users").document(user.getUid())
+            .collection("users").document(user.getUid())
             .get()
             .addOnSuccessListener(snapshot -> {
                 if (!snapshot.exists()) return;
@@ -162,7 +162,7 @@ public class EditProfileActivity extends AppCompatActivity {
                     updateBioCount(bio.length());
                 }
 
-                String photoUrl = snapshot.getString("photoUrl");
+                String photoUrl = snapshot.getString("profileImageUrl");
                 if (photoUrl != null && !photoUrl.isEmpty() && ivProfilePhoto != null
                         && pendingPhotoUri == null) {
                     Glide.with(this).load(photoUrl).circleCrop().into(ivProfilePhoto);
@@ -195,7 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void uploadPhotoThenSave(String uid, String name, String bio) {
         StorageReference ref = FirebaseStorage.getInstance()
-            .getReference("profile_photos/" + uid + ".jpg");
+            .getReference("profile_images/" + uid + ".jpg");
 
         ref.putFile(pendingPhotoUri)
             .addOnSuccessListener(task ->
@@ -213,16 +213,16 @@ public class EditProfileActivity extends AppCompatActivity {
     private void persistToFirestore(String uid, String name, String bio, String photoUrl) {
         Map<String, Object> data = new HashMap<>();
         if (!name.isEmpty()) {
-            data.put("fullName", name);
+            data.put("name", name);
             UserPrefs.saveName(this, name);
         }
         data.put("bio", bio);
         if (photoUrl != null) {
-            data.put("photoUrl", photoUrl);
+            data.put("profileImageUrl", photoUrl);
         }
 
         FirebaseFirestore.getInstance()
-            .collection("Users").document(uid)
+            .collection("users").document(uid)
             .set(data, SetOptions.merge())
             .addOnSuccessListener(unused -> {
                 Toast.makeText(this, "Profile updated!", Toast.LENGTH_SHORT).show();

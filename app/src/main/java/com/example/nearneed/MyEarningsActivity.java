@@ -12,101 +12,133 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * Displays real-time earnings for the logged-in provider.
+ *
+ * Data source: Firestore → bookings collection
+ * Filter:      providerId == currentUser.uid AND status == "completed"
+ * Total:       Sum of all booking.amount values (no hardcoded values)
+ * Update:      Automatic via addSnapshotListener — live updates whenever a gig completes
+ */
 public class MyEarningsActivity extends AppCompatActivity {
+
+    private TextView tvTotalBalanceAmount;
+    private TransactionAdapter adapter;
+    private final List<TransactionItem> transactionList = new ArrayList<>();
+    private ListenerRegistration earningsListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_earnings);
 
-        // Back button navigation
+        // Back button
         ImageView btnBack = findViewById(R.id.btn_back);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
+        if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        // Get Intent Extras
-        String specificServiceName = getIntent().getStringExtra("service_name");
-        double specificServiceAmount = getIntent().getDoubleExtra("service_amount", -1);
-
-        // Update UI dynamically
-        TextView tvTotalBalanceLabel = findViewById(R.id.tvTotalBalanceLabel);
-        TextView tvTotalBalanceAmount = findViewById(R.id.tvTotalBalanceAmount);
-        TextView tvRecentActivityLabel = findViewById(R.id.tvRecentActivityLabel);
+        tvTotalBalanceAmount = findViewById(R.id.tvTotalBalanceAmount);
 
         // Setup RecyclerView
         RecyclerView rvTransactions = findViewById(R.id.rv_transactions);
-        List<TransactionItem> transactionList = new ArrayList<>();
-        TransactionAdapter adapter = new TransactionAdapter(transactionList);
+        adapter = new TransactionAdapter(transactionList);
         if (rvTransactions != null) {
             rvTransactions.setLayoutManager(new LinearLayoutManager(this));
             rvTransactions.setAdapter(adapter);
         }
 
-        ApplicationViewModel viewModel = new androidx.lifecycle.ViewModelProvider(this).get(ApplicationViewModel.class);
-        viewModel.getUserApplications().observe(this, apps -> {
-            transactionList.clear();
-            double total = 0;
-            for (Application app : apps) {
-                String status = app.status != null ? app.status.toUpperCase() : "PENDING";
-                double amount = app.proposedBudget != null ? app.proposedBudget : 0.0;
-                
-                if ("COMPLETED".equals(status)) {
-                    total += amount;
-                }
+        attachRealtimeEarningsListener();
+    }
 
-                transactionList.add(new TransactionItem(
-                    app.postTitle != null ? app.postTitle : "Untitled Job",
-                    app.postType != null ? app.postType : "Service",
-                    formatDate(app.appliedAt),
-                    "5.0",
-                    "₹" + (int)amount,
-                    status,
-                    "GIG".equals(app.postType) ? R.drawable.ic_payment_wallet_blue : R.drawable.ic_groceries
-                ));
-            }
-            adapter.notifyDataSetChanged();
-            if (tvTotalBalanceAmount != null) {
-                tvTotalBalanceAmount.setText("₹" + (int)total);
-            }
-        });
+    /**
+     * Attaches a real-time Firestore listener on all bookings where:
+     *   - providerId == current user's UID
+     *   - status     == "completed"
+     *
+     * The listener fires immediately on attach (initial load) and again on every change,
+     * guaranteeing the UI always reflects the true sum of completed gig payments.
+     */
+    private void attachRealtimeEarningsListener() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            if (tvTotalBalanceAmount != null) tvTotalBalanceAmount.setText("₹0");
+            return;
+        }
+
+        earningsListener = FirebaseFirestore.getInstance()
+                .collection("bookings")
+                .whereEqualTo("providerId", user.getUid())
+                .whereEqualTo("status", "completed")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) return;
+
+                    transactionList.clear();
+                    double totalEarnings = 0.0;
+
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        Booking booking = doc.toObject(Booking.class);
+
+                        double amount = booking.amount != null ? booking.amount : 0.0;
+                        totalEarnings += amount;
+
+                        transactionList.add(new TransactionItem(
+                                booking.postTitle != null ? booking.postTitle : "Completed Gig",
+                                booking.postType != null ? booking.postType : "GIG",
+                                formatDate(booking.timestamp),
+                                "5.0",
+                                "₹" + (int) amount,
+                                "COMPLETED",
+                                "GIG".equalsIgnoreCase(booking.postType)
+                                        ? R.drawable.ic_payment_wallet_blue
+                                        : R.drawable.ic_groceries
+                        ));
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    if (tvTotalBalanceAmount != null) {
+                        tvTotalBalanceAmount.setText("₹" + (int) totalEarnings);
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Detach listener to prevent memory leaks
+        if (earningsListener != null) {
+            earningsListener.remove();
+            earningsListener = null;
+        }
     }
 
     private String formatDate(Long timestamp) {
-        if (timestamp == null) return "Just Now";
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMM, hh:mm a", java.util.Locale.getDefault());
-        return sdf.format(new java.util.Date(timestamp));
+        if (timestamp == null) return "—";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
     }
 
-    private List<TransactionItem> getDummyTransactions() {
-        List<TransactionItem> list = new ArrayList<>();
-        list.add(new TransactionItem("Emergency Food Delivery", "Food Support", "Today, 2:45 PM", "4.8", "₹120", "COMPLETED", R.drawable.ic_groceries));
-        list.add(new TransactionItem("Medicine Pick-up", "Medical Help", "Yesterday, 8:15 PM", "5.0", "₹85", "PENDING", R.drawable.ic_solid_firstaid));
-        list.add(new TransactionItem("Leaky Faucet Repair", "Maintenance", "12 Mar, 10:30 AM", "4.7", "₹200", "COMPLETED", R.drawable.ic_solid_wrench));
-        list.add(new TransactionItem("Garden Weeding", "Gardening", "10 Mar, 4:00 PM", "4.9", "₹150", "FAILED", R.drawable.ic_solid_plant));
-        list.add(new TransactionItem("Laptop Setup Help", "IT Services", "08 Mar, 1:20 PM", "5.0", "₹300", "COMPLETED", R.drawable.ic_solid_laptop));
-        list.add(new TransactionItem("Dog Walking", "Pet Care", "05 Mar, 7:30 AM", "4.6", "₹80", "COMPLETED", R.drawable.ic_solid_paw));
-        list.add(new TransactionItem("Deep Cleaning", "Cleaning", "01 Mar, 9:00 AM", "4.8", "₹450", "PENDING", R.drawable.ic_solid_broom));
-        list.add(new TransactionItem("Furniture Assembly", "General Labor", "28 Feb, 3:45 PM", "5.0", "₹250", "COMPLETED", R.drawable.ic_solid_supplies));
-        list.add(new TransactionItem("Car Wash", "Maintenance", "25 Feb, 11:15 AM", "4.5", "₹180", "FAILED", R.drawable.ic_solid_car));
-        list.add(new TransactionItem("Urgent Document Courier", "Delivery", "20 Feb, 5:50 PM", "4.9", "₹95", "COMPLETED", R.drawable.ic_truck_blue));
-        return list;
-    }
+    // ─── Model ────────────────────────────────────────────────────────────────
 
-    // Inner Model Class
     private static class TransactionItem {
-        String title;
-        String category;
-        String date;
-        String rating;
-        String amount;
-        String status;
+        String title, category, date, rating, amount, status;
         int iconResId;
 
-        TransactionItem(String title, String category, String date, String rating, String amount, String status, int iconResId) {
+        TransactionItem(String title, String category, String date,
+                        String rating, String amount, String status, int iconResId) {
             this.title = title;
             this.category = category;
             this.date = date;
@@ -117,7 +149,8 @@ public class MyEarningsActivity extends AppCompatActivity {
         }
     }
 
-    // Inner Adapter Class
+    // ─── Adapter ──────────────────────────────────────────────────────────────
+
     private static class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.ViewHolder> {
 
         private final List<TransactionItem> items;
@@ -129,46 +162,35 @@ public class MyEarningsActivity extends AppCompatActivity {
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_transaction_inr, parent, false);
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_transaction_inr, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             TransactionItem item = items.get(position);
-            holder.tvTitle.setText(item.title);
-            holder.tvCategory.setText(item.category);
-            holder.tvDate.setText(item.date);
-            holder.tvRating.setText(item.rating);
-            holder.tvAmount.setText("+" + item.amount);
-            holder.tvStatus.setText(item.status);
-            
-            // Dynamic text color for status
-            if ("COMPLETED".equalsIgnoreCase(item.status)) {
-                holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#059669")); // Green
-                holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#059669")); // Green
-                holder.tvAmount.setText("+" + item.amount.replace("+", "")); // Ensure single plus
-            } else if ("PENDING".equalsIgnoreCase(item.status)) {
-                holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#D97706")); // Orange
-                holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#D97706")); // Orange
-                holder.tvAmount.setText("+" + item.amount.replace("+", ""));
-            } else if ("FAILED".equalsIgnoreCase(item.status)) {
-                holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#DC2626")); // Red
-                holder.tvAmount.setTextColor(android.graphics.Color.parseColor("#DC2626")); // Red
-                holder.tvAmount.setText(item.amount.replace("+", "")); // No plus sign for failed
+            if (holder.tvTitle    != null) holder.tvTitle.setText(item.title);
+            if (holder.tvCategory != null) holder.tvCategory.setText(item.category);
+            if (holder.tvDate     != null) holder.tvDate.setText(item.date);
+            if (holder.tvRating   != null) holder.tvRating.setText(item.rating);
+            if (holder.tvStatus   != null) {
+                holder.tvStatus.setText(item.status);
+                holder.tvStatus.setTextColor(
+                        android.graphics.Color.parseColor("#059669")); // always green (completed only)
             }
-            
+            if (holder.tvAmount != null) {
+                holder.tvAmount.setText("+" + item.amount);
+                holder.tvAmount.setTextColor(
+                        android.graphics.Color.parseColor("#059669")); // green
+            }
             try {
-                holder.ivIcon.setImageResource(item.iconResId);
-            } catch (Exception e) {
-                // fallback
-            }
+                if (holder.ivIcon != null) holder.ivIcon.setImageResource(item.iconResId);
+            } catch (Exception ignored) {}
         }
 
         @Override
-        public int getItemCount() {
-            return items.size();
-        }
+        public int getItemCount() { return items.size(); }
 
         static class ViewHolder extends RecyclerView.ViewHolder {
             TextView tvTitle, tvCategory, tvDate, tvRating, tvAmount, tvStatus;
@@ -176,13 +198,13 @@ public class MyEarningsActivity extends AppCompatActivity {
 
             ViewHolder(@NonNull View itemView) {
                 super(itemView);
-                tvTitle = itemView.findViewById(R.id.tv_transaction_title);
+                tvTitle    = itemView.findViewById(R.id.tv_transaction_title);
                 tvCategory = itemView.findViewById(R.id.tv_transaction_category);
-                tvDate = itemView.findViewById(R.id.tv_transaction_date);
-                tvRating = itemView.findViewById(R.id.tv_transaction_rating);
-                tvAmount = itemView.findViewById(R.id.tv_transaction_amount);
-                tvStatus = itemView.findViewById(R.id.tv_transaction_status);
-                ivIcon = itemView.findViewById(R.id.iv_transaction_icon);
+                tvDate     = itemView.findViewById(R.id.tv_transaction_date);
+                tvRating   = itemView.findViewById(R.id.tv_transaction_rating);
+                tvAmount   = itemView.findViewById(R.id.tv_transaction_amount);
+                tvStatus   = itemView.findViewById(R.id.tv_transaction_status);
+                ivIcon     = itemView.findViewById(R.id.iv_transaction_icon);
             }
         }
     }

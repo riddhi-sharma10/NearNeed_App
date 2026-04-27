@@ -83,7 +83,16 @@ public class PostViewModel extends ViewModel {
         nearbyPostsListener = PostRepository.observeAllActivePosts(new PostRepository.PostListener() {
             @Override
             public void onPostsLoaded(List<Post> posts) {
-                nearbyPosts.setValue(posts);
+                List<Post> activePosts = new ArrayList<>();
+                if (posts != null) {
+                    for (Post p : posts) {
+                        // Only show active posts to providers
+                        if (p.status == null || "active".equalsIgnoreCase(p.status)) {
+                            activePosts.add(p);
+                        }
+                    }
+                }
+                nearbyPosts.setValue(activePosts);
                 isLoading.setValue(false);
                 errorMessage.setValue(null);
             }
@@ -109,7 +118,15 @@ public class PostViewModel extends ViewModel {
         nearbyPostsListener = PostRepository.observeNearbyPosts(context, latitude, longitude, radiusKm, new PostRepository.PostListener() {
             @Override
             public void onPostsLoaded(List<Post> posts) {
-                nearbyPosts.setValue(posts);
+                List<Post> activePosts = new ArrayList<>();
+                if (posts != null) {
+                    for (Post p : posts) {
+                        if (p.status == null || "active".equalsIgnoreCase(p.status)) {
+                            activePosts.add(p);
+                        }
+                    }
+                }
+                nearbyPosts.setValue(activePosts);
                 isLoading.setValue(false);
                 errorMessage.setValue(null);
             }

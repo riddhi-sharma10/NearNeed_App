@@ -21,12 +21,19 @@ public class ChatViewModel extends AndroidViewModel {
     private MutableLiveData<String> error;
     private ListenerRegistration messageListener;
     private String currentUserId;
+    private String seekerId;
+    private String providerId;
 
     public ChatViewModel(@NonNull Application application) {
         super(application);
         messages = new MutableLiveData<>(new ArrayList<>());
         error = new MutableLiveData<>();
         currentUserId = FirebaseAuth.getInstance().getUid();
+    }
+
+    public void setRoleIds(String seekerId, String providerId) {
+        this.seekerId = seekerId;
+        this.providerId = providerId;
     }
 
     public LiveData<List<ChatMessage>> getMessages() {
@@ -66,7 +73,7 @@ public class ChatViewModel extends AndroidViewModel {
      * Send a text message.
      */
     public void sendMessage(String chatId, String receiverId, String text) {
-        ChatRepository.sendMessage(chatId, currentUserId, receiverId, text, new ChatRepository.SaveCallback() {
+        ChatRepository.sendMessage(chatId, currentUserId, receiverId, text, seekerId, providerId, new ChatRepository.SaveCallback() {
             @Override
             public void onSuccess() {
                 // Handled by real-time listener
@@ -83,7 +90,7 @@ public class ChatViewModel extends AndroidViewModel {
      * Send a media message (Image or Voice).
      */
     public void sendMediaMessage(String chatId, String receiverId, String mediaUrl, boolean isVoice) {
-        ChatRepository.sendMediaMessage(chatId, currentUserId, receiverId, mediaUrl, isVoice, new ChatRepository.SaveCallback() {
+        ChatRepository.sendMediaMessage(chatId, currentUserId, receiverId, mediaUrl, isVoice, seekerId, providerId, new ChatRepository.SaveCallback() {
             @Override
             public void onSuccess() {
                 // Handled by real-time listener

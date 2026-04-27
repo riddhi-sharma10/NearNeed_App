@@ -144,15 +144,19 @@ public class ChatActivity extends AppCompatActivity {
         currentUserId = FirebaseAuth.getInstance().getUid();
         otherUserId = getIntent().getStringExtra("CHAT_USER_ID");
         chatId = getIntent().getStringExtra("CHAT_ID");
+        String seekerId = getIntent().getStringExtra("SEEKER_ID");
+        String providerId = getIntent().getStringExtra("PROVIDER_ID");
 
         if (chatId == null && currentUserId != null && otherUserId != null) {
-            // Generate a stable chatId by sorting UIDs
             String[] ids = {currentUserId, otherUserId};
             Arrays.sort(ids);
             chatId = ids[0] + "_" + ids[1];
         }
 
         setupViewModel();
+        if (chatViewModel != null) {
+            chatViewModel.setRoleIds(seekerId, providerId);
+        }
     }
 
     private void setupViewModel() {
@@ -600,7 +604,11 @@ public class ChatActivity extends AppCompatActivity {
     private void showFullscreenImage(Uri imageUri) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         ImageView imageView = new ImageView(this);
-        imageView.setImageURI(imageUri);
+        com.bumptech.glide.Glide.with(this)
+                .load(imageUri)
+                .placeholder(R.color.divider_subtle)
+                .error(R.drawable.bg_image_placeholder)
+                .into(imageView);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setBackgroundColor(android.graphics.Color.BLACK);
         imageView.setPadding(0, 0, 0, 0);
@@ -692,9 +700,15 @@ public class ChatActivity extends AppCompatActivity {
                 ImageView ivImage = message.isOutgoing ? holder.ivSentImage : holder.ivReceivedImage;
 
                 if (cvImage != null && ivImage != null) {
-                    if (message.imageUri != null) {
+                    if (message.imageUri != null && !message.imageUri.isEmpty()) {
                         cvImage.setVisibility(View.VISIBLE);
-                        ivImage.setImageURI(Uri.parse(message.imageUri));
+                        com.bumptech.glide.Glide.with(ivImage.getContext())
+                                .load(message.imageUri)
+                                .placeholder(R.color.divider_subtle)
+                                .error(R.drawable.bg_image_placeholder)
+                                .centerCrop()
+                                .into(ivImage);
+                        
                         // Click to view fullscreen
                         ivImage.setOnClickListener(v -> showFullscreenImage(Uri.parse(message.imageUri)));
                     } else {

@@ -104,6 +104,13 @@ public class HomeSeekerActivity extends AppCompatActivity {
         setupFAB();
         setupDashboardNotifications();
         setupObservers();
+
+        View fabAiChat = findViewById(R.id.fab_ai_chat);
+        if (fabAiChat != null) {
+            fabAiChat.setOnClickListener(v -> {
+                startActivity(new Intent(this, AiChatActivity.class));
+            });
+        }
     }
 
     private void setupRecyclerViews() {

@@ -182,9 +182,10 @@
                         android:paddingVertical="16dp"
                         android:gravity="center">
                         <TextView
+                            android:id="@+id/tv_provider_jobs_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="142"
+                            android:text="--"
                             android:textColor="#0F172A"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -214,9 +215,10 @@
                         android:paddingVertical="16dp"
                         android:gravity="center">
                         <TextView
+                            android:id="@+id/tv_provider_mtd_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="$4.5k"
+                            android:text="--"
                             android:textColor="#0F172A"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -248,9 +250,10 @@
                         android:paddingVertical="16dp"
                         android:gravity="center">
                         <TextView
+                            android:id="@+id/tv_provider_rating_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4.8"
+                            android:text="--"
                             android:textColor="#0F172A"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -287,9 +290,10 @@
                         android:textColor="#B0C4DE"
                         android:textSize="14sp" />
                     <TextView
+                        android:id="@+id/tv_provider_earnings_main"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$4,500"
+                        android:text="--"
                         android:textColor="@color/white"
                         android:textSize="36sp"
                         android:textStyle="bold"

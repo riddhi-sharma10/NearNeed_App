@@ -54,17 +54,6 @@
         android:text="How would you like to speak with our support team?"
         android:textSize="14sp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnContinueChat"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="12dp"
-        android:text="Continue with Chat"
-        android:textAllCaps="false"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        app:backgroundTint="@color/brand_primary"
-        app:cornerRadius="16dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCallAgent"

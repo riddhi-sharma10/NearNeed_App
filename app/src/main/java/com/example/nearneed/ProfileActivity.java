@@ -16,13 +16,19 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private ListenerRegistration profileListener;
+    private ListenerRegistration postsStatsListener;
+    private ListenerRegistration bookingsStatsListener;
+    private ListenerRegistration reviewsStatsListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,8 @@ public class ProfileActivity extends AppCompatActivity {
                     if (error != null || snapshot == null || !snapshot.exists()) return;
                     applySnapshot(snapshot);
                 });
+
+        bindRealtimeStats(user.getUid());
     }
 
     @Override
@@ -64,6 +72,119 @@ public class ProfileActivity extends AppCompatActivity {
             profileListener.remove();
             profileListener = null;
         }
+        if (postsStatsListener != null) {
+            postsStatsListener.remove();
+            postsStatsListener = null;
+        }
+        if (bookingsStatsListener != null) {
+            bookingsStatsListener.remove();
+            bookingsStatsListener = null;
+        }
+        if (reviewsStatsListener != null) {
+            reviewsStatsListener.remove();
+            reviewsStatsListener = null;
+        }
+    }
+
+    private void bindRealtimeStats(String uid) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        boolean isProvider = RoleManager.isProvider(this);
+
+        if (postsStatsListener != null) postsStatsListener.remove();
+        postsStatsListener = db.collection("posts")
+                .whereEqualTo("createdBy", uid)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+                    int count = snapshot.size();
+
+                    TextView tvPosts = findViewById(R.id.tv_profile_posts_value);
+                    if (tvPosts != null) tvPosts.setText(String.valueOf(count));
+
+                    TextView tvJobs = findViewById(R.id.tv_provider_jobs_count);
+                    if (tvJobs != null) tvJobs.setText(String.valueOf(count));
+                });
+
+        if (bookingsStatsListener != null) bookingsStatsListener.remove();
+        String bookingField = isProvider ? "providerId" : "seekerId";
+        bookingsStatsListener = db.collection("bookings")
+                .whereEqualTo(bookingField, uid)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+
+                    int bookingsCount = snapshot.size();
+                    TextView tvBookings = findViewById(R.id.tv_profile_bookings_value);
+                    if (tvBookings != null) tvBookings.setText(String.valueOf(bookingsCount));
+
+                    // Provider dashboard: keep MTD + earnings card in real-time.
+                    TextView tvMtd = findViewById(R.id.tv_provider_mtd_value);
+                    TextView tvEarningsMain = findViewById(R.id.tv_provider_earnings_main);
+                    if (tvMtd != null || tvEarningsMain != null) {
+                        double monthlyTotal = calculateCurrentMonthEarnings(snapshot);
+                        String formatted = formatInrShort(monthlyTotal);
+                        if (tvMtd != null) tvMtd.setText(formatted);
+                        if (tvEarningsMain != null) tvEarningsMain.setText(formatted);
+                    }
+                });
+
+        if (reviewsStatsListener != null) reviewsStatsListener.remove();
+        reviewsStatsListener = db.collection("reviews")
+                .whereEqualTo("revieweeId", uid)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+
+                    int count = snapshot.size();
+                    double sum = 0.0;
+                    for (QueryDocumentSnapshot doc : snapshot) {
+                        Double value = doc.getDouble("rating");
+                        if (value != null) {
+                            sum += value;
+                        }
+                    }
+                    double avg = count > 0 ? (sum / count) : 0.0;
+                    String ratingText = String.format(Locale.getDefault(), "%.1f", avg);
+
+                    TextView tvSeekerRating = findViewById(R.id.tv_profile_rating_value);
+                    if (tvSeekerRating != null) tvSeekerRating.setText(ratingText);
+
+                    TextView tvProviderRating = findViewById(R.id.tv_provider_rating_value);
+                    if (tvProviderRating != null) tvProviderRating.setText(ratingText);
+                });
+    }
+
+    private double calculateCurrentMonthEarnings(com.google.firebase.firestore.QuerySnapshot snapshot) {
+        if (snapshot == null) return 0.0;
+
+        Calendar now = Calendar.getInstance();
+        int nowYear = now.get(Calendar.YEAR);
+        int nowMonth = now.get(Calendar.MONTH);
+
+        double total = 0.0;
+        for (QueryDocumentSnapshot doc : snapshot) {
+            Long ts = doc.getLong("timestamp");
+            if (ts == null) {
+                ts = doc.getLong("createdAt");
+            }
+            if (ts == null) continue;
+
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(ts);
+            if (c.get(Calendar.YEAR) != nowYear || c.get(Calendar.MONTH) != nowMonth) {
+                continue;
+            }
+
+            Double amount = doc.getDouble("amount");
+            if (amount != null) {
+                total += amount;
+            }
+        }
+        return total;
+    }
+
+    private String formatInrShort(double amount) {
+        if (amount >= 1000) {
+            return String.format(Locale.getDefault(), "₹%.1fk", amount / 1000.0);
+        }
+        return String.format(Locale.getDefault(), "₹%.0f", amount);
     }
 
     private void applyLocalCache() {

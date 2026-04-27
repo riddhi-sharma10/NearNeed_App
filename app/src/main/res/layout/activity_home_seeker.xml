@@ -547,6 +547,18 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_ai_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="90dp"
+        android:src="@drawable/ic_chat_outline"
+        app:backgroundTint="@color/brand_primary"
+        app:tint="@color/white"
+        app:elevation="6dp" />
+
     <include layout="@layout/layout_main_navbar_page" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

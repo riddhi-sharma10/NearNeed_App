@@ -270,6 +270,7 @@
                         android:textSize="11sp" />
 
                     <TextView
+                        android:id="@+id/tv_home_provider_earnings"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
@@ -330,6 +331,7 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tv_home_provider_active_jobs"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
@@ -368,6 +370,7 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tv_home_provider_rating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
@@ -690,6 +693,18 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_ai_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="110dp"
+        android:src="@drawable/ic_chat_outline"
+        app:backgroundTint="@color/brand_primary"
+        app:tint="@color/white"
+        app:elevation="6dp" />
 
     <include
         android:id="@+id/floatingNavbar"

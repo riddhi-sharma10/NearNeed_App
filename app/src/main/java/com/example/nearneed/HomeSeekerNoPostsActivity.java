@@ -61,6 +61,13 @@ public class HomeSeekerNoPostsActivity extends AppCompatActivity {
         DashboardSearchHelper.bindMapSearchShortcut(searchEdit, this);
 
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), true);
+        
+        View fabAiChat = findViewById(R.id.fab_ai_chat);
+        if (fabAiChat != null) {
+            fabAiChat.setOnClickListener(v -> {
+                startActivity(new Intent(this, AiChatActivity.class));
+            });
+        }
     }
 
     private void showLocationPicker() {

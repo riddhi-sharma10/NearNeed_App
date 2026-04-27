@@ -91,10 +91,6 @@ public class HelpSupportActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.dialog_contact_support, null);
         dialog.setContentView(view);
 
-        view.findViewById(R.id.btnContinueChat).setOnClickListener(v -> {
-            dialog.dismiss();
-            startActivity(new android.content.Intent(this, AiChatActivity.class));
-        });
 
         view.findViewById(R.id.btnCallAgent).setOnClickListener(v -> {
             dialog.dismiss();

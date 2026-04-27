@@ -9,6 +9,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +25,7 @@ import java.util.List;
 public class HomeProviderActivity extends AppCompatActivity {
 
     private TextView tvGreeting;
+    private TextView tvDeliveryLocation;
     private PostViewModel postViewModel;
     private UserViewModel userViewModel;
     
@@ -46,6 +48,7 @@ public class HomeProviderActivity extends AppCompatActivity {
         SeekerNavbarController.bind(this, findViewById(android.R.id.content), SeekerNavbarController.TAB_HOME);
 
         tvGreeting = findViewById(R.id.tvGreeting);
+        tvDeliveryLocation = findViewById(R.id.tvDeliveryLocation);
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
@@ -64,6 +67,13 @@ public class HomeProviderActivity extends AppCompatActivity {
             startActivity(new Intent(this, MapsActivity.class))); // View Community visibility in Map
             
         findViewById(R.id.locationSection).setOnClickListener(v -> showLocationPicker());
+
+        View fabAiChat = findViewById(R.id.fab_ai_chat);
+        if (fabAiChat != null) {
+            fabAiChat.setOnClickListener(v -> {
+                startActivity(new Intent(this, AiChatActivity.class));
+            });
+        }
     }
 
     private void setupHeader() {
@@ -123,6 +133,28 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         // Use observeAllActivePosts to ensure everything is synced immediately and globally
         postViewModel.observeAllActivePosts();
+
+        // Observe user profile stats
+        userViewModel.getLocation().observe(this, location -> {
+            if (tvDeliveryLocation != null && location != null && !location.isEmpty()) {
+                tvDeliveryLocation.setText(location);
+            }
+        });
+
+        userViewModel.getMtdEarnings().observe(this, earnings -> {
+            TextView tvEarnings = findViewById(R.id.tv_home_provider_earnings);
+            if (tvEarnings != null) tvEarnings.setText(earnings);
+        });
+
+        userViewModel.getBookingsCount().observe(this, count -> {
+            TextView tvJobs = findViewById(R.id.tv_home_provider_active_jobs);
+            if (tvJobs != null) tvJobs.setText(String.valueOf(count));
+        });
+
+        userViewModel.getRating().observe(this, rating -> {
+            TextView tvRating = findViewById(R.id.tv_home_provider_rating);
+            if (tvRating != null) tvRating.setText(String.format("%.1f", rating));
+        });
     }
 
     private void setupDashboardNotifications() {

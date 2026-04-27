@@ -18,10 +18,12 @@ import androidx.fragment.app.Fragment;
 import com.example.nearneed.databinding.FragmentProfileBinding;
 import com.example.nearneed.databinding.LayoutProfileProviderBinding;
 import com.example.nearneed.databinding.LayoutProfileSeekerBinding;
+import androidx.lifecycle.ViewModelProvider;
 
 public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding binding;
+    private UserViewModel userViewModel;
 
     @Nullable
     @Override
@@ -33,6 +35,8 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // 1. Initial State Initialization
         String currentRole = RoleManager.getRole(requireContext());
@@ -93,6 +97,34 @@ public class ProfileFragment extends Fragment {
             });
         }
 
+        userViewModel.getName().observe(getViewLifecycleOwner(), name -> {
+            if (name != null && !name.isEmpty()) {
+                seekerBinding.tvProfileName.setText(name);
+                String[] parts = name.split(" ");
+                if (parts.length > 0) {
+                    seekerBinding.tvProfileInitials.setText(parts[0].substring(0, 1).toUpperCase());
+                }
+            }
+        });
+
+        userViewModel.getLocation().observe(getViewLifecycleOwner(), location -> {
+            if (location != null && !location.isEmpty()) {
+                seekerBinding.tvProfileLocationSeeker.setText(location);
+            }
+        });
+
+        userViewModel.getPostsCount().observe(getViewLifecycleOwner(), count -> {
+            seekerBinding.tvProfilePostsValue.setText(String.valueOf(count));
+        });
+
+        userViewModel.getBookingsCount().observe(getViewLifecycleOwner(), count -> {
+            seekerBinding.tvProfileBookingsValue.setText(String.valueOf(count));
+        });
+
+        userViewModel.getRating().observe(getViewLifecycleOwner(), rating -> {
+            seekerBinding.tvProfileRatingValue.setText(String.format("%.1f", rating));
+        });
+
         // My Posts
         if (seekerBinding.menuMyPosts != null) {
             seekerBinding.menuMyPosts.setOnClickListener(v -> {
@@ -149,6 +181,35 @@ public class ProfileFragment extends Fragment {
                 Snackbar.make(requireView(), "Opening Provider Profile Editor...", Snackbar.LENGTH_SHORT).show();
             });
         }
+
+        userViewModel.getName().observe(getViewLifecycleOwner(), name -> {
+            if (name != null && !name.isEmpty()) {
+                providerBinding.tvProfileName.setText(name);
+                String[] parts = name.split(" ");
+                if (parts.length > 0) {
+                    providerBinding.tvProfileInitials.setText(parts[0].substring(0, 1).toUpperCase());
+                }
+            }
+        });
+
+        userViewModel.getLocation().observe(getViewLifecycleOwner(), location -> {
+            if (location != null && !location.isEmpty()) {
+                providerBinding.tvProfileLocation.setText(location);
+            }
+        });
+
+        userViewModel.getBookingsCount().observe(getViewLifecycleOwner(), count -> {
+            providerBinding.tvProviderJobsCount.setText(String.valueOf(count));
+        });
+
+        userViewModel.getMtdEarnings().observe(getViewLifecycleOwner(), earnings -> {
+            providerBinding.tvProviderMtdValue.setText(earnings);
+            providerBinding.tvProviderEarningsMain.setText(earnings);
+        });
+
+        userViewModel.getRating().observe(getViewLifecycleOwner(), rating -> {
+            providerBinding.tvProviderRatingValue.setText(String.format("%.1f", rating));
+        });
 
         // My Jobs
         if (providerBinding.menuMyJobs != null) {

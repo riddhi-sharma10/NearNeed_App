@@ -90,6 +90,17 @@ public class RequestApplyBottomSheet extends BottomSheetDialogFragment {
         if (btnSubmit != null) btnSubmit.setOnClickListener(v -> submitApplication());
 
         updatePaymentUI();
+
+        if (postId != null) {
+            ApplicationRepository.checkAlreadyApplied(postId, alreadyApplied -> {
+                if (!alreadyApplied || btnSubmit == null) return;
+                btnSubmit.setEnabled(false);
+                btnSubmit.setText("Already Applied");
+                btnSubmit.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.text_muted)));
+            });
+        }
     }
 
     private void updatePaymentUI() {

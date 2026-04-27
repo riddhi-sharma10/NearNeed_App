@@ -31,6 +31,42 @@ public class ApplicationRepository {
         void onFailure(Exception e);
     }
 
+    public interface AlreadyAppliedCallback {
+        void onResult(boolean alreadyApplied);
+    }
+
+    /**
+     * Check if the current user already has an active (non-withdrawn) application for a post.
+     */
+    public static void checkAlreadyApplied(String postId, AlreadyAppliedCallback callback) {
+        if (postId == null || callback == null) return;
+        String uid = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        if (uid == null) { callback.onResult(false); return; }
+
+        FirebaseFirestore.getInstance()
+                .collection(APPLICATIONS_COLLECTION)
+                .whereEqualTo("postId", postId)
+                .whereEqualTo("applicantId", uid)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if (snapshot == null || snapshot.isEmpty()) {
+                        callback.onResult(false);
+                        return;
+                    }
+                    boolean hasActive = false;
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        String status = doc.getString("status");
+                        if (!"withdrawn".equalsIgnoreCase(status)) {
+                            hasActive = true;
+                            break;
+                        }
+                    }
+                    callback.onResult(hasActive);
+                })
+                .addOnFailureListener(e -> callback.onResult(false));
+    }
+
     /**
      * Submit an application to a post (simple form).
      */

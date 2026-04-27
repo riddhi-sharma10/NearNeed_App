@@ -42,7 +42,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
     
     private RecyclerView rvMyGigs;
     private RecyclerView rvCommunity;
-    private View emptyStateContainer;
+    private View emptyStateContainer, emptyStateCommunityContainer;
     private View postsContentContainer;
     
     private DashboardGigsAdapter gigsAdapter;
@@ -152,6 +152,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
         rvMyGigs = findViewById(R.id.rvMyGigPosts);
         rvCommunity = findViewById(R.id.rvCommunityNeeds);
         emptyStateContainer = findViewById(R.id.empty_state_container);
+        emptyStateCommunityContainer = findViewById(R.id.empty_state_container_community);
         postsContentContainer = findViewById(R.id.posts_content_container);
 
         rvMyGigs.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -173,6 +174,11 @@ public class HomeSeekerActivity extends AppCompatActivity {
             findViewById(R.id.btn_post_now_empty).setOnClickListener(v -> 
                 startActivity(new Intent(this, PostOptionsActivity.class)));
         }
+
+        if (findViewById(R.id.btn_post_community_empty) != null) {
+            findViewById(R.id.btn_post_community_empty).setOnClickListener(v ->
+                startActivity(new Intent(this, PostOptionsActivity.class)));
+        }
     }
 
     private void setupObservers() {
@@ -183,36 +189,32 @@ public class HomeSeekerActivity extends AppCompatActivity {
             postViewModel.getUserPosts().observe(this, posts -> {
                 if (posts == null) return;
                 List<Post> myGigs = new ArrayList<>();
+                List<Post> myCommunity = new ArrayList<>();
                 for (Post p : posts) {
                     if ("GIG".equalsIgnoreCase(p.type)) myGigs.add(p);
+                    else if ("COMMUNITY".equalsIgnoreCase(p.type)) myCommunity.add(p);
                 }
                 gigsAdapter.setPosts(myGigs);
-                
+                communityAdapter.setPosts(myCommunity);
+
                 if (myGigs.isEmpty()) {
                     emptyStateContainer.setVisibility(View.VISIBLE);
-                    postsContentContainer.setVisibility(View.GONE);
+                    rvMyGigs.setVisibility(View.GONE);
                 } else {
                     emptyStateContainer.setVisibility(View.GONE);
-                    postsContentContainer.setVisibility(View.VISIBLE);
+                    rvMyGigs.setVisibility(View.VISIBLE);
+                }
+
+                if (myCommunity.isEmpty()) {
+                    emptyStateCommunityContainer.setVisibility(View.VISIBLE);
+                    rvCommunity.setVisibility(View.GONE);
+                } else {
+                    emptyStateCommunityContainer.setVisibility(View.GONE);
+                    rvCommunity.setVisibility(View.VISIBLE);
                 }
             });
             postViewModel.observeUserPosts(this, userId);
         }
-
-        // Observe global active posts for Community Needs to ensure immediate sync from all users
-        postViewModel.getNearbyPosts().observe(this, posts -> {
-            if (posts == null) return;
-            List<Post> communityPosts = new ArrayList<>();
-            for (Post p : posts) {
-                if ("COMMUNITY".equalsIgnoreCase(p.type)) {
-                    communityPosts.add(p);
-                }
-            }
-            communityAdapter.setPosts(communityPosts);
-        });
-        
-        // Sync globally to ensure all community posts appear immediately
-        postViewModel.observeAllActivePosts();
     }
 
     private void setupFAB() {

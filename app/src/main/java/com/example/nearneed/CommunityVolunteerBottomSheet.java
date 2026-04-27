@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -73,6 +74,17 @@ public class CommunityVolunteerBottomSheet extends BottomSheetDialogFragment {
 
         if (btnSubmit != null) {
             btnSubmit.setOnClickListener(v -> submitVolunteer());
+        }
+
+        if (postId != null) {
+            ApplicationRepository.checkAlreadyApplied(postId, alreadyApplied -> {
+                if (!alreadyApplied || btnSubmit == null) return;
+                btnSubmit.setEnabled(false);
+                btnSubmit.setText("Already Volunteered");
+                btnSubmit.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.text_muted)));
+            });
         }
     }
 

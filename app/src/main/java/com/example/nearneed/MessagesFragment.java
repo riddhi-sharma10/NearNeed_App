@@ -320,6 +320,18 @@ public class MessagesFragment extends Fragment {
         if (displayedChats.isEmpty()) {
             emptyStateContainer.setVisibility(View.VISIBLE);
             rvMessages.setVisibility(View.GONE);
+            if (isAdded() && getContext() != null) {
+                ImageView ivCat = emptyStateContainer.findViewById(R.id.ivEmptyCat);
+                if (ivCat != null) {
+                    com.bumptech.glide.Glide.with(getContext())
+                            .load("https://cataas.com/cat/cute")
+                            .placeholder(R.drawable.avatar_alex)
+                            .error(R.drawable.avatar_alex)
+                            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                            .centerCrop()
+                            .into(ivCat);
+                }
+            }
         } else {
             emptyStateContainer.setVisibility(View.GONE);
             rvMessages.setVisibility(View.VISIBLE);
@@ -501,7 +513,16 @@ public class MessagesFragment extends Fragment {
             holder.tvMessageSnippet.setTypeface(null, chat.isUnread ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
             
             if (holder.ivAvatar != null) {
-                holder.ivAvatar.setImageResource(resolveAvatarForName(chat.name));
+                String imageToLoad = (chat.profileImage != null && !chat.profileImage.isEmpty())
+                        ? chat.profileImage
+                        : getCatUrl(chat.userId);
+                com.bumptech.glide.Glide.with(holder.ivAvatar.getContext())
+                        .load(imageToLoad)
+                        .placeholder(R.drawable.avatar_alex)
+                        .error(R.drawable.avatar_alex)
+                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.ALL)
+                        .centerCrop()
+                        .into(holder.ivAvatar);
             }
 
             holder.itemView.setOnClickListener(v -> openChat(chat));
@@ -536,15 +557,9 @@ public class MessagesFragment extends Fragment {
             }
         }
 
-        private int resolveAvatarForName(String name) {
-            String lower = name == null ? "" : name.toLowerCase();
-            if (lower.endsWith("a") || lower.contains("sharma") || lower.contains("gupta") || lower.contains("kapoor") || lower.contains("jain")) {
-                return R.drawable.avatar_sarah;
-            }
-            if (lower.contains("rahul") || lower.contains("aarav") || lower.contains("aditya") || lower.contains("karan") || lower.contains("deepak") || lower.contains("vishu") || lower.contains("kabir")) {
-                return R.drawable.avatar_david;
-            }
-            return R.drawable.avatar_alex;
+        private String getCatUrl(String userId) {
+            int slot = Math.abs((userId != null ? userId.hashCode() : 0) % 25);
+            return "https://cataas.com/cat/cute?i=" + slot;
         }
     }
 }

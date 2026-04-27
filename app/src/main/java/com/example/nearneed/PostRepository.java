@@ -154,6 +154,7 @@ public class PostRepository {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         post.createdBy = currentUserId;
         post.timestamp = System.currentTimeMillis();
+        if (post.status == null) post.status = "active";
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         com.google.firebase.firestore.DocumentReference docRef = db.collection(POSTS_COLLECTION).document();

@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.concurrent.TimeUnit;
 
@@ -117,19 +118,56 @@ public class OtpEnterActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         boolean isSignup = getIntent().getBooleanExtra("IS_SIGNUP", false);
-                        Intent intent;
-                        if (isSignup) {
-                            intent = new Intent(OtpEnterActivity.this, ProfileInfoActivity.class);
-                        } else {
-                            intent = new Intent(OtpEnterActivity.this, AccountTypeActivity.class);
-                        }
-                        startActivity(intent);
-                        finish();
+                        checkIfUserExistsAndRoute(isSignup);
                     } else {
                         Toast.makeText(OtpEnterActivity.this, "Sign in failed.", Toast.LENGTH_SHORT).show();
                         btnSendOtp.setEnabled(true);
                         btnSendOtp.setText("Get OTP");
                     }
+                });
+    }
+
+    private void checkIfUserExistsAndRoute(boolean isSignup) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore.getInstance().collection("users").document(uid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    boolean userExists = doc.exists() && doc.getString("name") != null;
+                    if (isSignup) {
+                        if (userExists) {
+                            FirebaseAuth.getInstance().signOut();
+                            Toast.makeText(this, "An account already exists for this number. Please log in.", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(this, WelcomeActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            UserPrefs.clear(this);
+                            startActivity(new Intent(this, ProfileInfoActivity.class));
+                            finish();
+                        }
+                    } else { // Login
+                        if (userExists) {
+                            startActivity(new Intent(this, AccountTypeActivity.class));
+                            finish();
+                        } else {
+                            FirebaseAuth.getInstance().signOut();
+                            Toast.makeText(this, "No account found for this number. Please sign up.", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(this, WelcomeActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (isSignup) {
+                        UserPrefs.clear(this);
+                        startActivity(new Intent(this, ProfileInfoActivity.class));
+                    } else {
+                        startActivity(new Intent(this, AccountTypeActivity.class));
+                    }
+                    finish();
                 });
     }
 }

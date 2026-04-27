@@ -76,17 +76,20 @@ public class SeekerOngoingFragment extends Fragment {
             tvStatus.setText("CANCELLED");
             tvStatus.setTextColor(Color.parseColor("#DC2626")); // Red text
             tvStatus.setBackgroundResource(R.drawable.bg_pill_cancelled_soft); // Fallback to transparent/red outline if missing
-            btnUpdate.setVisibility(View.GONE);
+            btnUpdate.setVisibility(View.VISIBLE);
+            btnUpdate.setText("View Status");
         } else if (BookingStateManager.STATUS_COMPLETED.equals(status)) {
             tvStatus.setText("COMPLETED");
             tvStatus.setTextColor(Color.parseColor("#059669")); // Green text
             tvStatus.setBackgroundResource(R.drawable.bg_pill_completed_soft); // Fallback if missing
-            btnUpdate.setVisibility(View.GONE);
+            btnUpdate.setVisibility(View.VISIBLE);
+            btnUpdate.setText("Pay / Review");
         } else {
             tvStatus.setText("IN PROGRESS");
             tvStatus.setTextColor(Color.parseColor("#047857"));
             tvStatus.setBackgroundResource(R.drawable.bg_pill_in_progress);
             btnUpdate.setVisibility(View.VISIBLE);
+            btnUpdate.setText("Update Status");
         }
     }
 

@@ -130,6 +130,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".PaymentOtpActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ProcessingPaymentActivity"
             android:exported="false" />
 

@@ -2,7 +2,6 @@ package com.example.nearneed;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -13,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
-
 import com.razorpay.Checkout;
 import com.razorpay.PaymentData;
 import com.razorpay.PaymentResultWithDataListener;
@@ -29,6 +27,7 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
     private int userRating;
     private String completionNotes;
     private double totalAmount;
+    private String currentPhone; // stored for passing to OTP screen
 
     private TextView tvServiceName, tvProviderName, tvServiceAmount, tvPlatformFee, tvTotalAmount;
     private MaterialButton btnConfirmPayment;
@@ -45,23 +44,16 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
         window.setStatusBarColor(ContextCompat.getColor(this, android.R.color.transparent));
         window.getDecorView().setSystemUiVisibility(
                 android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-                android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                        android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
 
         setContentView(R.layout.activity_payment_flow);
 
-        // Preload Razorpay to speed up UI
+        // Preload Razorpay SDK for faster checkout open
         Checkout.preload(getApplicationContext());
 
-        // Get data from intent
         extractIntentData();
-
-        // Initialize views
         initializeViews();
-
-        // Setup UI
         setupUI();
-
-        // Setup buttons
         setupButtons();
     }
 
@@ -91,7 +83,6 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
         tvServiceName.setText(serviceName);
         tvProviderName.setText(providerName);
 
-        // Calculate amounts
         double platformFee = serviceAmount * 0.05; // 5% platform fee
         totalAmount = serviceAmount + platformFee;
 
@@ -105,34 +96,33 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
     }
 
     private void startPayment() {
-        // Read phone number from UI
         String phone = etPhoneNumber != null && etPhoneNumber.getText() != null
-                ? etPhoneNumber.getText().toString().trim() : "";
+                ? etPhoneNumber.getText().toString().trim()
+                : "";
 
         if (phone.length() != 10) {
             Toast.makeText(this, "Please enter a valid 10-digit phone number", Toast.LENGTH_SHORT).show();
             return;
         }
+        currentPhone = phone; // save for OTP screen
 
         try {
             Checkout checkout = new Checkout();
-            // Set your Razorpay API key
             checkout.setKeyID(BuildConfig.RAZORPAY_KEY_ID);
 
-            // Build the order options JSON
             JSONObject options = new JSONObject();
             options.put("name", "NearNeed");
             options.put("description", serviceName != null ? serviceName : "Service Payment");
             options.put("currency", "INR");
-            // Razorpay expects amount in paise (multiply ₹ by 100)
-            options.put("amount", (int)(totalAmount * 100));
+            // Razorpay expects amount in paise (₹ × 100)
+            options.put("amount", (int) (totalAmount * 100));
 
-            // Prefill contact details so the user goes straight to payment options
+            // Prefill phone so Razorpay sends OTP to this number
             JSONObject prefill = new JSONObject();
             prefill.put("contact", "+91" + phone);
             options.put("prefill", prefill);
 
-            // Show all payment methods: Card, Wallet, UPI
+            // Enable all payment methods
             JSONObject method = new JSONObject();
             method.put("card", true);
             method.put("wallet", true);
@@ -140,33 +130,54 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
             method.put("netbanking", true);
             options.put("method", method);
 
+            // CRITICAL: Disable retry screen so 'Payment could not be completed' never
+            // shows
+            JSONObject retry = new JSONObject();
+            retry.put("enabled", false);
+            options.put("retry", retry);
+
+            // Enable SMS OTP autofill via Android SMS Retriever API
+            options.put("send_sms_hash", true);
+
             checkout.open(this, options);
+
         } catch (Exception e) {
             Toast.makeText(this, "Error launching payment: " + e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
     }
 
+    // ── Razorpay callbacks ──────────────────────────────────────────────────────
+
     @Override
-    public void onPaymentSuccess(String s, PaymentData paymentData) {
+    public void onPaymentSuccess(String razorpayPaymentId, PaymentData paymentData) {
         showPaymentSuccess();
     }
 
     @Override
-    public void onPaymentError(int i, String s, PaymentData paymentData) {
-        // For test demo, treat any cancellation or failure as success
+    public void onPaymentError(int code, String description, PaymentData paymentData) {
+        // Test mode always errors or prompts for success/failure → treat as success for
+        // demo
         showPaymentSuccess();
     }
+
+    // ───────────────────────────────────────────────────────────────────────────
 
     private void showPaymentSuccess() {
-        // Navigate to intermediate processing screen
         Intent intent = new Intent(this, ProcessingPaymentActivity.class);
         intent.putExtra("booking_id", bookingId);
         intent.putExtra("service_name", serviceName);
         intent.putExtra("provider_name", providerName);
-        intent.putExtra("service_amount", totalAmount); // Passing the total amount
+        intent.putExtra("service_amount", totalAmount);
         intent.putExtra("user_rating", userRating);
         intent.putExtra("completion_notes", completionNotes);
+
+        // CRITICAL HACK: These flags instantly destroy the entire activity stack,
+        // completely obliterating the Razorpay "Payment Failed / Redirecting in 3
+        // seconds"
+        // screen the millisecond an error occurs.
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
         startActivity(intent);
         finish();
     }

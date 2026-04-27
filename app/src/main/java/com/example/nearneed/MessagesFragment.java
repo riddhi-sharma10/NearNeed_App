@@ -75,6 +75,7 @@ public class MessagesFragment extends Fragment {
         currentUserId = firebaseUser != null ? firebaseUser.getUid() : null;
 
         currentRole = RoleManager.getRole(requireContext());
+        updateEmptyState();
         if (currentUserId != null && !currentUserId.isEmpty()) {
             subscribeToRealtimeChats();
         } else {

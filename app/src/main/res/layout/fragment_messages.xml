@@ -159,15 +159,23 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingHorizontal="24dp"
+            android:paddingHorizontal="40dp"
+            android:paddingBottom="48dp"
             android:visibility="gone">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/ic_chat_outline"
+                android:layout_marginBottom="20dp"
+                app:tint="#D1D5DB" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No conversations yet"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:text="No messages yet"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-medium"
                 android:textColor="#111827"
                 android:gravity="center"
                 android:layout_marginBottom="8dp" />
@@ -175,11 +183,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Start chatting with service providers or seekers to begin conversations"
+                android:text="When you connect with a provider or seeker, your conversations will appear here."
                 android:textSize="14sp"
-                android:textColor="#6B7280"
+                android:textColor="#9CA3AF"
                 android:gravity="center"
-                android:lineSpacingExtra="2dp" />
+                android:lineSpacingExtra="3dp" />
 
         </LinearLayout>
 

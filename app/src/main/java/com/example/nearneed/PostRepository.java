@@ -114,6 +114,31 @@ public class PostRepository {
     }
 
     /**
+     * Observe a single post by id in real-time.
+     */
+    public static ListenerRegistration observePostById(String postId, PostListener listener) {
+        if (postId == null || postId.trim().isEmpty() || listener == null) return null;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        return db.collection(POSTS_COLLECTION)
+                .document(postId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        listener.onError(e);
+                        return;
+                    }
+                    if (snapshot != null && snapshot.exists()) {
+                        java.util.List<Post> posts = new java.util.ArrayList<>();
+                        Post post = fromSnapshot(snapshot);
+                        if (post != null) {
+                            posts.add(post);
+                        }
+                        listener.onPostsLoaded(posts);
+                    }
+                });
+    }
+
+    /**
      * Create a new post.
      */
     public static void createPost(Post post, SaveCallback callback) {

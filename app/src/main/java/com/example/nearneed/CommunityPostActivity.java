@@ -4,8 +4,11 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
+import java.util.ArrayList;
 
 public class CommunityPostActivity extends AppCompatActivity {
+
+    private String selectedCategory = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +38,10 @@ public class CommunityPostActivity extends AppCompatActivity {
                     // Show keyboard automatically
                     android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager) getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(etOtherSpec, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+                    selectedCategory = etOtherSpec.getText().toString().trim();
                 } else {
                     etOtherSpec.setVisibility(android.view.View.GONE);
+                    selectedCategory = ((android.widget.TextView) v).getText().toString().trim();
                 }
             });
         }
@@ -47,8 +52,12 @@ public class CommunityPostActivity extends AppCompatActivity {
                 android.widget.TextView chipOther = findViewById(R.id.chipOther);
                 if (s.length() > 0) {
                     chipOther.setText(s);
+                    selectedCategory = s.toString().trim();
                 } else {
                     chipOther.setText("Other");
+                    if (selectedCategory != null && selectedCategory.equalsIgnoreCase("Other")) {
+                        selectedCategory = "";
+                    }
                 }
             }
             public void afterTextChanged(android.text.Editable s) {}
@@ -88,6 +97,15 @@ public class CommunityPostActivity extends AppCompatActivity {
                 }
 
                 android.content.Intent intent = new android.content.Intent(this, CommunityPostStep2Activity.class);
+                intent.putExtra("post_type", "community");
+                intent.putExtra("title", etTitle.getText().toString().trim());
+                intent.putExtra("description", etDesc.getText().toString().trim());
+                intent.putExtra("category", selectedCategory);
+                ArrayList<String> imageUris = new ArrayList<>();
+                for (android.net.Uri uri : photoUris) {
+                    imageUris.add(uri.toString());
+                }
+                intent.putStringArrayListExtra("selected_images", imageUris);
                 startActivity(intent);
             });
         }

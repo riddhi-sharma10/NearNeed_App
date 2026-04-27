@@ -263,7 +263,6 @@ public class HomeSeekerActivity extends AppCompatActivity {
                 intent.putExtra("budget", post.budget);
                 intent.putExtra("description", post.description);
                 intent.putExtra("distance", post.distance);
-                intent.putExtra("duration", post.duration);
                 intent.putExtra("address", post.location);
                 v.getContext().startActivity(intent);
             });

@@ -202,6 +202,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             initSeekerUI(view);
         }
 
+        if (getActivity() != null) {
+            SeekerNavbarController.bind(getActivity(), view, SeekerNavbarController.TAB_MAP);
+        }
+
         return view;
     }
 

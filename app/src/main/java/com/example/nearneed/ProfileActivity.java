@@ -27,6 +27,7 @@ public class ProfileActivity extends AppCompatActivity {
         String role = RoleManager.getRole(this);
         if (RoleManager.ROLE_PROVIDER.equals(role)) {
             setContentView(R.layout.layout_profile_provider);
+            setupProviderStats();
         } else {
             setContentView(R.layout.layout_profile_seeker);
         }
@@ -60,6 +61,33 @@ public class ProfileActivity extends AppCompatActivity {
             profileListener.remove();
             profileListener = null;
         }
+    }
+
+    private void setupProviderStats() {
+        UserViewModel userViewModel = new androidx.lifecycle.ViewModelProvider(this).get(UserViewModel.class);
+
+        userViewModel.getProviderJobsCount().observe(this, count -> {
+            TextView tvJobs = findViewById(R.id.tv_provider_jobs_count);
+            if (tvJobs != null) tvJobs.setText(String.valueOf(count));
+        });
+
+        userViewModel.getMtdEarnings().observe(this, earnings -> {
+            TextView tvTotal = findViewById(R.id.tv_provider_mtd_value);
+            if (tvTotal != null) tvTotal.setText(earnings);
+
+            TextView tvMainEarnings = findViewById(R.id.tv_provider_earnings_main);
+            if (tvMainEarnings != null) tvMainEarnings.setText(earnings);
+        });
+
+        userViewModel.getRating().observe(this, rating -> {
+            TextView tvRating = findViewById(R.id.tv_provider_rating_value);
+            if (tvRating != null) tvRating.setText(String.format("%.1f", rating));
+        });
+
+        userViewModel.getWeeklyJobsCount().observe(this, count -> {
+            TextView tvWeekly = findViewById(R.id.tv_provider_weekly_jobs);
+            if (tvWeekly != null) tvWeekly.setText(count + " jobs completed this week");
+        });
     }
 
     private void applyLocalCache() {

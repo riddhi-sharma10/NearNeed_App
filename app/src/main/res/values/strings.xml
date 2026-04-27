@@ -187,7 +187,7 @@
     <string name="status_available">Available</string>
     <string name="status_busy">Busy</string>
     <string name="status_offline">Offline</string>
-    <string name="earnings_mtd">EARNINGS MTD</string>
+    <string name="earnings_mtd">TOTAL EARNINGS</string>
     <string name="earnings_amount">₹1,250.00</string>
     <string name="earnings_growth">+12% from last month</string>
     <string name="active_jobs_label">Active Jobs</string>

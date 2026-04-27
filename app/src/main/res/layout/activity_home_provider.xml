@@ -280,18 +280,7 @@
                         android:textSize="36sp"
                         android:letterSpacing="-0.02" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:gravity="center_vertical"
-                        app:drawableStartCompat="@drawable/ic_trending_up"
-                        android:drawablePadding="6dp"
-                        app:drawableTint="#065F46"
-                        android:fontFamily="sans-serif-black"
-                        android:text="@string/earnings_growth"
-                        android:textColor="#065F46"
-                        android:textSize="14sp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

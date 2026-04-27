@@ -85,7 +85,7 @@ public class UserRepository {
                 if (snapshot != null) {
                     providerJobsCountLiveData.postValue(snapshot.size());
                     updateRating(snapshot, "seekerRating");
-                    calculateMTDEarnings(snapshot);
+                    calculateTotalEarnings(snapshot);
                     calculateWeeklyJobs(snapshot);
                 }
             });
@@ -107,21 +107,20 @@ public class UserRepository {
         }
     }
 
-    private void calculateMTDEarnings(com.google.firebase.firestore.QuerySnapshot snapshot) {
+    private void calculateTotalEarnings(com.google.firebase.firestore.QuerySnapshot snapshot) {
         if (snapshot == null) return;
-        double mtd = 0;
-        long startOfMonth = getStartOfMonthTimestamp();
+        double total = 0;
         for (DocumentSnapshot doc : snapshot.getDocuments()) {
-            Long timestamp = doc.getLong("timestamp");
+            String status = doc.getString("status");
             Double amount = doc.getDouble("amount");
-            if (timestamp != null && timestamp >= startOfMonth && amount != null) {
-                mtd += amount;
+            if ("completed".equalsIgnoreCase(status) && amount != null) {
+                total += amount;
             }
         }
-        if (mtd >= 1000) {
-            mtdEarningsLiveData.postValue(String.format("₹%.1fk", mtd / 1000.0));
+        if (total >= 1000) {
+            mtdEarningsLiveData.postValue(String.format("₹%.1fk", total / 1000.0));
         } else {
-            mtdEarningsLiveData.postValue(String.format("₹%.0f", mtd));
+            mtdEarningsLiveData.postValue(String.format("₹%.0f", total));
         }
     }
 

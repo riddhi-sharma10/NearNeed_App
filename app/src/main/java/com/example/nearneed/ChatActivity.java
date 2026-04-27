@@ -76,6 +76,7 @@ public class ChatActivity extends AppCompatActivity {
     private String otherUserId;
     private String currentUserId;
     private ChatViewModel chatViewModel;
+    private Runnable progressUpdater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +156,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setupViewModel() {
-        ChatViewModel chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
+        chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
         
         chatViewModel.getMessages().observe(this, messages -> {
             messageList.clear();
@@ -186,9 +187,6 @@ public class ChatActivity extends AppCompatActivity {
         }
         // Scroll to the latest message
         rvMessages.scrollToPosition(messageList.size() - 1);
-
-        // Initialize ViewModel
-        chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
 
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
@@ -518,6 +516,22 @@ public class ChatActivity extends AppCompatActivity {
             releaseMediaPlayer();
             Toast.makeText(this, "Playback failed", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void startProgressLoop() {
+        handler.removeCallbacks(progressUpdater);
+        progressUpdater = new Runnable() {
+            @Override
+            public void run() {
+                if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition < messageList.size()) {
+                    ChatMessage msg = messageList.get(activeAudioPosition);
+                    msg.progress = getMediaPlayerProgress();
+                    adapter.notifyItemChanged(activeAudioPosition, PAYLOAD_AUDIO_STATE);
+                    handler.postDelayed(this, 100);
+                }
+            }
+        };
+        handler.post(progressUpdater);
     }
 
     private void stopAllAudio() {

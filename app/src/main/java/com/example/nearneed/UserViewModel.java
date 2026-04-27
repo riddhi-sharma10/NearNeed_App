@@ -4,27 +4,27 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 public class UserViewModel extends ViewModel {
-    private final androidx.lifecycle.MutableLiveData<String> name = new androidx.lifecycle.MutableLiveData<>();
-    private final androidx.lifecycle.MutableLiveData<String> location = new androidx.lifecycle.MutableLiveData<>();
+    private final UserRepository userRepository;
+
+    public UserViewModel() {
+        this.userRepository = new UserRepository();
+    }
 
     public LiveData<String> getName() {
-        return name;
+        return userRepository.getName();
     }
 
     public LiveData<String> getLocation() {
-        return location;
-    }
-
-    public void saveName(String name) {
-        this.name.setValue(name);
+        return userRepository.getLocation();
     }
 
     public void saveLocation(String location) {
-        this.location.setValue(location);
+        userRepository.saveLocation(location);
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
+        userRepository.cleanup();
     }
 }

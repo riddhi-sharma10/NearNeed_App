@@ -68,11 +68,17 @@ public class HomeProviderActivity extends AppCompatActivity {
 
     private void setupHeader() {
         String cachedName = UserPrefs.getName(this);
-        if (!cachedName.isEmpty()) tvGreeting.setText("Hello, " + cachedName);
+        if (!cachedName.isEmpty()) {
+            tvGreeting.setText("Hello, " + cachedName);
+        } else {
+            tvGreeting.setText("Hello, Loading...");
+        }
 
         userViewModel.getName().observe(this, name -> {
-            tvGreeting.setText("Hello, " + name);
-            UserPrefs.saveName(this, name);
+            if (name != null && !name.isEmpty() && !name.equals("Hello")) {
+                tvGreeting.setText("Hello, " + name);
+                UserPrefs.saveName(this, name);
+            }
         });
     }
 

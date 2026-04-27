@@ -68,19 +68,33 @@ public class HomeSeekerActivity extends AppCompatActivity {
         // Show cached values
         String cachedName = UserPrefs.getName(this);
         String cachedLocation = UserPrefs.getLocation(this);
-        if (!cachedName.isEmpty()) tvGreeting.setText("Hello, " + cachedName);
-        if (cachedLocation != null && !cachedLocation.isEmpty()) tvDeliveryLocation.setText(cachedLocation);
+        
+        if (!cachedName.isEmpty()) {
+            tvGreeting.setText("Hello, " + cachedName);
+        } else {
+            tvGreeting.setText("Hello, Loading...");
+        }
+        
+        if (cachedLocation != null && !cachedLocation.isEmpty()) {
+            tvDeliveryLocation.setText(cachedLocation);
+        } else {
+            tvDeliveryLocation.setText("Loading location...");
+        }
 
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
 
         userViewModel.getName().observe(this, name -> {
-            tvGreeting.setText("Hello, " + name);
-            UserPrefs.saveName(this, name);
+            if (name != null && !name.isEmpty() && !name.equals("Hello")) {
+                tvGreeting.setText("Hello, " + name);
+                UserPrefs.saveName(this, name);
+            }
         });
         userViewModel.getLocation().observe(this, location -> {
-            tvDeliveryLocation.setText(location);
-            UserPrefs.saveLocation(this, location);
+            if (location != null && !location.isEmpty() && !location.contains("Fetching")) {
+                tvDeliveryLocation.setText(location);
+                UserPrefs.saveLocation(this, location);
+            }
         });
 
         findViewById(R.id.locationSection).setOnClickListener(v -> showLocationPicker());

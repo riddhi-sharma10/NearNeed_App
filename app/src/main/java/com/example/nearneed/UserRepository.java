@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class UserRepository {
 
-    private final MutableLiveData<String> nameLiveData = new MutableLiveData<>("Hello");
-    private final MutableLiveData<String> locationLiveData = new MutableLiveData<>("Fetching location...");
+    private final MutableLiveData<String> nameLiveData = new MutableLiveData<>("");
+    private final MutableLiveData<String> locationLiveData = new MutableLiveData<>("");
     private ListenerRegistration firestoreListener;
 
     public UserRepository() {

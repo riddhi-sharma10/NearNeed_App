@@ -54,8 +54,8 @@
     <string name="txt_skip_for_now">Skip for now</string>
     <string name="txt_identity_verified">Identity Verified</string>
     <string name="txt_your_neighbour_profile_now_sho">Your Neighbour profile now shows a verified\nbadge. People can trust your posts.</string>
-    <string name="txt_abhinav_oberoi">Abhinav Oberoi</string>
-    <string name="txt_verified_neighbour_downtown">Verified Neighbour • Downtown</string>
+    <string name="txt_user_display_name">User Name</string>
+    <string name="txt_verified_neighbour_location">Verified Neighbour • Location</string>
     <string name="txt_go_to_dashboard">Go to Dashboard</string>
     <string name="txt_welcome_back">welcome back!</string>
     <string name="txt_enter_your_number">Enter your number</string>
@@ -149,13 +149,13 @@
 
     <string name="txt_pay_status_title">Payment Status</string>
     <string name="txt_pay_confirmed">Payment confirmed.</string>
-    <string name="txt_pay_sent_to">₹250 sent to Rahul S.</string>
-    <string name="txt_pay_txn_id">TRANSACTION ID TXN9823410</string>
+    <string name="txt_pay_sent_to">Amount sent to recipient</string>
+    <string name="txt_pay_txn_id">TRANSACTION ID</string>
     <string name="txt_pay_save_receipt">Save receipt</string>
     <string name="txt_pay_status_label">Status</string>
     <string name="txt_pay_success">Successful</string>
     <string name="txt_pay_recipient_label">Recipient</string>
-    <string name="txt_pay_rate_button">Rate Rahul S. →</string>
+    <string name="txt_pay_rate_button">Rate Recipient →</string>
     <string name="txt_pay_rate_later">I\'ll rate later</string>
     <string name="txt_applicants_title">Applicants</string>
     <string name="txt_demo_gig_title">Plumbing Repair - Kitchen Sink</string>
@@ -166,23 +166,23 @@
     <string name="txt_all_applicants">All Applicants</string>
     <string name="txt_highly_rated">Highly Rated</string>
     <string name="txt_verified_only">Verified Only</string>
-    <string name="txt_demo_rahul">Rahul Sharma</string>
-    <string name="txt_demo_rating">4.9 (124 reviews)</string>
-    <string name="txt_demo_pro">Pro Handyman</string>
-    <string name="txt_demo_bid">₹250</string>
-    <string name="txt_demo_strike">₹300</string>
+    <string name="txt_demo_rahul">Name</string>
+    <string name="txt_demo_rating">5.0 (0 reviews)</string>
+    <string name="txt_demo_pro">Skilled Neighbor</string>
+    <string name="txt_demo_bid">₹0</string>
+    <string name="txt_demo_strike">₹0</string>
     <string name="txt_prefers_upi">Prefers UPI</string>
     <string name="txt_demo_bid_msg">I have 5 years of experience in kitchen plumbing. Can fix this within 30 mins. Available this evening.</string>
     <string name="txt_view_profile">View Profile</string>
     <string name="txt_accept_bid">Accept Bid</string>
     <string name="txt_settings">Settings</string>
     <string name="txt_profile_image">Profile Image</string>
-    <string name="txt_user_name">Abhinav Oberoi</string>
-    <string name="txt_user_location">Downtown, NY</string>
+    <string name="txt_user_name">Name</string>
+    <string name="txt_user_location">Location</string>
 
     <!-- Provider Home Screen Strings -->
     <string name="title_curated_commons">The Curated Commons</string>
-    <string name="greeting_marcus">Good Morning, Marcus</string>
+    <string name="greeting_user">Hello</string>
     <string name="subtext_impact">Ready for today\'s community impact?</string>
     <string name="status_available">Available</string>
     <string name="status_busy">Busy</string>

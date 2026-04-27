@@ -180,17 +180,20 @@ public class EditProfileActivity extends AppCompatActivity {
             return;
         }
 
+        TextInputEditText etFullName = findViewById(R.id.etFullName);
+        String name = etFullName != null && etFullName.getText() != null
+            ? etFullName.getText().toString().trim() : "";
         String bio = etBio != null && etBio.getText() != null
             ? etBio.getText().toString().trim() : "";
 
         if (pendingPhotoUri != null) {
-            uploadPhotoThenSave(user.getUid(), bio);
+            uploadPhotoThenSave(user.getUid(), name, bio);
         } else {
-            persistToFirestore(user.getUid(), bio, null);
+            persistToFirestore(user.getUid(), name, bio, null);
         }
     }
 
-    private void uploadPhotoThenSave(String uid, String bio) {
+    private void uploadPhotoThenSave(String uid, String name, String bio) {
         StorageReference ref = FirebaseStorage.getInstance()
             .getReference("profile_photos/" + uid + ".jpg");
 
@@ -199,7 +202,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 ref.getDownloadUrl().addOnSuccessListener(downloadUri -> {
                     String url = downloadUri.toString();
                     UserPrefs.savePhotoUri(this, url);
-                    persistToFirestore(uid, bio, url);
+                    persistToFirestore(uid, name, bio, url);
                 })
                 .addOnFailureListener(e ->
                     Toast.makeText(this, "Failed to get photo URL", Toast.LENGTH_SHORT).show()))
@@ -207,8 +210,12 @@ public class EditProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
-    private void persistToFirestore(String uid, String bio, String photoUrl) {
+    private void persistToFirestore(String uid, String name, String bio, String photoUrl) {
         Map<String, Object> data = new HashMap<>();
+        if (!name.isEmpty()) {
+            data.put("fullName", name);
+            UserPrefs.saveName(this, name);
+        }
         data.put("bio", bio);
         if (photoUrl != null) {
             data.put("photoUrl", photoUrl);

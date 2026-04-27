@@ -48,20 +48,28 @@ public class BookingRepository {
         booking.createdAt = System.currentTimeMillis();
         booking.status = "confirmed";
         booking.paymentStatus = "pending";
-
         booking.participants = java.util.Arrays.asList(seekerId, providerId);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(BOOKINGS_COLLECTION)
-                .document(bookingId)
-                .set(booking)
-                .addOnSuccessListener(aVoid -> {
-                    // Notify provider they have been booked
-                    NotificationCenter.sendNotificationToUser(providerId, "You've been Booked!", 
-                        "You have a new booking for: " + postTitle);
-                    callback.onSuccess(bookingId);
-                })
-                .addOnFailureListener(callback::onFailure);
+        
+        // Fetch names for denormalization
+        db.collection("Users").document(seekerId).get().addOnSuccessListener(seekerDoc -> {
+            if (seekerDoc.exists()) booking.seekerName = seekerDoc.getString("fullName");
+            
+            db.collection("Users").document(providerId).get().addOnSuccessListener(providerDoc -> {
+                if (providerDoc.exists()) booking.providerName = providerDoc.getString("fullName");
+                
+                db.collection(BOOKINGS_COLLECTION)
+                        .document(bookingId)
+                        .set(booking)
+                        .addOnSuccessListener(aVoid -> {
+                            NotificationCenter.sendNotificationToUser(providerId, "You've been Booked!", 
+                                "You've been booked for: " + postTitle);
+                            callback.onSuccess(bookingId);
+                        })
+                        .addOnFailureListener(callback::onFailure);
+            });
+        });
     }
 
     /**

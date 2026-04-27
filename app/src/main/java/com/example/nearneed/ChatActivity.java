@@ -606,8 +606,8 @@ public class ChatActivity extends AppCompatActivity {
         ImageView imageView = new ImageView(this);
         com.bumptech.glide.Glide.with(this)
                 .load(imageUri)
-                .placeholder(R.color.bg_grey_light)
-                .error(R.drawable.ic_image_placeholder)
+                .placeholder(R.color.divider_subtle)
+                .error(R.drawable.bg_image_placeholder)
                 .into(imageView);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setBackgroundColor(android.graphics.Color.BLACK);
@@ -704,8 +704,8 @@ public class ChatActivity extends AppCompatActivity {
                         cvImage.setVisibility(View.VISIBLE);
                         com.bumptech.glide.Glide.with(ivImage.getContext())
                                 .load(message.imageUri)
-                                .placeholder(R.color.bg_grey_light)
-                                .error(R.drawable.ic_image_placeholder)
+                                .placeholder(R.color.divider_subtle)
+                                .error(R.drawable.bg_image_placeholder)
                                 .centerCrop()
                                 .into(ivImage);
                         

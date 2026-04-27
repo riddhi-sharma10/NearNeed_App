@@ -6,9 +6,16 @@ import android.graphics.PorterDuff;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.Arrays;
 
 public final class SeekerNavbarController {
 
@@ -129,11 +136,16 @@ public final class SeekerNavbarController {
 
         if (chatContainer != null) {
             chatContainer.setOnClickListener(v -> {
-                if (!(activity instanceof MessagesActivity)) {
+                if (activity instanceof MessagesActivity) return;
+                
+                String role = RoleManager.getRole(activity);
+                if (RoleManager.ROLE_SEEKER.equals(role)) {
+                    openAcceptedProviderChat(activity);
+                } else {
+                    // Providers and others go to full list
                     Intent intent = new Intent(activity, MessagesActivity.class);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    // Don't finish Home activity so user can come back easily
                 }
             });
         }
@@ -153,13 +165,51 @@ public final class SeekerNavbarController {
         View chatBadge = root.findViewById(R.id.nav_chat_badge);
         if (chatBadge != null) {
             NotificationCenter.listenChatUnreadCount(count -> {
-                if (count > 0) {
-                    chatBadge.setVisibility(View.VISIBLE);
-                } else {
-                    chatBadge.setVisibility(View.GONE);
-                }
+                activity.runOnUiThread(() -> {
+                    if (activity.isFinishing()) return;
+                    if (count > 0) {
+                        chatBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        chatBadge.setVisibility(View.GONE);
+                    }
+                });
             });
         }
+    }
+
+    /**
+     * Logic for Seeker to open direct chat with accepted provider or fall back to list
+     */
+    private static void openAcceptedProviderChat(Activity activity) {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null) return;
+
+        FirebaseFirestore.getInstance()
+                .collection("bookings")
+                .whereEqualTo("seekerId", currentUid)
+                .whereIn("status", Arrays.asList("upcoming", "in_progress", "confirmed"))
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots != null && !snapshots.isEmpty() && activity instanceof AppCompatActivity) {
+                        DocumentSnapshot doc = snapshots.getDocuments().get(0);
+                        String providerId = doc.getString("providerId");
+                        String providerName = doc.getString("providerName");
+                        
+                        if (providerId != null) {
+                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider")
+                                    .show(((AppCompatActivity)activity).getSupportFragmentManager(), "ChatBottomSheet");
+                        } else {
+                            activity.startActivity(new Intent(activity, MessagesActivity.class));
+                        }
+                    } else {
+                        activity.startActivity(new Intent(activity, MessagesActivity.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    activity.startActivity(new Intent(activity, MessagesActivity.class));
+                });
     }
 
     // Legacy method for backward compatibility

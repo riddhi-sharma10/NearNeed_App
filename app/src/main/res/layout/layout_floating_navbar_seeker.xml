@@ -106,6 +106,16 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_nav_messages"
                 app:tint="#94A3B8" />
+
+            <View
+                android:id="@+id/nav_chat_badge"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_dot_blue"
+                android:visibility="gone" />
         </FrameLayout>
 
         <FrameLayout

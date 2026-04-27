@@ -31,32 +31,22 @@ public class BookingsPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        if (RoleManager.ROLE_PROVIDER.equals(userRole)) {
-            switch (position) {
-                case 0: return new ProviderUpcomingFragment();
-                case 1: return new ProviderOngoingFragment();
-                case 2: return new ProviderPastFragment();
-                default: return new ProviderUpcomingFragment();
-            }
-        } else {
-            // Default to Seeker - pass filter type to fragments
-            Fragment fragment;
-            switch (position) {
-                case 0: fragment = new SeekerUpcomingFragment(); break;
-                case 1: fragment = new SeekerOngoingFragment(); break;
-                case 2: fragment = new SeekerPastFragment(); break;
-                default: fragment = new SeekerUpcomingFragment();
-            }
-
-            // Pass filter type to fragment
-            if (filterType != null) {
-                Bundle args = new Bundle();
-                args.putString("filter_type", filterType);
-                fragment.setArguments(args);
-            }
-
-            return fragment;
+        String tab;
+        switch (position) {
+            case 0:
+                tab = "upcoming";
+                break;
+            case 1:
+                tab = "ongoing";
+                break;
+            case 2:
+                tab = "past";
+                break;
+            default:
+                tab = "upcoming";
+                break;
         }
+        return BookingsRealtimeFragment.newInstance(userRole, tab, filterType);
     }
 
     @Override

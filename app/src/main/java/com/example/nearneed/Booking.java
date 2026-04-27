@@ -22,6 +22,7 @@ public class Booking {
 
     // Extended fields used by BookingEntity and UI
     public Long createdAt;
+    public Long scheduledDate;
     public Double amount;
 
     public Booking() {}

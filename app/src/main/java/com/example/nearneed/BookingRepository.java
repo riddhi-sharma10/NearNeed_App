@@ -33,7 +33,7 @@ public class BookingRepository {
      * Create a new booking (simple form).
      */
     public static void createBooking(String postId, String seekerId, String providerId, SaveCallback callback) {
-        createBooking(postId, null, null, seekerId, providerId, null, callback);
+        createBooking(postId, null, null, seekerId, providerId, null, null, callback);
     }
 
     /**
@@ -41,7 +41,7 @@ public class BookingRepository {
      */
     public static void createBooking(String postId, String postTitle, String postType,
                                      String seekerId, String providerId, String applicationId,
-                                     SaveCallback callback) {
+                                     Long scheduledDate, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
         Booking booking = new Booking(postId, seekerId, providerId);
@@ -49,6 +49,7 @@ public class BookingRepository {
         booking.postType = postType;
         booking.applicationId = applicationId;
         booking.createdAt = System.currentTimeMillis();
+        booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(BOOKINGS_COLLECTION)
@@ -79,8 +80,12 @@ public class BookingRepository {
      * Observe bookings for current user (Context overload used by ViewModel).
      */
     public static ListenerRegistration observeUserBookings(Context context, BookingListener listener) {
+        if (context == null || listener == null) return null;
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return null;
+
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        return observeUserBookings(uid, "seeker", listener);
+        // Return unified listener that handles both roles for a truly real-time experience
+        return observeUserBookings(uid, "all", listener);
     }
 
     /**
@@ -151,12 +156,22 @@ public class BookingRepository {
     public static ListenerRegistration observeUserBookings(String userId, String role, BookingListener listener) {
         if (userId == null || listener == null) return null;
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        
+        if ("all".equalsIgnoreCase(role)) {
+            // Complex case: Listen to both. 
+            // For simplicity in a single ListenerRegistration return, we can use two queries 
+            // but we need a way to combine them. 
+            // Alternatively, the ViewModel can manage two listeners.
+            // For now, let's implement a merged listener if role is "all".
+            return observeAllUserBookings(userId, listener);
+        }
+
         String field = "seekerId";
-        if ("provider".equals(role)) {
+        if (RoleManager.ROLE_PROVIDER.equalsIgnoreCase(role) || "provider".equalsIgnoreCase(role)) {
             field = "providerId";
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         return db.collection(BOOKINGS_COLLECTION)
                 .whereEqualTo(field, userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -176,6 +191,58 @@ public class BookingRepository {
                         listener.onBookingsLoaded(bookings);
                     }
                 });
+    }
+
+    private static ListenerRegistration observeAllUserBookings(String userId, BookingListener listener) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final List<Booking>[] seekerResult = new List[]{new ArrayList<>()};
+        final List<Booking>[] providerResult = new List[]{new ArrayList<>()};
+
+        Runnable combiner = () -> {
+            List<Booking> combined = new ArrayList<>();
+            combined.addAll(seekerResult[0]);
+            combined.addAll(providerResult[0]);
+            // Sort by timestamp desc
+            java.util.Collections.sort(combined, (b1, b2) -> {
+                Long t1 = b1.timestamp != null ? b1.timestamp : 0L;
+                Long t2 = b2.timestamp != null ? b2.timestamp : 0L;
+                return t2.compareTo(t1);
+            });
+            listener.onBookingsLoaded(combined);
+        };
+
+        ListenerRegistration reg1 = db.collection(BOOKINGS_COLLECTION)
+                .whereEqualTo("seekerId", userId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (snapshot != null) {
+                        seekerResult[0] = new ArrayList<>();
+                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                            Booking b = fromSnapshot(doc);
+                            if (b != null) seekerResult[0].add(b);
+                        }
+                        combiner.run();
+                    }
+                });
+
+        ListenerRegistration reg2 = db.collection(BOOKINGS_COLLECTION)
+                .whereEqualTo("providerId", userId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (snapshot != null) {
+                        providerResult[0] = new ArrayList<>();
+                        for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                            Booking b = fromSnapshot(doc);
+                            if (b != null) providerResult[0].add(b);
+                        }
+                        combiner.run();
+                    }
+                });
+
+        return new ListenerRegistration() {
+            @Override public void remove() {
+                reg1.remove();
+                reg2.remove();
+            }
+        };
     }
 
     /**

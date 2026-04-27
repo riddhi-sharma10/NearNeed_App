@@ -141,9 +141,10 @@ public class BookingViewModel extends AndroidViewModel {
      * Create a new booking.
      */
     public void createBooking(String postId, String postTitle, String postType, 
-                              String seekerId, String providerId, String applicationId, BookingRepository.SaveCallback callback) {
+                              String seekerId, String providerId, String applicationId, 
+                              Long scheduledDate, BookingRepository.SaveCallback callback) {
         isLoading.setValue(true);
-        BookingRepository.createBooking(postId, postTitle, postType, seekerId, providerId, applicationId, new BookingRepository.SaveCallback() {
+        BookingRepository.createBooking(postId, postTitle, postType, seekerId, providerId, applicationId, scheduledDate, new BookingRepository.SaveCallback() {
             @Override
             public void onSuccess(String bookingId) {
                 isLoading.setValue(false);
@@ -160,11 +161,24 @@ public class BookingViewModel extends AndroidViewModel {
         });
     }
 
-    /**
-     * Create a booking directly from an Application document.
-     */
     public void createBookingFromApplication(com.example.nearneed.Application app) {
-        createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, null);
+        // Fetch the original post to get its scheduledDate
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("posts")
+                .document(app.postId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    Long scheduledDate = null;
+                    if (documentSnapshot.exists()) {
+                        scheduledDate = documentSnapshot.getLong("scheduledDate");
+                    }
+                    // If scheduledDate is missing in post, it defaults to System.currentTimeMillis() in createBooking
+                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, scheduledDate, null);
+                })
+                .addOnFailureListener(e -> {
+                    // Fallback to current time if fetch fails
+                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, System.currentTimeMillis(), null);
+                });
     }
 
     /**

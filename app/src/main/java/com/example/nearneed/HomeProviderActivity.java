@@ -31,6 +31,8 @@ public class HomeProviderActivity extends AppCompatActivity {
     
     private NearbyRequestsAdapter nearbyRequestsAdapter;
     private CommunityVolunteeringAdapter communityVolunteeringAdapter;
+    private ProviderScheduleAdapter scheduleAdapter;
+    private BookingViewModel bookingViewModel;
     private ListenerRegistration badgeListener;
     private TextView tvDashboardNotificationBadge;
 
@@ -52,10 +54,12 @@ public class HomeProviderActivity extends AppCompatActivity {
 
         postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
+        bookingViewModel = new ViewModelProvider(this).get(BookingViewModel.class);
 
         setupHeader();
         setupNearbyRequests();
         setupCommunityVolunteering();
+        setupSchedule();
         setupObservers();
         setupDashboardNotifications();
         setupRoleToggle();
@@ -114,6 +118,15 @@ public class HomeProviderActivity extends AppCompatActivity {
         }
     }
 
+    private void setupSchedule() {
+        RecyclerView rvSchedule = findViewById(R.id.rvProviderSchedule);
+        scheduleAdapter = new ProviderScheduleAdapter();
+        if (rvSchedule != null) {
+            rvSchedule.setLayoutManager(new LinearLayoutManager(this));
+            rvSchedule.setAdapter(scheduleAdapter);
+        }
+    }
+
     private void setupObservers() {
         // Observe posts and filter by type (GIG vs COMMUNITY)
         postViewModel.getNearbyPosts().observe(this, posts -> {
@@ -155,6 +168,32 @@ public class HomeProviderActivity extends AppCompatActivity {
             TextView tvRating = findViewById(R.id.tv_home_provider_rating);
             if (tvRating != null) tvRating.setText(String.format("%.1f", rating));
         });
+
+        // Observe bookings for the schedule
+        bookingViewModel.getUserBookings().observe(this, bookings -> {
+            if (bookings != null) {
+                List<Booking> todayBookings = new ArrayList<>();
+                java.util.Calendar now = java.util.Calendar.getInstance();
+                
+                for (Booking b : bookings) {
+                    if (b.scheduledDate != null) {
+                        java.util.Calendar scheduled = java.util.Calendar.getInstance();
+                        scheduled.setTimeInMillis(b.scheduledDate);
+                        
+                        boolean isToday = now.get(java.util.Calendar.YEAR) == scheduled.get(java.util.Calendar.YEAR) &&
+                                          now.get(java.util.Calendar.DAY_OF_YEAR) == scheduled.get(java.util.Calendar.DAY_OF_YEAR);
+                        
+                        boolean isActive = !"completed".equals(b.status) && !"cancelled".equals(b.status);
+                        
+                        if (isToday && isActive) {
+                            todayBookings.add(b);
+                        }
+                    }
+                }
+                scheduleAdapter.setBookings(todayBookings);
+            }
+        });
+        bookingViewModel.observeUserBookings();
     }
 
     private void setupDashboardNotifications() {

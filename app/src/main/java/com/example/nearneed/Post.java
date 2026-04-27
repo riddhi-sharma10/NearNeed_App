@@ -18,6 +18,7 @@ public class Post {
     public String budget;           // ONLY for gigs
     public Integer volunteersNeeded; // ONLY for community
     public Long timestamp;
+    public Long scheduledDate;
     public String status;           // "active" | "completed" | "cancelled"
 
     // UI/Legacy fields

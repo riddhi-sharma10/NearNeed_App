@@ -80,10 +80,18 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
             tvTitle.setText(booking.postTitle);
             tvType.setText(booking.postType);
             
-            // Show the other party's name
-            String otherPartyName = RoleManager.ROLE_SEEKER.equals(userRole) ? booking.providerName : booking.seekerName;
-            if (otherPartyName == null || otherPartyName.isEmpty()) {
-                otherPartyName = RoleManager.ROLE_SEEKER.equals(userRole) ? "Provider" : "Seeker";
+            // Show the other party's name dynamically based on who the user is in this specific booking
+            String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+            String otherPartyName;
+            
+            if (currentUserId != null && currentUserId.equals(booking.seekerId)) {
+                // User is the seeker, show provider name
+                otherPartyName = booking.providerName;
+                if (otherPartyName == null || otherPartyName.isEmpty()) otherPartyName = "Provider";
+            } else {
+                // User is the provider, show seeker name
+                otherPartyName = booking.seekerName;
+                if (otherPartyName == null || otherPartyName.isEmpty()) otherPartyName = "Seeker";
             }
             tvName.setText(otherPartyName);
             

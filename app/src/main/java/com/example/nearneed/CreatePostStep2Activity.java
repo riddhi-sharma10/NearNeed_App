@@ -41,6 +41,7 @@ public class CreatePostStep2Activity extends AppCompatActivity {
     private PostViewModel postViewModel;
     private Double selectedLat = 28.4595; // Default Gurgaon
     private Double selectedLng = 77.0266;
+    private Long selectedScheduledDate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,11 +101,12 @@ public class CreatePostStep2Activity extends AppCompatActivity {
                     .build();
 
             datePicker.addOnPositiveButtonClickListener(selection -> {
+                selectedScheduledDate = selection;
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(selection);
                 SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
-                String selectedDate = sdf.format(calendar.getTime());
-                tvDisplayDate.setText(selectedDate);
+                String selectedDateString = sdf.format(calendar.getTime());
+                tvDisplayDate.setText(selectedDateString);
                 tvDisplayDate.setTextColor(Color.parseColor("#111827"));
                 updatePostButtonState();
             });
@@ -204,6 +206,7 @@ public class CreatePostStep2Activity extends AppCompatActivity {
         post.location = tvLocationSearch.getText().toString();
         post.urgency = selectedUrgency;
         post.preferredDate = tvDisplayDate.getText().toString();
+        post.scheduledDate = selectedScheduledDate;
         post.preferredTime = tvDisplayTime.getText().toString();
         post.additionalNotes = etAdditionalNotes.getText().toString().trim();
         post.timestamp = System.currentTimeMillis();

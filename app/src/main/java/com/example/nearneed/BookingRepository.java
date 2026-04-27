@@ -32,8 +32,8 @@ public class BookingRepository {
     /**
      * Create a new booking (simple form).
      */
-    public static void createBooking(String postId, String seekerId, String providerId, SaveCallback callback) {
-        createBooking(postId, null, null, seekerId, providerId, null, null, callback);
+    public static void createBooking(String postId, String seekerId, String providerId, Double amount, SaveCallback callback) {
+        createBooking(postId, null, null, seekerId, providerId, null, amount, null, callback);
     }
 
     /**
@@ -41,7 +41,7 @@ public class BookingRepository {
      */
     public static void createBooking(String postId, String postTitle, String postType,
                                      String seekerId, String providerId, String applicationId,
-                                     Long scheduledDate, SaveCallback callback) {
+                                     Double amount, Long scheduledDate, SaveCallback callback) {
         if (postId == null || callback == null) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -61,6 +61,7 @@ public class BookingRepository {
             booking.scheduledDate = scheduledDate != null ? scheduledDate : System.currentTimeMillis();
             booking.seekerName    = seekerName[0];
             booking.providerName  = providerName[0];
+            booking.amount        = amount;
             booking.status        = "upcoming";
 
             db.collection(BOOKINGS_COLLECTION)
@@ -218,7 +219,23 @@ public class BookingRepository {
         FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
                 .document(bookingId)
                 .update(updates)
-                .addOnSuccessListener(v -> callback.onSuccess(bookingId))
+                .addOnSuccessListener(v -> {
+                    // Sync to User Profile if seeker is rating provider
+                    if (!"provider".equalsIgnoreCase(raterRole)) {
+                        FirebaseFirestore.getInstance().collection(BOOKINGS_COLLECTION)
+                                .document(bookingId).get().addOnSuccessListener(doc -> {
+                                    if (doc != null && doc.exists()) {
+                                        String providerId = doc.getString("providerId");
+                                        Double amt = doc.getDouble("amount");
+                                        if (providerId != null) {
+                                            UserProfileRepository.incrementProviderStats(providerId, 
+                                                amt != null ? amt : 0.0, rating);
+                                        }
+                                    }
+                                });
+                    }
+                    callback.onSuccess(bookingId);
+                })
                 .addOnFailureListener(callback::onFailure);
     }
 

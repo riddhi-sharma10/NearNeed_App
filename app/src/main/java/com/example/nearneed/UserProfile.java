@@ -19,6 +19,8 @@ public class UserProfile {
     public Double rating;
     public String bio;
     public String dob;              // Date of birth
+    public Integer jobsCompleted;   // for providers
+    public Double earnings;         // for providers
 
     public UserProfile() {
     }

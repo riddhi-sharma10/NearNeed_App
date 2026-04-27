@@ -146,6 +146,8 @@ public class BookingsAdapter extends RecyclerView.Adapter<BookingsAdapter.Bookin
                         intent.putExtra("booking_id",     booking.bookingId);
                         intent.putExtra("booking_title",  booking.postTitle);
                         intent.putExtra("current_status", booking.status);
+                        intent.putExtra("service_amount", booking.amount != null ? booking.amount : 500.0);
+                        intent.putExtra("provider_name",  booking.providerName != null ? booking.providerName : "Provider");
                         itemView.getContext().startActivity(intent);
                     });
                 } else {

@@ -147,9 +147,9 @@ public class BookingViewModel extends AndroidViewModel {
      */
     public void createBooking(String postId, String postTitle, String postType, 
                               String seekerId, String providerId, String applicationId, 
-                              Long scheduledDate, BookingRepository.SaveCallback callback) {
+                              Double amount, Long scheduledDate, BookingRepository.SaveCallback callback) {
         isLoading.setValue(true);
-        BookingRepository.createBooking(postId, postTitle, postType, seekerId, providerId, applicationId, scheduledDate, new BookingRepository.SaveCallback() {
+        BookingRepository.createBooking(postId, postTitle, postType, seekerId, providerId, applicationId, amount, scheduledDate, new BookingRepository.SaveCallback() {
             @Override
             public void onSuccess(String bookingId) {
                 isLoading.setValue(false);
@@ -178,11 +178,11 @@ public class BookingViewModel extends AndroidViewModel {
                         scheduledDate = documentSnapshot.getLong("scheduledDate");
                     }
                     // If scheduledDate is missing in post, it defaults to System.currentTimeMillis() in createBooking
-                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, scheduledDate, null);
+                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, app.proposedBudget, scheduledDate, null);
                 })
                 .addOnFailureListener(e -> {
                     // Fallback to current time if fetch fails
-                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, System.currentTimeMillis(), null);
+                    createBooking(app.postId, app.postTitle, app.postType, app.creatorId, app.applicantId, app.applicationId, app.proposedBudget, System.currentTimeMillis(), null);
                 });
     }
 

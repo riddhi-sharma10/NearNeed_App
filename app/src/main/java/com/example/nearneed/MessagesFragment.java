@@ -127,7 +127,6 @@ public class MessagesFragment extends Fragment {
 
         chatsListener = firestore.collection("chats")
                 .whereArrayContains("participants", currentUserId)
-                .orderBy("lastTimestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) {
                         return;
@@ -167,12 +166,20 @@ public class MessagesFragment extends Fragment {
                                 false,
                                 unread
                         );
+                        // Store the timestamp for client-side sorting
+                        entry.lastTimestamp = ts != null ? ts.toDate().getTime() : 0L;
                         merged.put(entry.chatId, entry);
                         hydrateUserInfo(entry);
                     }
 
                     allChats.clear();
                     allChats.addAll(merged.values());
+                    
+                    // Client-side sort by lastTimestamp descending
+                    java.util.Collections.sort(allChats, (c1, c2) -> {
+                        return Long.compare(c2.lastTimestamp, c1.lastTimestamp);
+                    });
+
                     displayedChats.clear();
                     displayedChats.addAll(allChats);
                     if (adapter != null) {
@@ -422,6 +429,7 @@ public class MessagesFragment extends Fragment {
         String email, phone, gender, experience, rating, reviews, bio, address, profileImage;
         boolean isVerified;
         boolean isOnline, isUnread;
+        long lastTimestamp;
 
         ChatEntry(String chatId, String userId, String name, String gig, String snippet, String time, boolean isOnline, boolean isUnread) {
             this.chatId = chatId;

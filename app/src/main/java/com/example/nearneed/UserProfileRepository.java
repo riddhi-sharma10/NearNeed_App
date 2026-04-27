@@ -128,6 +128,11 @@ public final class UserProfileRepository {
         profile.lat = snapshot.contains("lat") ? snapshot.getDouble("lat") : snapshot.getDouble("latitude");
         profile.lng = snapshot.contains("lng") ? snapshot.getDouble("lng") : snapshot.getDouble("longitude");
         profile.role = snapshot.getString("role");
+        
+        profile.jobsCompleted = snapshot.contains("jobsCompleted") ? snapshot.getLong("jobsCompleted").intValue() : 0;
+        profile.earnings = snapshot.contains("earnings") ? snapshot.getDouble("earnings") : 0.0;
+        profile.rating = snapshot.contains("rating") ? snapshot.getDouble("rating") : 0.0;
+        
         return profile;
     }
 
@@ -223,5 +228,40 @@ public final class UserProfileRepository {
                     }
                     if (onComplete != null) onComplete.run();
                 });
+    }
+
+    /**
+     * Increment provider statistics after a job is completed.
+     */
+    public static void incrementProviderStats(String providerId, double addEarnings, int newRating) {
+        if (providerId == null || providerId.isEmpty()) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection(USERS_COLLECTION).document(providerId);
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(docRef);
+            
+            long jobs = snapshot.contains("jobsCompleted") ? snapshot.getLong("jobsCompleted") : 0;
+            double currentRating = snapshot.contains("rating") ? snapshot.getDouble("rating") : 0.0;
+            double totalEarnings = snapshot.contains("earnings") ? snapshot.getDouble("earnings") : 0.0;
+
+            // Simple weighted average for rating: (old_avg * old_count + new_val) / (old_count + 1)
+            double updatedRating = (currentRating * jobs + newRating) / (jobs + 1.0);
+            
+            transaction.update(docRef, 
+                "jobsCompleted", com.google.firebase.firestore.FieldValue.increment(1),
+                "earnings", com.google.firebase.firestore.FieldValue.increment(addEarnings),
+                "rating", updatedRating
+            );
+
+            return null;
+        }).addOnFailureListener(e -> {
+            // Fallback for simple increment if transaction fails
+            java.util.Map<String, Object> simple = new java.util.HashMap<>();
+            simple.put("jobsCompleted", com.google.firebase.firestore.FieldValue.increment(1));
+            simple.put("earnings", com.google.firebase.firestore.FieldValue.increment(addEarnings));
+            docRef.update(simple);
+        });
     }
 }

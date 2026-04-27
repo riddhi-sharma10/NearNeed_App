@@ -35,8 +35,12 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.ListenerRegistration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -67,6 +71,11 @@ public class ChatActivity extends AppCompatActivity {
     private Handler handler = new Handler(Looper.getMainLooper());
     private static final Object PAYLOAD_AUDIO_STATE = "payload_audio_state";
     private int activeAudioPosition = RecyclerView.NO_POSITION;
+    
+    private String chatId;
+    private String otherUserId;
+    private String currentUserId;
+    private ChatViewModel chatViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,21 +140,39 @@ public class ChatActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        // Realistic alternating conversation
-        messageList.add(new ChatMessage("Hey! Are you available today?", false, false));       // received
-        messageList.add(new ChatMessage("Yeah, what's up?", false, true));                      // sent
-        messageList.add(new ChatMessage("I need help with the plumbing at my place.", false, false)); // received
-        messageList.add(new ChatMessage("That would be amazing, thank you!", false, true));     // sent
-        messageList.add(new ChatMessage("I can come by around 3 PM if that works?", false, false)); // received
-        messageList.add(new ChatMessage("3 PM works perfectly for me 👍", false, true));        // sent
-        messageList.add(new ChatMessage("Great! Do I need to get any parts?", false, false));   // received
-        messageList.add(new ChatMessage("Just bring the wrench set, I have everything else.", false, true)); // sent
-        messageList.add(new ChatMessage("Perfect. See you then!", false, false));               // received
-        messageList.add(new ChatMessage("See you! 🔧", false, true));                          // sent
+        currentUserId = FirebaseAuth.getInstance().getUid();
+        otherUserId = getIntent().getStringExtra("CHAT_USER_ID");
+        chatId = getIntent().getStringExtra("CHAT_ID");
 
-        // If opened from messages list with a snippet, show it too
-        if (chatSnippet != null && !chatSnippet.isEmpty()) {
-            messageList.add(new ChatMessage(chatSnippet, false, false));
+        if (chatId == null && currentUserId != null && otherUserId != null) {
+            // Generate a stable chatId by sorting UIDs
+            String[] ids = {currentUserId, otherUserId};
+            Arrays.sort(ids);
+            chatId = ids[0] + "_" + ids[1];
+        }
+
+        setupViewModel();
+    }
+
+    private void setupViewModel() {
+        ChatViewModel chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
+        
+        chatViewModel.getMessages().observe(this, messages -> {
+            messageList.clear();
+            for (ChatMessage m : messages) {
+                m.isVoice = m.audioPath != null && !m.audioPath.isEmpty();
+                if (m.isVoice) m.durationSecs = 7;
+                messageList.add(m);
+            }
+            adapter.notifyDataSetChanged();
+            if (!messageList.isEmpty()) {
+                rvMessages.scrollToPosition(messageList.size() - 1);
+            }
+        });
+
+        if (chatId != null) {
+            chatViewModel.observeMessages(chatId);
+            chatViewModel.markAsRead(chatId);
         }
 
         adapter = new ChatAdapter(messageList);
@@ -160,17 +187,20 @@ public class ChatActivity extends AppCompatActivity {
         // Scroll to the latest message
         rvMessages.scrollToPosition(messageList.size() - 1);
 
+        // Initialize ViewModel
+        chatViewModel = new androidx.lifecycle.ViewModelProvider(this).get(ChatViewModel.class);
+
         // SEND button logic - Send text message
         btnSend.setOnClickListener(v -> {
             String text = etMessageInput.getText().toString().trim();
-            if (!text.isEmpty() || selectedImageUri != null) {
-                ChatMessage msg = new ChatMessage(text, false, true);
+            if ((!text.isEmpty() || selectedImageUri != null) && chatId != null) {
                 if (selectedImageUri != null) {
-                    msg.imageUri = selectedImageUri.toString();
+                    chatViewModel.sendMediaMessage(chatId, otherUserId, selectedImageUri.toString(), false);
                     selectedImageUri = null;
                     if (cvImagePreview != null) cvImagePreview.setVisibility(View.GONE);
+                } else {
+                    chatViewModel.sendMessage(chatId, otherUserId, text);
                 }
-                addMessage(msg);
                 etMessageInput.setText("");
             }
         });
@@ -329,10 +359,9 @@ public class ChatActivity extends AppCompatActivity {
                             if (secs < 1) {
                                 Toast.makeText(ChatActivity.this, "🎙 Hold to record a voice message", Toast.LENGTH_SHORT).show();
                             } else {
-                                ChatMessage msg = new ChatMessage("", true, true);
-                                msg.durationSecs = secs;
-                                msg.audioPath = audioFilePath;
-                                addMessage(msg);
+                                if (chatId != null) {
+                                    chatViewModel.sendMediaMessage(chatId, otherUserId, audioFilePath, true);
+                                }
                             }
                         }
                         return true;
@@ -564,79 +593,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addMessage(ChatMessage message) {
-        messageList.add(message);
-        adapter.notifyItemInserted(messageList.size() - 1);
-        rvMessages.scrollToPosition(messageList.size() - 1);
-    }
-
-    private Runnable progressUpdater = new Runnable() {
-        @Override
-        public void run() {
-            if (activeAudioPosition == RecyclerView.NO_POSITION || activeAudioPosition >= messageList.size()) {
-                return;
-            }
-
-            ChatMessage activeMessage = messageList.get(activeAudioPosition);
-            if (!activeMessage.isPlaying) {
-                return;
-            }
-
-            if (activeMessage.audioPath != null && isMediaPlayerActive()) {
-                activeMessage.progress = getMediaPlayerProgress();
-            } else {
-                activeMessage.progress += 2;
-                if (activeMessage.progress >= 100) {
-                    stopAudio(activeMessage, activeAudioPosition);
-                    return;
-                }
-            }
-
-            RecyclerView.ViewHolder vh = rvMessages.findViewHolderForAdapterPosition(activeAudioPosition);
-            if (vh != null) {
-                SeekBar sb = vh.itemView.findViewById(R.id.sbProgress);
-                TextView tvDur = vh.itemView.findViewById(R.id.tvDuration);
-                ImageView ivPP = vh.itemView.findViewById(R.id.ivPlayPause);
-
-                if (sb != null) sb.setProgress(activeMessage.progress);
-                if (tvDur != null) {
-                    if (activeMessage.audioPath != null) {
-                        tvDur.setText("0:" + String.format("%02d", getMediaPlayerPositionSecs()));
-                    } else {
-                        int secs = (int) (activeMessage.progress / 100f * activeMessage.durationSecs);
-                        tvDur.setText("0:" + String.format("%02d", secs));
-                    }
-                }
-                if (ivPP != null) {
-                    ivPP.setImageResource(android.R.drawable.ic_media_pause);
-                    ivPP.setAlpha(0.9f);
-                }
-            }
-
-            handler.postDelayed(this, 100);
-        }
-    };
-
-    public void startProgressLoop() {
-        handler.removeCallbacks(progressUpdater);
-        handler.post(progressUpdater);
-    }
-
-    class ChatMessage {
-        String text;
-        boolean isVoice;
-        boolean isOutgoing;
-        boolean isPlaying = false;
-        int progress = 0;
-        int durationSecs = 0;
-        String imageUri;
-        String audioPath;
-
-        ChatMessage(String text, boolean isVoice, boolean isOutgoing) {
-            this.text = text;
-            this.isVoice = isVoice;
-            this.isOutgoing = isOutgoing;
-            if (this.isVoice) this.durationSecs = 7;
-        }
+        // Handled by ViewModel observation
     }
 
     class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
@@ -705,8 +662,8 @@ public class ChatActivity extends AppCompatActivity {
             } else {
                 if (llBubble != null) llBubble.setVisibility(View.VISIBLE);
                 if (holder.tvMessage != null) {
-                    holder.tvMessage.setText(message.text);
-                    holder.tvMessage.setVisibility((message.text == null || message.text.isEmpty()) ? View.GONE : View.VISIBLE);
+                    holder.tvMessage.setText(message.messageText);
+                    holder.tvMessage.setVisibility((message.messageText == null || message.messageText.isEmpty()) ? View.GONE : View.VISIBLE);
                 }
                 if (holder.clVoiceMessage != null) {
                     holder.clVoiceMessage.setVisibility(View.GONE);

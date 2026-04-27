@@ -89,8 +89,37 @@ public class ChatViewModel extends AndroidViewModel {
     /**
      * Send a media message (Image or Voice).
      */
-    public void sendMediaMessage(String chatId, String receiverId, String mediaUrl, boolean isVoice) {
-        ChatRepository.sendMediaMessage(chatId, currentUserId, receiverId, mediaUrl, isVoice, seekerId, providerId, new ChatRepository.SaveCallback() {
+    public void sendMediaMessage(String chatId, String receiverId, String localPathOrUri, boolean isVoice) {
+        if (isVoice) {
+            StorageRepository.uploadAudio(localPathOrUri, new StorageRepository.UploadCallback() {
+                @Override
+                public void onSuccess(String downloadUrl) {
+                    performSendMedia(chatId, receiverId, downloadUrl, true);
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    error.setValue("Audio upload failed: " + e.getMessage());
+                }
+            });
+        } else {
+            android.net.Uri imageUri = android.net.Uri.parse(localPathOrUri);
+            StorageRepository.uploadImage(imageUri, "chat_images", new StorageRepository.UploadCallback() {
+                @Override
+                public void onSuccess(String downloadUrl) {
+                    performSendMedia(chatId, receiverId, downloadUrl, false);
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    error.setValue("Image upload failed: " + e.getMessage());
+                }
+            });
+        }
+    }
+
+    private void performSendMedia(String chatId, String receiverId, String downloadUrl, boolean isVoice) {
+        ChatRepository.sendMediaMessage(chatId, currentUserId, receiverId, downloadUrl, isVoice, seekerId, providerId, new ChatRepository.SaveCallback() {
             @Override
             public void onSuccess() {
                 // Handled by real-time listener

@@ -492,10 +492,13 @@ public class ChatActivity extends AppCompatActivity {
         if (position == RecyclerView.NO_POSITION || position >= messageList.size()) {
             return;
         }
-        if (path == null || !(new File(path).exists())) {
-            Toast.makeText(this, "Audio file not found", Toast.LENGTH_SHORT).show();
+        
+        boolean isNetworkUrl = path != null && path.startsWith("http");
+        if (path == null || (!isNetworkUrl && !(new java.io.File(path).exists()))) {
+            Toast.makeText(this, "Audio file not available", Toast.LENGTH_SHORT).show();
             return;
         }
+        
         if (activeAudioPosition != RecyclerView.NO_POSITION && activeAudioPosition != position) {
             stopAudio(messageList.get(activeAudioPosition), activeAudioPosition);
         }
@@ -504,14 +507,28 @@ public class ChatActivity extends AppCompatActivity {
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            message.durationSecs = Math.max(1, mediaPlayer.getDuration() / 1000);
-            message.progress = 0;
-            activeAudioPosition = position;
-            mediaPlayer.start();
-            message.isPlaying = true;
-            adapter.notifyItemChanged(position, PAYLOAD_AUDIO_STATE);
-            startProgressLoop();
+            if (isNetworkUrl) {
+                // For network URLs, we should use prepareAsync to avoid blocking UI thread
+                mediaPlayer.setOnPreparedListener(mp -> {
+                    message.durationSecs = Math.max(1, mp.getDuration() / 1000);
+                    message.progress = 0;
+                    activeAudioPosition = position;
+                    mp.start();
+                    message.isPlaying = true;
+                    adapter.notifyItemChanged(position, PAYLOAD_AUDIO_STATE);
+                    startProgressLoop();
+                });
+                mediaPlayer.prepareAsync();
+            } else {
+                mediaPlayer.prepare();
+                message.durationSecs = Math.max(1, mediaPlayer.getDuration() / 1000);
+                message.progress = 0;
+                activeAudioPosition = position;
+                mediaPlayer.start();
+                message.isPlaying = true;
+                adapter.notifyItemChanged(position, PAYLOAD_AUDIO_STATE);
+                startProgressLoop();
+            }
             
             mediaPlayer.setOnCompletionListener(mp -> {
                 stopAudio(message, position);

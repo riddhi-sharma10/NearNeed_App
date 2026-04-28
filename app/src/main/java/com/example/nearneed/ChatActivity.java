@@ -179,16 +179,16 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        if (chatId != null) {
-            chatViewModel.observeMessages(chatId);
-            chatViewModel.markAsRead(chatId);
-        }
-
         adapter = new ChatAdapter(messageList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true); // messages start from bottom
         rvMessages.setLayoutManager(layoutManager);
         rvMessages.setAdapter(adapter);
+
+        if (chatId != null) {
+            chatViewModel.observeMessages(chatId);
+            chatViewModel.markAsRead(chatId);
+        }
         RecyclerView.ItemAnimator animator = rvMessages.getItemAnimator();
         if (animator instanceof SimpleItemAnimator) {
             ((SimpleItemAnimator) animator).setSupportsChangeAnimations(false);

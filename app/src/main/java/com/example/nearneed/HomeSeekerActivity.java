@@ -184,7 +184,7 @@ public class HomeSeekerActivity extends AppCompatActivity {
                         String providerName = doc.getString("providerName");
                         
                         if (providerId != null) {
-                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider")
+                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider", currentUid, providerId)
                                     .show(getSupportFragmentManager(), "ChatBottomSheet");
                         } else {
                             startActivity(new Intent(this, AiChatActivity.class));

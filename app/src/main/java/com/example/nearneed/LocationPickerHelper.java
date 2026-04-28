@@ -207,6 +207,7 @@ public class LocationPickerHelper {
 
                     final String finalAddress = addressText;
                     new Handler(Looper.getMainLooper()).post(() -> {
+                        if (activity == null || activity.isFinishing() || !dialog.isShowing()) return;
                         if (progressBar != null) progressBar.setVisibility(View.GONE);
                         if (finalAddress != null) {
                             selectLocation(finalAddress, location.getLatitude(), location.getLongitude());

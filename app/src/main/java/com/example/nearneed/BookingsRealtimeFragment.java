@@ -79,7 +79,8 @@ public class BookingsRealtimeFragment extends Fragment {
 
             @Override
             public void onMessage(Booking booking) {
-                Intent intent = new Intent(requireActivity(), ChatActivity.class);
+                if (getActivity() == null) return;
+                Intent intent = new Intent(getActivity(), ChatActivity.class);
                 String currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
                 
                 String otherUserId;
@@ -95,6 +96,8 @@ public class BookingsRealtimeFragment extends Fragment {
                 
                 intent.putExtra("CHAT_NAME", otherUserName != null ? otherUserName : "NearNeed User");
                 intent.putExtra("CHAT_USER_ID", otherUserId);
+                intent.putExtra("SEEKER_ID", booking.seekerId);
+                intent.putExtra("PROVIDER_ID", booking.providerId);
                 startActivity(intent);
             }
 
@@ -118,12 +121,12 @@ public class BookingsRealtimeFragment extends Fragment {
         if (RoleManager.ROLE_SEEKER.equals(role)) {
             postViewModel = new ViewModelProvider(this).get(PostViewModel.class);
             String userId = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
-            if (userId != null) {
+            if (userId != null && getContext() != null) {
                 postViewModel.getUserPosts().observe(getViewLifecycleOwner(), posts -> {
                     currentPosts = posts != null ? posts : new ArrayList<>();
                     updateUI();
                 });
-                postViewModel.observeUserPosts(requireContext(), userId);
+                postViewModel.observeUserPosts(getContext(), userId);
             }
         } else if (RoleManager.ROLE_PROVIDER.equals(role)) {
             applicationViewModel = new ViewModelProvider(this).get(ApplicationViewModel.class);

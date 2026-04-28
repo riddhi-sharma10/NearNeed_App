@@ -192,9 +192,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(layoutId, container, false);
 
         if (getActivity() != null) {
-            postViewModel = new ViewModelProvider(requireActivity()).get(PostViewModel.class);
-            applicationViewModel = new ViewModelProvider(requireActivity(), 
-                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
+            postViewModel = new ViewModelProvider(getActivity()).get(PostViewModel.class);
+            applicationViewModel = new ViewModelProvider(getActivity(), 
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication()))
                 .get(ApplicationViewModel.class);
         }
 
@@ -407,10 +407,33 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // Description — show actual post description, not the type label
         if (descTv != null) {
             String desc = (data.snippet != null && !data.snippet.trim().isEmpty())
-                    ? data.snippet : "No description provided.";
+                    ? data.snippet : "Ready to help with your request!";
             descTv.setText(desc);
-            descTv.setMaxLines(3);
+            descTv.setMaxLines(2);
             descTv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        }
+
+        if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+            // Price
+            TextView priceTv = infoCard.findViewById(R.id.provider_price);
+            if (priceTv != null) {
+                String price = (data.budget != null && !data.budget.isEmpty()) ? data.budget : "65";
+                priceTv.setText("$" + price);
+            }
+
+            // Image
+            ImageView imageIv = infoCard.findViewById(R.id.provider_image);
+            if (imageIv != null) {
+                // For demo, use category-based images or default
+                imageIv.setImageResource(R.drawable.avatar_david);
+            }
+            
+            // Rating
+            TextView ratingTv = infoCard.findViewById(R.id.provider_rating);
+            if (ratingTv != null) ratingTv.setText("4.9");
+            
+            TextView reviewsTv = infoCard.findViewById(R.id.provider_review_count);
+            if (reviewsTv != null) reviewsTv.setText("(128 reviews)");
         }
 
         if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {

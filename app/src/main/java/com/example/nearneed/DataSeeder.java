@@ -91,7 +91,7 @@ public class DataSeeder {
         Map<String, Object> appSchema = new HashMap<>();
         appSchema.put("applicationId", "schema_template_app");
         appSchema.put("postId", "schema_template_post");
-        appSchema.put("providerId", "schema_template_user");
+        appSchema.put("applicantId", "schema_template_user");
         appSchema.put("message", "Template application message");
         appSchema.put("status", "pending"); // "pending", "accepted", "rejected"
         appSchema.put("timestamp", currentTimestamp);
@@ -116,7 +116,8 @@ public class DataSeeder {
         chatSchema.put("seekerId", "schema_template_user");
         chatSchema.put("providerId", "schema_template_user");
         chatSchema.put("lastMessage", "Template last message");
-        chatSchema.put("timestamp", currentTimestamp);
+        chatSchema.put("lastTimestamp", currentTimestamp);
+        chatSchema.put("participants", java.util.Arrays.asList("schema_template_user", "another_user"));
         batch.set(chatRef, chatSchema);
 
         // 7. MESSAGES Schema Template (Individual text bubbles)
@@ -125,7 +126,7 @@ public class DataSeeder {
         msgSchema.put("messageId", "schema_template_msg");
         msgSchema.put("chatId", "schema_template_chat");
         msgSchema.put("senderId", "schema_template_user");
-        msgSchema.put("text", "Template chat bubble");
+        msgSchema.put("messageText", "Template chat bubble");
         msgSchema.put("timestamp", currentTimestamp);
         batch.set(msgRef, msgSchema);
 

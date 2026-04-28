@@ -178,6 +178,20 @@ public class PersonProfileActivity extends AppCompatActivity {
         Intent intent = new Intent(this, ChatActivity.class);
         intent.putExtra("CHAT_USER_ID", personUserId);
         intent.putExtra("CHAT_NAME", personName != null ? personName : "User");
+        
+        // Pass role IDs if available to maintain conversation visibility
+        String currentRole = RoleManager.getRole(this);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
+                intent.putExtra("SEEKER_ID", currentUser.getUid());
+                intent.putExtra("PROVIDER_ID", personUserId);
+            } else {
+                intent.putExtra("PROVIDER_ID", currentUser.getUid());
+                intent.putExtra("SEEKER_ID", personUserId);
+            }
+        }
+        
         startActivity(intent);
     }
 

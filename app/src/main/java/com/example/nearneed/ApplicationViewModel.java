@@ -98,15 +98,25 @@ public class ApplicationViewModel extends AndroidViewModel {
         postApplicationsListener = ApplicationRepository.observeApplicationsForPost(getApplication(), postId, new ApplicationRepository.ApplicationListener() {
             @Override
             public void onApplicationsLoaded(List<com.example.nearneed.Application> applications) {
-                postApplications.setValue(applications);
-                isLoading.setValue(false);
-                errorMessage.setValue(null);
+                if (postApplications != null) {
+                    postApplications.setValue(applications);
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
+                if (errorMessage != null) {
+                    errorMessage.setValue(null);
+                }
             }
 
             @Override
             public void onError(Exception e) {
-                errorMessage.setValue("Error loading applications: " + e.getMessage());
-                isLoading.setValue(false);
+                if (errorMessage != null) {
+                    errorMessage.setValue("Error loading applications: " + e.getMessage());
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
             }
         });
     }
@@ -120,11 +130,18 @@ public class ApplicationViewModel extends AndroidViewModel {
         }
 
         // Offline First: Load from Room first
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        com.google.firebase.auth.FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            if (userApplications != null) {
+                userApplications.setValue(new ArrayList<>());
+            }
+            return;
+        }
+        String uid = currentUser.getUid();
         ApplicationRepository.loadUserApplicationsFromRoom(getApplication(), uid, new ApplicationRepository.ApplicationListener() {
             @Override
             public void onApplicationsLoaded(List<com.example.nearneed.Application> applications) {
-                if (userApplications.getValue() == null || userApplications.getValue().isEmpty()) {
+                if (userApplications != null && (userApplications.getValue() == null || userApplications.getValue().isEmpty())) {
                     userApplications.setValue(applications);
                 }
             }
@@ -132,19 +149,31 @@ public class ApplicationViewModel extends AndroidViewModel {
             public void onError(Exception e) {}
         });
 
-        isLoading.setValue(true);
+        if (isLoading != null) {
+            isLoading.setValue(true);
+        }
         userApplicationsListener = ApplicationRepository.observeUserApplications(getApplication(), new ApplicationRepository.ApplicationListener() {
             @Override
             public void onApplicationsLoaded(List<com.example.nearneed.Application> applications) {
-                userApplications.setValue(applications);
-                isLoading.setValue(false);
-                errorMessage.setValue(null);
+                if (userApplications != null) {
+                    userApplications.setValue(applications);
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
+                if (errorMessage != null) {
+                    errorMessage.setValue(null);
+                }
             }
 
             @Override
             public void onError(Exception e) {
-                errorMessage.setValue("Error loading your applications: " + e.getMessage());
-                isLoading.setValue(false);
+                if (errorMessage != null) {
+                    errorMessage.setValue("Error loading your applications: " + e.getMessage());
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
             }
         });
     }
@@ -155,19 +184,29 @@ public class ApplicationViewModel extends AndroidViewModel {
     public void submitApplication(String postId, String postTitle, String postType, 
                                   String creatorId, String message, String budget, 
                                   String paymentMethod, com.example.nearneed.ApplicationRepository.SaveCallback callback) {
-        isLoading.setValue(true);
+        if (isLoading != null) {
+            isLoading.setValue(true);
+        }
         com.example.nearneed.ApplicationRepository.submitApplication(postId, postTitle, postType, creatorId, message, budget, paymentMethod, new com.example.nearneed.ApplicationRepository.SaveCallback() {
             @Override
             public void onSuccess(String applicationId) {
-                isLoading.setValue(false);
-                errorMessage.setValue(null);
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
+                if (errorMessage != null) {
+                    errorMessage.setValue(null);
+                }
                 if (callback != null) callback.onSuccess(applicationId);
             }
 
             @Override
             public void onFailure(Exception e) {
-                errorMessage.setValue("Failed to submit application: " + e.getMessage());
-                isLoading.setValue(false);
+                if (errorMessage != null) {
+                    errorMessage.setValue("Failed to submit application: " + e.getMessage());
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
                 if (callback != null) callback.onFailure(e);
             }
         });
@@ -191,18 +230,28 @@ public class ApplicationViewModel extends AndroidViewModel {
      * Update application status (helper for UI).
      */
     public void updateApplicationStatus(String applicationId, String status) {
-        isLoading.setValue(true);
+        if (isLoading != null) {
+            isLoading.setValue(true);
+        }
         com.example.nearneed.ApplicationRepository.updateApplicationStatus(applicationId, status, new com.example.nearneed.ApplicationRepository.SaveCallback() {
             @Override
             public void onSuccess(String id) {
-                isLoading.setValue(false);
-                errorMessage.setValue(null);
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
+                if (errorMessage != null) {
+                    errorMessage.setValue(null);
+                }
             }
 
             @Override
             public void onFailure(Exception e) {
-                errorMessage.setValue("Failed to update status: " + e.getMessage());
-                isLoading.setValue(false);
+                if (errorMessage != null) {
+                    errorMessage.setValue("Failed to update status: " + e.getMessage());
+                }
+                if (isLoading != null) {
+                    isLoading.setValue(false);
+                }
             }
         });
     }

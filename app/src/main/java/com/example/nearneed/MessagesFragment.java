@@ -75,12 +75,15 @@ public class MessagesFragment extends Fragment {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = firebaseUser != null ? firebaseUser.getUid() : null;
 
-        currentRole = RoleManager.getRole(requireContext());
-        updateEmptyState();
-        if (currentUserId != null && !currentUserId.isEmpty()) {
-            subscribeToRealtimeChats();
-        } else {
-            loadChatsForRole(currentRole);
+        Context context = getContext();
+        if (context != null) {
+            currentRole = RoleManager.getRole(context);
+            updateEmptyState();
+            if (currentUserId != null && !currentUserId.isEmpty()) {
+                subscribeToRealtimeChats();
+            } else {
+                loadChatsForRole(currentRole);
+            }
         }
         setupSearch(view);
         SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_CHAT);
@@ -90,13 +93,16 @@ public class MessagesFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        String latestRole = RoleManager.getRole(requireContext());
-        if (!latestRole.equals(currentRole)) {
-            currentRole = latestRole;
-            if (currentUserId == null || currentUserId.isEmpty()) {
-                loadChatsForRole(currentRole);
+        Context context = getContext();
+        if (context != null) {
+            String latestRole = RoleManager.getRole(context);
+            if (!latestRole.equals(currentRole)) {
+                currentRole = latestRole;
+                if (currentUserId == null || currentUserId.isEmpty()) {
+                    loadChatsForRole(currentRole);
+                }
+                collapseSearch();
             }
-            collapseSearch();
         }
     }
 
@@ -134,15 +140,19 @@ public class MessagesFragment extends Fragment {
 
                     Map<String, ChatEntry> merged = new HashMap<>();
                     for (DocumentSnapshot doc : snapshots.getDocuments()) {
-                        List<String> participants = (List<String>) doc.get("participants");
-                        if (participants == null || participants.isEmpty()) {
+                        Object participantsObj = doc.get("participants");
+                        if (!(participantsObj instanceof List)) {
+                            continue;
+                        }
+                        List<?> participants = (List<?>) participantsObj;
+                        if (participants.isEmpty()) {
                             continue;
                         }
 
                         String otherUserId = null;
-                        for (String participant : participants) {
-                            if (participant != null && !participant.equals(currentUserId)) {
-                                otherUserId = participant;
+                        for (Object p : participants) {
+                            if (p instanceof String && !p.equals(currentUserId)) {
+                                otherUserId = (String) p;
                                 break;
                             }
                         }
@@ -157,10 +167,15 @@ public class MessagesFragment extends Fragment {
                         boolean matchesRole = false;
                         if (RoleManager.ROLE_SEEKER.equals(currentRole)) {
                             // In Seeker Dashboard, show chats where I am the seeker
-                            matchesRole = (seekerId != null && seekerId.equals(currentUserId)) || (seekerId == null && providerId == null); // Allow legacy
+                            // If seekerId is missing, allow it if it's a legacy chat or both are null
+                            matchesRole = (seekerId != null && seekerId.equals(currentUserId)) 
+                                    || (seekerId == null && providerId == null)
+                                    || (seekerId == null); // Be more permissive for seekers
                         } else if (RoleManager.ROLE_PROVIDER.equals(currentRole)) {
                             // In Provider Dashboard, show chats where I am the provider
-                            matchesRole = (providerId != null && providerId.equals(currentUserId)) || (seekerId == null && providerId == null); // Allow legacy
+                            matchesRole = (providerId != null && providerId.equals(currentUserId)) 
+                                    || (seekerId == null && providerId == null)
+                                    || (providerId == null); // Be more permissive for providers
                         }
 
                         if (!matchesRole) continue;
@@ -174,7 +189,14 @@ public class MessagesFragment extends Fragment {
                             displaySnippet = "You: " + snippet;
                         }
                         
-                        Timestamp ts = doc.getTimestamp("lastTimestamp");
+                        Timestamp ts = null;
+                        Object tsObj = doc.get("lastTimestamp");
+                        if (tsObj instanceof Timestamp) {
+                            ts = (Timestamp) tsObj;
+                        } else if (tsObj instanceof Long) {
+                            ts = new Timestamp(new Date((Long) tsObj));
+                        }
+                        
                         String time = formatChatTime(ts);
                         Boolean isRead = doc.getBoolean("isRead");
                         
@@ -277,10 +299,12 @@ public class MessagesFragment extends Fragment {
         btnCancelSearch = root.findViewById(R.id.btnCancelSearch);
 
         btnSearch.setOnClickListener(v -> {
+            Context context = getContext();
+            if (context == null || !isAdded()) return;
             searchBarContainer.setVisibility(View.VISIBLE);
-            searchBarContainer.startAnimation(AnimationUtils.loadAnimation(requireContext(), android.R.anim.fade_in));
+            searchBarContainer.startAnimation(AnimationUtils.loadAnimation(context, android.R.anim.fade_in));
             etSearch.requestFocus();
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) imm.showSoftInput(etSearch, InputMethodManager.SHOW_IMPLICIT);
         });
 
@@ -323,8 +347,8 @@ public class MessagesFragment extends Fragment {
             emptyStateContainer.setVisibility(View.VISIBLE);
             rvMessages.setVisibility(View.GONE);
             ImageView ivCat = emptyStateContainer.findViewById(R.id.ivEmptyCat);
-            if (ivCat != null && isAdded()) {
-                com.bumptech.glide.Glide.with(ivCat)
+            if (ivCat != null && isAdded() && getContext() != null) {
+                com.bumptech.glide.Glide.with(ivCat.getContext())
                         .load("https://cataas.com/cat/cute")
                         .placeholder(R.drawable.avatar_alex)
                         .error(R.drawable.avatar_alex)
@@ -383,7 +407,9 @@ public class MessagesFragment extends Fragment {
     }
 
     private void openChat(ChatEntry chat) {
-        Intent intent = new Intent(requireContext(), ChatActivity.class);
+        Context context = getContext();
+        if (context == null) return;
+        Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra("CHAT_ID", chat.chatId);
         intent.putExtra("CHAT_USER_ID", chat.userId);
         intent.putExtra("CHAT_NAME", chat.name);
@@ -404,11 +430,14 @@ public class MessagesFragment extends Fragment {
         intent.putExtra("PERSON_BIO", chat.bio != null ? chat.bio : buildBio(chat));
         intent.putExtra("IS_VERIFIED", chat.isVerified);
         startActivity(intent);
-        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        if (getActivity() != null) {
+            getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
     }
 
     private void openPersonProfile(ChatEntry chat) {
-        Intent intent = new Intent(requireContext(), PersonProfileActivity.class);
+        if (getContext() == null) return;
+        Intent intent = new Intent(getContext(), PersonProfileActivity.class);
         intent.putExtra("PERSON_USER_ID", chat.userId);
         intent.putExtra("PERSON_NAME", chat.name);
         intent.putExtra("PERSON_EMAIL", chat.email != null ? chat.email : buildEmail(chat.name));
@@ -420,7 +449,9 @@ public class MessagesFragment extends Fragment {
         intent.putExtra("PERSON_BIO", chat.bio != null ? chat.bio : buildBio(chat));
         intent.putExtra("IS_VERIFIED", chat.isVerified);
         startActivity(intent);
-        requireActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        if (getActivity() != null) {
+            getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        }
     }
 
     private String buildEmail(String name) {

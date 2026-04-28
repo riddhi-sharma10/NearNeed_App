@@ -33,11 +33,13 @@ public class ChatBottomSheet extends BottomSheetDialogFragment {
     private ChatSimpleAdapter adapter;
     private List<ChatMessage> messageList = new ArrayList<>();
 
-    public static ChatBottomSheet newInstance(String otherUserId, String otherUserName) {
+    public static ChatBottomSheet newInstance(String otherUserId, String otherUserName, String seekerId, String providerId) {
         ChatBottomSheet fragment = new ChatBottomSheet();
         Bundle args = new Bundle();
         args.putString("otherUserId", otherUserId);
         args.putString("otherUserName", otherUserName);
+        args.putString("seekerId", seekerId);
+        args.putString("providerId", providerId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,6 +87,13 @@ public class ChatBottomSheet extends BottomSheetDialogFragment {
 
     private void setupViewModel() {
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
+        
+        if (getArguments() != null) {
+            String seekerId = getArguments().getString("seekerId");
+            String providerId = getArguments().getString("providerId");
+            chatViewModel.setRoleIds(seekerId, providerId);
+        }
+
         adapter = new ChatSimpleAdapter(messageList);
         rvMessages.setLayoutManager(new LinearLayoutManager(getContext()));
         rvMessages.setAdapter(adapter);

@@ -93,50 +93,53 @@ public final class SeekerNavbarController {
         // Set listeners
         if (homeContainer != null) {
             homeContainer.setOnClickListener(v -> {
+                if (activity == null || activity.isFinishing()) return;
+                if (activity instanceof HomeProviderActivity || activity instanceof HomeSeekerActivity) return;
+
                 String role = RoleManager.getRole(activity);
+                Intent intent;
                 if (RoleManager.ROLE_PROVIDER.equals(role)) {
-                    if (!(activity instanceof HomeProviderActivity)) {
-                        Intent intent = new Intent(activity, HomeProviderActivity.class);
-                        activity.startActivity(intent);
-                        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                        activity.finish();
-                    }
+                    intent = new Intent(activity, HomeProviderActivity.class);
                 } else {
-                    if (!(activity instanceof HomeSeekerActivity) && !(activity instanceof HomeSeekerNoPostsActivity)) {
-                        Intent intent = new Intent(activity, HomeSeekerActivity.class);
-                        activity.startActivity(intent);
-                        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                        activity.finish();
-                    }
+                    intent = new Intent(activity, HomeSeekerActivity.class);
                 }
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (mapContainer != null) {
             mapContainer.setOnClickListener(v -> {
-                if (!(activity instanceof MapsActivity)) {
-                    Intent intent = new Intent(activity, MapsActivity.class);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
+                if (activity == null || activity.isFinishing()) return;
+                if (activity instanceof MapsActivity) return;
+                
+                Intent intent = new Intent(activity, MapsActivity.class);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (bookingsContainer != null) {
             bookingsContainer.setOnClickListener(v -> {
-                if (!(activity instanceof BookingsActivity)) {
-                    Intent intent = new Intent(activity, BookingsActivity.class);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    // Don't finish activity for stack preservation, or finish depending on current?
-                    // Home usually finishes itself, but since Bookings is a top-level tab, let's follow the chat/profile pattern which doesn't finish Home.
-                }
+                if (activity == null || activity.isFinishing()) return;
+                if (activity instanceof BookingsActivity) return;
+                
+                Intent intent = new Intent(activity, BookingsActivity.class);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
         if (chatContainer != null) {
             chatContainer.setOnClickListener(v -> {
-                if (!(activity instanceof MessagesActivity)) {
+                if (activity == null || activity.isFinishing()) return;
+                if (activity instanceof MessagesActivity) return;
+                
+                String role = RoleManager.getRole(activity);
+                if (RoleManager.ROLE_SEEKER.equals(role)) {
+                    openAcceptedProviderChat(activity);
+                } else {
                     Intent intent = new Intent(activity, MessagesActivity.class);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -146,12 +149,12 @@ public final class SeekerNavbarController {
 
         if (profileContainer != null) {
             profileContainer.setOnClickListener(v -> {
-                if (!(activity instanceof ProfileActivity)) {
-                    Intent intent = new Intent(activity, ProfileActivity.class);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    // Don't finish Home activity
-                }
+                if (activity == null || activity.isFinishing()) return;
+                if (activity instanceof ProfileActivity) return;
+                
+                Intent intent = new Intent(activity, ProfileActivity.class);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 
@@ -160,7 +163,7 @@ public final class SeekerNavbarController {
         if (chatBadge != null) {
             NotificationCenter.listenChatUnreadCount(count -> {
                 activity.runOnUiThread(() -> {
-                    if (activity.isFinishing()) return;
+                    if (activity.isFinishing() || chatBadge == null) return;
                     if (count > 0) {
                         chatBadge.setVisibility(View.VISIBLE);
                     } else {
@@ -169,6 +172,45 @@ public final class SeekerNavbarController {
                 });
             });
         }
+    }
+
+    /**
+     * Logic for Seeker to open direct chat with accepted provider or fall back to list
+     */
+    private static void openAcceptedProviderChat(Activity activity) {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null) return;
+
+        FirebaseFirestore.getInstance()
+                .collection("bookings")
+                .whereEqualTo("seekerId", currentUid)
+                .whereIn("status", Arrays.asList("upcoming", "in_progress", "confirmed"))
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (activity == null || activity.isFinishing()) return;
+                    
+                    if (snapshots != null && !snapshots.isEmpty() && activity instanceof AppCompatActivity) {
+                        DocumentSnapshot doc = snapshots.getDocuments().get(0);
+                        String providerId = doc.getString("providerId");
+                        String providerName = doc.getString("providerName");
+                        
+                        if (providerId != null) {
+                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider", currentUid, providerId)
+                                    .show(((AppCompatActivity)activity).getSupportFragmentManager(), "ChatBottomSheet");
+                        } else {
+                            activity.startActivity(new Intent(activity, MessagesActivity.class));
+                        }
+                    } else {
+                        activity.startActivity(new Intent(activity, MessagesActivity.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (activity != null && !activity.isFinishing()) {
+                        activity.startActivity(new Intent(activity, MessagesActivity.class));
+                    }
+                });
     }
 
     // Legacy method for backward compatibility

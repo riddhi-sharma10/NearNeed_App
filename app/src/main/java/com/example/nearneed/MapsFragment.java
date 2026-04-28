@@ -426,8 +426,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             // Card Background & Theme
             MaterialCardView card = (MaterialCardView) infoCard;
-            card.setCardBackgroundColor(ColorStateList.valueOf(ContextCompat.getColor(getContext(), 
-                isCommunity ? Color.parseColor("#F0FDF4") : Color.WHITE))); // Light green vs white
+            card.setCardBackgroundColor(ColorStateList.valueOf(
+                isCommunity ? Color.parseColor("#F0FDF4") : Color.WHITE)); // Light green vs white
 
             // Distance
             TextView distTv = infoCard.findViewById(R.id.job_distance);

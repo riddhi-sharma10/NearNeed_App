@@ -136,13 +136,7 @@ public final class SeekerNavbarController {
 
         if (chatContainer != null) {
             chatContainer.setOnClickListener(v -> {
-                if (activity instanceof MessagesActivity) return;
-                
-                String role = RoleManager.getRole(activity);
-                if (RoleManager.ROLE_SEEKER.equals(role)) {
-                    openAcceptedProviderChat(activity);
-                } else {
-                    // Providers and others go to full list
+                if (!(activity instanceof MessagesActivity)) {
                     Intent intent = new Intent(activity, MessagesActivity.class);
                     activity.startActivity(intent);
                     activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -175,41 +169,6 @@ public final class SeekerNavbarController {
                 });
             });
         }
-    }
-
-    /**
-     * Logic for Seeker to open direct chat with accepted provider or fall back to list
-     */
-    private static void openAcceptedProviderChat(Activity activity) {
-        String currentUid = FirebaseAuth.getInstance().getUid();
-        if (currentUid == null) return;
-
-        FirebaseFirestore.getInstance()
-                .collection("bookings")
-                .whereEqualTo("seekerId", currentUid)
-                .whereIn("status", Arrays.asList("upcoming", "in_progress", "confirmed"))
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    if (snapshots != null && !snapshots.isEmpty() && activity instanceof AppCompatActivity) {
-                        DocumentSnapshot doc = snapshots.getDocuments().get(0);
-                        String providerId = doc.getString("providerId");
-                        String providerName = doc.getString("providerName");
-                        
-                        if (providerId != null) {
-                            ChatBottomSheet.newInstance(providerId, providerName != null ? providerName : "Provider")
-                                    .show(((AppCompatActivity)activity).getSupportFragmentManager(), "ChatBottomSheet");
-                        } else {
-                            activity.startActivity(new Intent(activity, MessagesActivity.class));
-                        }
-                    } else {
-                        activity.startActivity(new Intent(activity, MessagesActivity.class));
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    activity.startActivity(new Intent(activity, MessagesActivity.class));
-                });
     }
 
     // Legacy method for backward compatibility

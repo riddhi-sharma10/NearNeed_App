@@ -69,23 +69,44 @@ public class RatingDialog {
     }
 
     private static void submitReview(String bookingId, String postId, String revieweeId, float rating, String comment, RatingCallback callback) {
-        String reviewerId = FirebaseAuth.getInstance().getCurrentUser() != null 
+        String reviewerId = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid() : "";
-        
+
         if (reviewerId.isEmpty()) return;
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Review review = new Review(bookingId, postId, reviewerId, revieweeId, rating, comment);
-        
-        db.collection("reviews").add(review)
-                .addOnSuccessListener(docRef -> {
-                    // Update the reviewee's average rating in Users collection
-                    updateUserRating(revieweeId, rating);
-                    callback.onSubmitted();
+
+        // Fetch reviewer's name first so it's stored with the review document
+        db.collection("users").document(reviewerId).get()
+                .addOnSuccessListener(reviewerSnap -> {
+                    String reviewerName = "Anonymous";
+                    if (reviewerSnap.exists()) {
+                        String n = reviewerSnap.getString("fullName");
+                        if (n == null || n.isEmpty()) n = reviewerSnap.getString("name");
+                        if (n != null && !n.isEmpty()) reviewerName = n;
+                    }
+
+                    final String finalName = reviewerName;
+
+                    // Build review data map (not POJO) to include reviewerName
+                    java.util.Map<String, Object> reviewData = new java.util.HashMap<>();
+                    reviewData.put("bookingId",    bookingId);
+                    reviewData.put("postId",       postId);
+                    reviewData.put("reviewerId",   reviewerId);
+                    reviewData.put("revieweeId",   revieweeId);
+                    reviewData.put("rating",       (double) rating);
+                    reviewData.put("comment",      comment);
+                    reviewData.put("reviewerName", finalName);
+                    reviewData.put("createdAt",    System.currentTimeMillis());
+
+                    db.collection("reviews").add(reviewData)
+                            .addOnSuccessListener(docRef -> {
+                                updateUserRating(revieweeId, rating);
+                                callback.onSubmitted();
+                            })
+                            .addOnFailureListener(e -> callback.onCancelled());
                 })
-                .addOnFailureListener(e -> {
-                    callback.onCancelled();
-                });
+                .addOnFailureListener(e -> callback.onCancelled());
     }
 
     private static void updateUserRating(String userId, float newRating) {
@@ -95,21 +116,21 @@ public class RatingDialog {
         db.runTransaction(transaction -> {
             com.google.firebase.firestore.DocumentSnapshot snapshot = transaction.get(userRef);
             double totalRating = 0;
-            long reviewCount = 0;
+            long reviewCount  = 0;
 
-            if (snapshot.contains("totalRating")) {
-                totalRating = snapshot.getDouble("totalRating");
-            }
-            if (snapshot.contains("reviewCount")) {
-                reviewCount = snapshot.getLong("reviewCount");
-            }
+            if (snapshot.contains("totalRating"))  totalRating  = snapshot.getDouble("totalRating");
+            if (snapshot.contains("reviewCount"))  reviewCount  = snapshot.getLong("reviewCount");
 
             totalRating += newRating;
             reviewCount++;
 
-            transaction.update(userRef, "totalRating", totalRating);
-            transaction.update(userRef, "reviewCount", reviewCount);
-            transaction.update(userRef, "averageRating", totalRating / reviewCount);
+            double avg = totalRating / reviewCount;
+
+            transaction.update(userRef, "totalRating",   totalRating);
+            transaction.update(userRef, "reviewCount",   reviewCount);
+            // Write both field names so all UI readers get the value
+            transaction.update(userRef, "averageRating", avg);
+            transaction.update(userRef, "rating",        avg);
 
             return null;
         });

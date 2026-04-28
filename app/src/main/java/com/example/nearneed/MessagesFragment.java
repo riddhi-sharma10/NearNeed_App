@@ -63,7 +63,7 @@ public class MessagesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         rvMessages = view.findViewById(R.id.rvMessages);
-        rvMessages.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvMessages.setLayoutManager(new LinearLayoutManager(getContext()));
 
         emptyStateContainer = view.findViewById(R.id
                 .emptyStateContainer);
@@ -86,7 +86,9 @@ public class MessagesFragment extends Fragment {
             }
         }
         setupSearch(view);
-        SeekerNavbarController.bind(requireActivity(), view, SeekerNavbarController.TAB_CHAT);
+        if (getActivity() != null) {
+            SeekerNavbarController.bind(getActivity(), view, SeekerNavbarController.TAB_CHAT);
+        }
     }
 
     @Override
@@ -275,8 +277,10 @@ public class MessagesFragment extends Fragment {
     }
 
     private String readString(DocumentSnapshot doc, String key, String fallback) {
-        String value = doc.getString(key);
-        return value == null || value.trim().isEmpty() ? fallback : value;
+        Object raw = doc.get(key);
+        if (raw == null) return fallback;
+        String value = String.valueOf(raw);
+        return value.trim().isEmpty() ? fallback : value;
     }
 
     private String formatChatTime(Timestamp timestamp) {
@@ -400,8 +404,8 @@ public class MessagesFragment extends Fragment {
             adapter.notifyDataSetChanged();
         }
         updateEmptyState();
-        if (etSearch != null) {
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (etSearch != null && getContext() != null) {
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
         }
     }

@@ -136,14 +136,9 @@ public final class SeekerNavbarController {
                 if (activity == null || activity.isFinishing()) return;
                 if (activity instanceof MessagesActivity) return;
                 
-                String role = RoleManager.getRole(activity);
-                if (RoleManager.ROLE_SEEKER.equals(role)) {
-                    openAcceptedProviderChat(activity);
-                } else {
-                    Intent intent = new Intent(activity, MessagesActivity.class);
-                    activity.startActivity(intent);
-                    activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
+                Intent intent = new Intent(activity, MessagesActivity.class);
+                activity.startActivity(intent);
+                activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             });
         }
 

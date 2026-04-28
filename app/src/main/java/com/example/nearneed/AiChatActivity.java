@@ -54,7 +54,7 @@ public class AiChatActivity extends AppCompatActivity {
 
     private static final String TAG = "NearNeedChatbot";
     private static final String GEMINI_URL =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=";
 
     // UI
     private RecyclerView     rvChat;
@@ -71,7 +71,7 @@ public class AiChatActivity extends AppCompatActivity {
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30,  TimeUnit.SECONDS)
+            .readTimeout(60,  TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
             .build();
 
@@ -125,7 +125,7 @@ public class AiChatActivity extends AppCompatActivity {
         });
 
         initConversationContext();
-        addBotMessage("👋 Hi! I'm the NearNeed Chatbot.\n\nI can help with bookings, payments, ID verification, posting gigs, and more. You can also attach an image using the 📎 button!");
+        addBotMessage("👋 Hi! I'm the NearNeed Assistant — your in-app guide for everything on the platform.\n\nTo get started, are you using NearNeed as a Seeker (looking to book services) or a Provider (offering services)?");
     }
 
     // ─── Image picker ─────────────────────────────────────────────────────────
@@ -149,12 +149,101 @@ public class AiChatActivity extends AppCompatActivity {
             ctxUser.put("role", "user");
             JSONArray up = new JSONArray();
             up.put(new JSONObject().put("text",
-                    "You are the NearNeed support chatbot. NearNeed is a hyperlocal gig platform in India. " +
-                    "Help with: bookings, payments, ID verification, posting gigs, community posts, profile, messaging. " +
-                    "RULES: " +
-                    "1. Be extremely concise and brief. Answer exactly what is asked and stop. Do NOT give long explanations. " +
-                    "2. DO NOT use any markdown formatting. No asterisks (**), no bold text, no bullet points, no hashes. Use plain text only. " +
-                    "3. If unsure, say: contact support@nearneed.in"));
+                "You are the official in-app AI assistant for NearNeed, a hyperlocal service marketplace in India that connects Seekers (users who book services) and Providers (users who offer services).\n" +
+                "\n" +
+                "BEFORE YOU RESPOND TO ANYTHING:\n" +
+                "You have been trained on the complete app. Walk through the entire app mentally before answering:\n" +
+                "1. Onboarding & Auth: Signup, Login, OTP verification, Role selection (Seeker / Provider)\n" +
+                "2. Home Screen: Search bar, categories, featured providers, banners\n" +
+                "3. Seeker Flow: Browse, Filter, View Provider Profile, Book Service, Payment, Track Booking, Rate & Review\n" +
+                "4. Provider Flow: Dashboard, View Requests, Accept/Decline, Start Job, Complete Job, Earnings\n" +
+                "5. Bookings: My Bookings with Upcoming, Active, Completed, Cancelled tabs\n" +
+                "6. Payments & Wallet: Add method, Pay, Refund status, Transaction history\n" +
+                "7. Earnings (Provider): Total earned, Withdraw, Bank account, Statement\n" +
+                "8. Profile: Edit info, Profile photo, Documents, My Services, Reviews\n" +
+                "9. Settings: Notifications toggle, Privacy, Language, Dark mode, Switch Role, Delete account\n" +
+                "10. Community / Feed: Create post, Comment, Report post\n" +
+                "11. Notifications: Bell icon, Granular toggles per category\n" +
+                "12. Support: Raise ticket, My tickets, Chat with support\n" +
+                "13. Role Switch: Toggle between Seeker and Provider from Profile or Settings\n" +
+                "\n" +
+                "YOUR CORE RULES:\n" +
+                "\n" +
+                "IDENTITY\n" +
+                "- You are the app's built-in assistant, not a generic chatbot\n" +
+                "- You know every screen, tab, button, and flow in the app\n" +
+                "- You always give tap-by-tap directions, never vague answers\n" +
+                "\n" +
+                "ROLE DETECTION\n" +
+                "- If the user's role is unclear, ask: Are you using the app as a Seeker or a Provider?\n" +
+                "- Once known, tailor every answer to their role and never mix up flows\n" +
+                "\n" +
+                "IMAGE UNDERSTANDING\n" +
+                "- When a user sends a photo, analyze it immediately\n" +
+                "- Identify what the issue or object is (e.g., damaged AC, leaking pipe, dirty room)\n" +
+                "- Map it to the correct service category in the app\n" +
+                "- Tell them exactly: which service to search, how to book, whether to attach the photo in the booking form\n" +
+                "- Example: User sends photo of a broken geyser -> This looks like a geyser repair issue. Go to Search -> type Plumbing or Geyser Repair -> pick a provider -> tap Book Now -> attach this photo so the provider knows what to expect.\n" +
+                "\n" +
+                "NAVIGATION\n" +
+                "- Always give the exact path: Screen name -> Tab -> Button\n" +
+                "- If unsure of exact name, say: Look for [description] in the bottom navigation bar or the menu\n" +
+                "- Never say 'somewhere in the app' - always be specific\n" +
+                "\n" +
+                "COMPLAINTS\n" +
+                "- Acknowledge first: I understand that's frustrating.\n" +
+                "- Then solve: give the exact path to raise a ticket or resolve in-app\n" +
+                "- For payment issues: always ask for Booking ID or Transaction ID first\n" +
+                "- For safety/abuse issues: treat as urgent, direct to Support and flag as High Priority\n" +
+                "\n" +
+                "PAYMENTS\n" +
+                "- Failed payment: check connection, retry, if deducted but failed refund in 5-7 days\n" +
+                "- Refund status: My Bookings -> Cancelled booking -> Refund Status\n" +
+                "- Provider payout: Earnings -> Withdraw -> enter amount -> confirm\n" +
+                "- Always ask for Transaction ID before escalating\n" +
+                "\n" +
+                "BOOKINGS\n" +
+                "- Seeker: My Bookings -> tabs for Upcoming / Active / Completed / Cancelled\n" +
+                "- Provider: My Requests or Provider Dashboard\n" +
+                "- Missing booking: Pull to refresh, log out and back in, raise ticket if still missing\n" +
+                "\n" +
+                "NOTIFICATIONS\n" +
+                "- Enable/disable: Settings -> Notifications -> Push Notifications toggle\n" +
+                "- Not working: Check Android system settings -> Apps -> NearNeed -> Notifications -> Allow\n" +
+                "- Also check Do Not Disturb mode\n" +
+                "\n" +
+                "ROLE SWITCHING\n" +
+                "- Settings -> Role -> Switch Mode OR Profile -> Switch to Provider / Switch to Seeker\n" +
+                "- Same account, credentials stay the same - only the dashboard and nav change\n" +
+                "\n" +
+                "EARNINGS (PROVIDER ONLY)\n" +
+                "- Earnings tab -> see total, pending, withdrawn\n" +
+                "- Withdraw -> select bank -> enter amount -> confirm\n" +
+                "- Earnings show after seeker confirms completion or within 24 hrs auto-completion window\n" +
+                "\n" +
+                "COMMUNITY\n" +
+                "- Community or Feed tab in bottom nav\n" +
+                "- Create post: tap + or Create Post -> write -> attach photo -> Post\n" +
+                "- Report: tap the 3 dots on any post -> Report\n" +
+                "\n" +
+                "PROFILE EDITING\n" +
+                "- Tap profile avatar -> Profile -> Edit icon -> update details -> Save\n" +
+                "- Provider: Profile -> My Services -> edit or add services\n" +
+                "- Documents: Profile -> Verification -> upload\n" +
+                "\n" +
+                "ESCALATION RULE\n" +
+                "- If nothing resolves it -> Support -> Raise a Ticket -> select category -> submit\n" +
+                "- For urgent issues: Support -> flag High Priority\n" +
+                "- Always tell the user their ticket can be tracked under Support -> My Tickets\n" +
+                "\n" +
+                "TONE RULES:\n" +
+                "- Warm, concise, helpful - like a knowledgeable friend inside the app\n" +
+                "- Never say I don't know without offering an alternative path\n" +
+                "- Keep answers under 5 sentences unless step-by-step directions are needed\n" +
+                "- De-escalate before problem-solving when the user is upset\n" +
+                "- Never make up screen names or features that don't exist\n" +
+                "- DO NOT use any markdown formatting. No asterisks, no bold text, no bullet points, no hashes. Use plain text only."
+            ));
             ctxUser.put("parts", up);
             conversationHistory.put(ctxUser);
 
@@ -162,7 +251,7 @@ public class AiChatActivity extends AppCompatActivity {
             ctxModel.put("role", "model");
             JSONArray mp = new JSONArray();
             mp.put(new JSONObject().put("text",
-                    "Got it! I'm the NearNeed support chatbot, here to help with your queries."));
+                "Got it! I'm trained on every screen and flow of the NearNeed app and I'm ready to help."));
             ctxModel.put("parts", mp);
             conversationHistory.put(ctxModel);
         } catch (Exception e) {
@@ -238,26 +327,47 @@ public class AiChatActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
-        // Fetch bookings where user is seeker
-        db.collection("bookings")
-                .whereEqualTo("seekerId", uid)
-                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .limit(20)
-                .get()
-                .addOnSuccessListener(seekerSnap -> {
-                    StringBuilder ctx = new StringBuilder();
-                    ctx.append("User name: ").append(userName).append("\n");
-                    ctx.append("Bookings as SEEKER (jobs they hired someone for):\n");
-                    int count = 0;
-                    for (QueryDocumentSnapshot doc : seekerSnap) {
-                        Booking b = doc.toObject(Booking.class);
-                        ctx.append(++count).append(". Service: \"").append(b.postTitle)
-                                .append("\" | Status: ").append(b.status)
-                                .append(" | Provider: ").append(b.providerName != null ? b.providerName : "N/A")
-                                .append(" | Date: ").append(b.timestamp != null ? sdf.format(new Date(b.timestamp)) : "?")
-                                .append("\n");
-                    }
-                    if (count == 0) ctx.append("No bookings found as seeker.\n");
+        // Fetch user profile details first
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener(userSnap -> {
+                StringBuilder ctx = new StringBuilder();
+                if (userSnap.exists()) {
+                    ctx.append("--- USER PROFILE DETAILS ---\n");
+                    ctx.append("Name: ").append(userSnap.getString("fullName") != null ? userSnap.getString("fullName") : userName).append("\n");
+                    ctx.append("Phone: ").append(userSnap.getString("phone")).append("\n");
+                    ctx.append("Gender: ").append(userSnap.getString("gender")).append("\n");
+                    ctx.append("Bio: ").append(userSnap.getString("bio")).append("\n");
+                    ctx.append("Address: ").append(userSnap.getString("address")).append("\n");
+                    ctx.append("Account Type: ").append(userSnap.getString("accountType")).append("\n");
+                    
+                    java.util.List<String> cats = (java.util.List<String>) userSnap.get("categories");
+                    if (cats != null && !cats.isEmpty()) ctx.append("Services Offered: ").append(cats.toString()).append("\n");
+                    
+                    java.util.List<String> days = (java.util.List<String>) userSnap.get("days");
+                    if (days != null && !days.isEmpty()) ctx.append("Available Days: ").append(days.toString()).append("\n");
+                    ctx.append("----------------------------\n\n");
+                } else {
+                    ctx.append("User name: ").append(userName).append("\n\n");
+                }
+
+                // Fetch bookings where user is seeker
+                db.collection("bookings")
+                        .whereEqualTo("seekerId", uid)
+                        .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                        .limit(20)
+                        .get()
+                        .addOnSuccessListener(seekerSnap -> {
+                            ctx.append("Bookings as SEEKER (jobs they hired someone for):\n");
+                            int count = 0;
+                            for (QueryDocumentSnapshot doc : seekerSnap) {
+                                Booking b = doc.toObject(Booking.class);
+                                ctx.append(++count).append(". Service: \"").append(b.postTitle)
+                                        .append("\" | Status: ").append(b.status)
+                                        .append(" | Provider: ").append(b.providerName != null ? b.providerName : "N/A")
+                                        .append(" | Date: ").append(b.timestamp != null ? sdf.format(new Date(b.timestamp)) : "?")
+                                        .append("\n");
+                            }
+                            if (count == 0) ctx.append("No bookings found as seeker.\n");
 
                     // Now fetch as provider
                     db.collection("bookings")
@@ -289,6 +399,8 @@ public class AiChatActivity extends AppCompatActivity {
                             .addOnFailureListener(e -> addToHistoryAndCallGemini(userQuestion, typingIndex));
                 })
                 .addOnFailureListener(e -> addToHistoryAndCallGemini(userQuestion, typingIndex));
+            })
+            .addOnFailureListener(e -> addToHistoryAndCallGemini(userQuestion, typingIndex));
     }
 
     private void addToHistoryAndCallGemini(String text, int typingIndex) {
@@ -385,7 +497,7 @@ public class AiChatActivity extends AppCompatActivity {
                     removeTypingIndicator(typingIndex);
                     btnSend.setEnabled(true);
                     String reply = parseGeminiReply(rb);
-                    if (reply == null) return;
+                    if (reply == null) return;  // error already shown by parseGeminiReply
                     addBotMessage(reply);
                     if (saveToHistory) {
                         try {
@@ -426,10 +538,20 @@ public class AiChatActivity extends AppCompatActivity {
             if (content == null) { addBotMessage("Empty response. Please try again!"); return null; }
             JSONArray parts = content.optJSONArray("parts");
             if (parts == null || parts.length() == 0) { addBotMessage("Empty response. Please try again!"); return null; }
-            String reply = parts.getJSONObject(0).optString("text", "").trim();
+            // Gemini thinking models return multiple parts — find the real text part (not thinking)
+            String reply = "";
+            for (int i = 0; i < parts.length(); i++) {
+                JSONObject part = parts.getJSONObject(i);
+                if (!part.has("thought") || !part.optBoolean("thought")) {
+                    String candidate = part.optString("text", "").trim();
+                    if (!candidate.isEmpty()) {
+                        reply = candidate;
+                        break;
+                    }
+                }
+            }
             // Strip out Markdown asterisks and hashes so they don't appear in the plain TextView
             reply = reply.replaceAll("\\*", "").replaceAll("#", "");
-            
             if (reply.isEmpty()) { addBotMessage("Empty response. Please try again!"); return null; }
             return reply;
         } catch (Exception e) {

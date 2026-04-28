@@ -16,6 +16,9 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class LoadingActivity extends AppCompatActivity {
 
     public static final String EXTRA_TARGET_CLASS = "extra_target_class";
@@ -53,7 +56,22 @@ public class LoadingActivity extends AppCompatActivity {
             targetClassNameRaw = getIntent().getStringExtra("TARGET_CLASS");
         }
 
-        mTargetClassName = targetClassNameRaw;
+        // ── Auth-aware routing ──────────────────────────────────────────────
+        // If no explicit target was passed (i.e. this is a cold-launch from the
+        // OS / back-stack clear), check whether the user is already signed in.
+        // If they are, route straight to the correct dashboard and bypass the
+        // login / welcome flow entirely.
+        if (mTargetClassName == null) {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser != null) {
+                // User has an active Firebase session — pick dashboard by role
+                boolean isProvider = RoleManager.isProvider(getApplicationContext());
+                mTargetClassName = isProvider
+                        ? HomeProviderActivity.class.getName()
+                        : HomeSeekerActivity.class.getName();
+            }
+            // else: mTargetClassName stays null → will default to WelcomeActivity below
+        }
 
         ImageView ivLogo = findViewById(R.id.ivLoadingLogo);
         startLogoPopupAnimation(ivLogo);

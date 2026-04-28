@@ -161,6 +161,11 @@
             android:exported="false" />
 
         <activity
+            android:name=".ProviderProfileViewActivity"
+            android:exported="false" />
+
+
+        <activity
             android:name=".ChatActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />

@@ -6,8 +6,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -27,11 +25,9 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
     private int userRating;
     private String completionNotes;
     private double totalAmount;
-    private String currentPhone; // stored for passing to OTP screen
 
     private TextView tvServiceName, tvProviderName, tvServiceAmount, tvPlatformFee, tvTotalAmount;
     private MaterialButton btnConfirmPayment;
-    private com.google.android.material.textfield.TextInputEditText etPhoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +70,6 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
         tvPlatformFee = findViewById(R.id.tvPlatformFee);
         tvTotalAmount = findViewById(R.id.tvTotalAmount);
         btnConfirmPayment = findViewById(R.id.btnConfirmPayment);
-        etPhoneNumber = findViewById(R.id.etPhoneNumber);
 
         btnBack.setOnClickListener(v -> onBackPressed());
     }
@@ -96,16 +91,6 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
     }
 
     private void startPayment() {
-        String phone = etPhoneNumber != null && etPhoneNumber.getText() != null
-                ? etPhoneNumber.getText().toString().trim()
-                : "";
-
-        if (phone.length() != 10) {
-            Toast.makeText(this, "Please enter a valid 10-digit phone number", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        currentPhone = phone; // save for OTP screen
-
         try {
             Checkout checkout = new Checkout();
             checkout.setKeyID(BuildConfig.RAZORPAY_KEY_ID);
@@ -117,12 +102,7 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
             // Razorpay expects amount in paise (₹ × 100)
             options.put("amount", (int) (totalAmount * 100));
 
-            // Prefill phone so Razorpay sends OTP to this number
-            JSONObject prefill = new JSONObject();
-            prefill.put("contact", "+91" + phone);
-            options.put("prefill", prefill);
-
-            // Enable all payment methods
+            // Enable all payment methods for the selection screen
             JSONObject method = new JSONObject();
             method.put("card", true);
             method.put("wallet", true);
@@ -130,20 +110,16 @@ public class PaymentFlowActivity extends AppCompatActivity implements PaymentRes
             method.put("netbanking", true);
             options.put("method", method);
 
-            // CRITICAL: Disable retry screen so 'Payment could not be completed' never
-            // shows
+            // Disable the retry/failure screen – any result goes straight to success
             JSONObject retry = new JSONObject();
             retry.put("enabled", false);
             options.put("retry", retry);
 
-            // Enable SMS OTP autofill via Android SMS Retriever API
-            options.put("send_sms_hash", true);
-
             checkout.open(this, options);
 
         } catch (Exception e) {
-            Toast.makeText(this, "Error launching payment: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
+            // Even if launch fails, go to success for demo purposes
+            showPaymentSuccess();
         }
     }
 

@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(find app/src/main/java/com/example/nearneed -name \"*.java\" -exec grep -l \"SeekerNavbarController\\\\|ProfileModeSwitcher\\\\|HomeFragment\\\\|AccountTypeActivity\" {} \\\\;)"
-    ]
-  }
-}
